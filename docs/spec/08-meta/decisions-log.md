@@ -8208,9 +8208,9 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 ## 2026-11-06 — Empty-home token meter and per-model totals (D682)
 
 - D682 narrows D335 / ADR 0173 by exactly one surface: the app now ships **its
-  own compact token meter**, in the empty home under the hero title and above
-  the composer. What D335 rejected was a second, weaker *dashboard inside
-  Settings*, and that rejection stands — Settings still has no Usage
+  own compact token meter**, stacked in the empty home's composer column
+  directly above the input. What D335 rejected was a second, weaker *dashboard
+  inside Settings*, and that rejection stands — Settings still has no Usage
   destination, settings search still indexes no usage tab, and
   `pi.token-insights` remains the full dashboard with KPIs, filtering and cost.
   The meter is a glance at two numbers a user asked to see where they already
@@ -8259,17 +8259,25 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   square, so the grid's height follows only the card's width.
 - Amended again when the card changed surfaces. Read back in the running app it
   was in the wrong place: a year of tokens answers "what have I been doing", so
-  it belongs under the empty-home hero — beside the question it answers — not
-  pinned in the navigation column. The move changed the layout envelope, so the
-  numbers were re-derived for the centered chat band: its 560 px preference
-  floor leaves ~8 px columns, a pane squeezed past that floor is where the column
-  floor and the sideways scroll actually earn their place, and the card stops
-  growing at 880 px so a maximized window does not turn a year into 14 px tiles.
+  it belongs in the empty home — beside the question it answers — not pinned in
+  the navigation column. The move changed the layout envelope, so the numbers
+  were re-derived for the centered chat band: its 560 px preference floor leaves
+  ~8 px columns, and a pane squeezed past that floor is where the column floor
+  and the sideways scroll actually earn their place. The card first landed in
+  the hero's own stack with a cap of its own; the next read of the real window
+  showed what that cap drew — an inset panel *inside* the composer's column
+  rather than a surface aligned with it. The meter now takes the composer's
+  width rule verbatim, so one envelope puts its edges on the input's at every
+  band, with the 8 px gap the shell already spends on a surface stacked above
+  the input. ADR 0066 is untouched by that: the composer stays flex-fixed at the
+  bottom of the home column and the scroller remains the only overflow surface
+  for hero content.
   `scripts/e2e-home-token-meter.mjs` — renamed from
   `e2e-sidebar-token-meter.mjs`, which measured the sidebar bounds of the first
-  cut — gates the built sheet at 402 / 560 / 760 / 1160 px on both hero variants
-  and fails on an illegible cell, a card off the centered band, or a meter that
-  is not under the hero.
+  cut — gates the built sheet at 402 / 560 / 760 / 1160 px on both hero
+  variants against the real composer markup, and fails on an illegible cell, a
+  card whose edges miss the input's, or a meter that is not between hero and
+  input.
 - The same pass fixed what this entry's central promise rests on. The range fill
   keyed each bucket through local midnight, and a zone whose spring-forward
   starts at 00:00 has no such instant: that day lost its bucket from `items`
@@ -8280,7 +8288,8 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   summing to `totals`, a no-model turn keeping its row, an aborted turn billing
   nowhere, and 400 consecutive days each keeping a bucket that adds back to
   `totals`) and `apps/desktop/test/token-usage-meter.test.mjs` (Monday-aligned
-  grid, quartile levels, tail folding, one host query, empty-home placement,
+  grid, quartile levels, tail folding, one host query, the composer-column
+  placement and edge alignment,
   catalog keys per locale). See E2E-UI-home-token-meter and the amendment to
   E2E-186.
 

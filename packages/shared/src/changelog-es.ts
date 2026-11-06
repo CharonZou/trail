@@ -7,7 +7,7 @@ export const esEntries: ChangelogEntry[] = [
     highlights: [
       "Cada proyecto elige su propio icono y color de espacio de trabajo, y la barra lateral los muestra en lugar del mismo icono de carpeta para todo.",
       "El índice del espacio de trabajo puede desactivarse por proyecto en los diálogos de crear y editar; al desactivarlo, las sugerencias @ no listan archivos, pero una ruta ya citada en una conversación sigue resolviéndose.",
-      "Uso de tokens bajo la pregunta inicial de la pantalla de inicio: un total de los últimos 12 meses, una franja diaria por intensidad y el mismo total repartido por modelo.",
+      "Uso de tokens en la pantalla de inicio, justo encima del campo de entrada: un total de los últimos 12 meses, una franja diaria por intensidad y el mismo total repartido por modelo.",
       "Minimiza la ventana o ponla a pantalla completa desde la nueva tarjeta Ventana en Ajustes, sin necesidad de la barra de menús.",
       "Más proveedores muestran su marca oficial en las listas, incluidos Mistral, Kimi y Moonshot.",
       "El icono de la aplicación es ahora una marca limpia en todas las superficies, incluida la barra de tareas de Windows y Alt+Tab.",

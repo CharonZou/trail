@@ -7,7 +7,7 @@ export const trEntries: ChangelogEntry[] = [
     highlights: [
       "Her proje kendi çalışma alanı simgesini ve rengini seçer; kenar çubuğundaki proje satırı artık her projede aynı klasör simgesi yerine bunu gösterir.",
       "Proje oluşturma ve düzenleme pencerelerinde çalışma alanı dizini proje bazında kapatılabilir; kapalıyken @ önerileri dosya listelemez, ancak bir konuşmada alıntılanmış bir yol çözümlenmeye devam eder.",
-      "Ana ekranın açılış sorusunun altında Token kullanımı: son 12 ay için tek bir toplam, güne göre ısı şeridi ve aynı toplamın modele göre dağılımı.",
+      "Ana ekranda, giriş alanının hemen üzerinde Token kullanımı: son 12 ay için tek bir toplam, güne göre ısı şeridi ve aynı toplamın modele göre dağılımı.",
       "Ayarlar'daki yeni Pencere kartıyla menü çubuğuna gerek kalmadan pencereyi küçültün veya tam ekrana alın.",
       "Daha fazla sağlayıcı listelerde resmi işaretlerini gösterir; Mistral, Kimi ve Moonshot dahil.",
       "Uygulama simgesi, Windows görev çubuğu ve Alt+Tab dahil her yüzeyde artık temiz bir marka işaretidir.",

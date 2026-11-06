@@ -3,14 +3,14 @@
  * Empty-home token meter layout in real Chromium with the built app's own CSS
  * (E2E-UI-home-token-meter).
  *
- * The meter sits under the empty-home hero, inside the centered chat band, so
- * its legibility is a layout question the renderer answers, not a unit test:
- * the band has a 560px preference floor but a squeezed pane still draws it
- * narrower, where 53 week columns start competing with their own gutters, and
- * a maximized pane widens it past the card's own cap. This check loads the
- * packaged stylesheet, renders the same stack ChatSurface builds for a project
- * and a temporary session, and measures the result in an Electron renderer at
- * every band width.
+ * The meter is stacked in the composer's own column, so its promise is a layout
+ * one the renderer answers rather than a unit test: the card must share the
+ * input's left and right edges at every band width, and 53 week columns must
+ * stay cells instead of a dot field while they do. The band floors at a 560px
+ * preference but a squeezed pane still draws it narrower, and a wide pane lets
+ * both surfaces grow together. This check loads the packaged stylesheet, renders
+ * the same column ChatSurface builds for a project and a temporary session, and
+ * measures the result in an Electron renderer at every band width.
  *
  * Set PI_E2E_ARTIFACT_DIR to also write one PNG per width for a human look.
  */
@@ -38,8 +38,8 @@ const BAND_WIDTHS = [402, 560, 760, 1160];
 const HOME_KINDS = ["project", "temporary"];
 /** One column per ISO week; `buildUsageHeatGrid` can emit up to 53 for a year. */
 const WEEK_COLUMNS = 53;
-/** `.token-usage-card { max-width: 880px }`. */
-const CARD_MAX_WIDTH = 880;
+/** The shell stacks a surface above the input with this gap (composer.css). */
+const STACKED_GAP = 8;
 
 const heroTitle = {
   project: "今天想在 Trail 里做点什么？",
@@ -93,17 +93,22 @@ const card = (view) =>
   (view === "calendar" ? heatView() : modelView()) +
   `</section>`;
 
-// The home stack as ChatSurface builds it: hero, first-run list position, meter,
-// then the composer kept outside the scroll. The band is the custom property the
-// drag handles write on `.main-pane`.
+// The home column as ChatSurface builds it: the hero and the first-run list
+// position stay in the scroller, and the meter is stacked above the composer in
+// the bottom region. The band is the custom property the drag handles write on
+// `.main-pane`, and the composer is the real dock markup so its width rule is
+// the one the card is measured against.
 const home = (bandWidth, kind, view) =>
   `<div class="home-main-content meter-home" data-band-width="${bandWidth}" data-home-session-kind="${kind}" data-view="${view}" style="--chat-content-max-width:${bandWidth}px;--chat-composer-max-width:${bandWidth}px">` +
   `<div class="home-scroll"><div class="home-stack-inner">` +
   `<div class="empty-hero"><div class="empty-hero-icon" aria-hidden="true"></div>` +
   `<h1>${heroTitle[kind]}</h1></div>` +
-  card(view) +
   `</div></div>` +
-  `<div class="home-composer-wrap"><div class="meter-composer">Composer</div></div>` +
+  `<div class="home-composer-wrap">` +
+  card(view) +
+  `<div class="composer-dock composer-dock-home"><div class="composer-stack">` +
+  `<div class="meter-composer">Composer</div></div></div>` +
+  `</div>` +
   `</div>`;
 
 const shells = BAND_WIDTHS.flatMap((bandWidth) =>
@@ -115,12 +120,11 @@ const shells = BAND_WIDTHS.flatMap((bandWidth) =>
 const probe = `(() => {
   const round2 = (value) => Math.round(value * 100) / 100;
   const measure = (shell) => {
-    const stack = shell.querySelector('.home-stack-inner');
     const hero = shell.querySelector('.empty-hero');
     const card = shell.querySelector('.token-usage-card');
-    const composer = shell.querySelector('.home-composer-wrap');
+    const composer = shell.querySelector('.composer-stack');
     const cardBox = card.getBoundingClientRect();
-    const stackBox = stack.getBoundingClientRect();
+    const composerBox = composer.getBoundingClientRect();
     const heroBox = hero.getBoundingClientRect();
     const row = {
       bandWidth: Number(shell.dataset.bandWidth),
@@ -128,12 +132,16 @@ const probe = `(() => {
       view: shell.dataset.view,
       cardWidth: round2(cardBox.width),
       cardHeight: Math.round(cardBox.height),
-      cardCenterOffset: round2(
-        (cardBox.left + cardBox.width / 2) - (stackBox.left + stackBox.width / 2)),
+      composerWidth: round2(composerBox.width),
+      // The card and the input are one column, so their edges must land on the
+      // same pixels. Anything else is an inset panel inside the composer.
+      edgeDeltaLeft: round2(cardBox.left - composerBox.left),
+      edgeDeltaRight: round2(cardBox.right - composerBox.right),
+      homeHeight: Math.round(shell.getBoundingClientRect().height),
       // Negative once the card is stacked above the hero instead of below it.
       heroGap: Math.round(cardBox.top >= heroBox.bottom
         ? cardBox.top - heroBox.bottom : cardBox.bottom - heroBox.top),
-      composerGap: Math.round(composer.getBoundingClientRect().top - cardBox.bottom),
+      composerGap: Math.round(composerBox.top - cardBox.bottom),
       cardOverflow: card.scrollWidth - card.clientWidth,
     };
     const strip = card.querySelector('.token-usage-heat');
@@ -304,7 +312,8 @@ try {
 
   for (const row of report.measure) {
     console.log(
-      `${label(row)}: card ${row.cardWidth}x${row.cardHeight}px at ${row.cardCenterOffset >= 0 ? "+" : ""}${row.cardCenterOffset}px of center, ` +
+      `${label(row)}: card ${row.cardWidth}x${row.cardHeight}px vs composer ${row.composerWidth}px wide, ` +
+        `edges ${row.edgeDeltaLeft >= 0 ? "+" : ""}${row.edgeDeltaLeft}px / ${row.edgeDeltaRight >= 0 ? "+" : ""}${row.edgeDeltaRight}px off the input, ` +
         `${row.heroGap}px below the hero, ${row.composerGap}px above the composer, card overflow ${row.cardOverflow}` +
         (row.cellWidth === undefined
           ? `, ${row.modelRows} model rows, bar ${row.barWidth}px filled to ${row.fillWidth}px`
@@ -316,20 +325,31 @@ try {
   for (const row of report.measure) {
     assert.ok(
       row.heroGap >= 0,
-      `${label(row)}: the meter is not under the hero (heroGap ${row.heroGap})`,
+      `${label(row)}: the meter is not below the hero (heroGap ${row.heroGap})`,
     );
     assert.ok(
-      row.composerGap > 0,
-      `${label(row)}: the meter overlaps the composer (composerGap ${row.composerGap})`,
-    );
-    assert.ok(row.cardOverflow <= 0, `${label(row)}: the card overflows the home stack`);
-    assert.ok(
-      Math.abs(row.cardCenterOffset) < 1,
-      `${label(row)}: the card sits ${row.cardCenterOffset}px off the centered band`,
+      row.composerGap > 0 && row.composerGap <= STACKED_GAP,
+      `${label(row)}: the meter sits ${row.composerGap}px above the input, expected the shell's ${STACKED_GAP}px stacked-surface gap`,
     );
     assert.ok(
-      row.cardWidth <= CARD_MAX_WIDTH + 0.5,
-      `${label(row)}: the card is ${row.cardWidth}px wide, past its ${CARD_MAX_WIDTH}px cap`,
+      Math.abs(row.edgeDeltaLeft) < 0.5 && Math.abs(row.edgeDeltaRight) < 0.5,
+      `${label(row)}: the card is ${row.edgeDeltaLeft}px / ${row.edgeDeltaRight}px off the composer's edges`,
+    );
+    // One envelope, not a card that caps itself narrower than the column.
+    assert.ok(
+      Math.abs(row.cardWidth - row.composerWidth) < 0.5,
+      `${label(row)}: the card is ${row.cardWidth}px against the composer's ${row.composerWidth}px`,
+    );
+    assert.ok(
+      row.cardWidth <= row.bandWidth + 0.5,
+      `${label(row)}: the card is ${row.cardWidth}px, wider than the ${row.bandWidth}px band`,
+    );
+    assert.ok(row.cardOverflow <= 0, `${label(row)}: the card overflows the composer column`);
+    // The meter is a glance, not the home column's subject: it may widen with
+    // the input, but the square cells it grows must not outdraw the hero.
+    assert.ok(
+      row.cardHeight <= row.homeHeight / 2,
+      `${label(row)}: the card is ${row.cardHeight}px tall in a ${row.homeHeight}px home column`,
     );
     if (row.cellWidth !== undefined) {
       // Below ~5 CSS px a tinted square stops reading as a cell: the gutter
@@ -352,12 +372,6 @@ try {
         row.stripScrollWidth >= row.stripVisibleWidth,
         `${label(row)}: the strip is clipped instead of scrollable`,
       );
-      // The grid follows the card's width, so a wide band must not turn a year
-      // of history into a block of tiles taller than the hero above it.
-      assert.ok(
-        row.stripContentHeight <= 120,
-        `${label(row)}: the heat grid is ${row.stripContentHeight}px tall`,
-      );
     }
     if (row.modelRows !== undefined) {
       assert.ok(
@@ -367,14 +381,6 @@ try {
       assert.equal(row.modelRows, 4, `${label(row)}: model rows`);
     }
   }
-
-  const widest = report.measure.find(
-    (row) => row.bandWidth === BAND_WIDTHS.at(-1) && row.view === "calendar",
-  );
-  assert.ok(
-    Math.abs(widest.cardWidth - CARD_MAX_WIDTH) < 1,
-    `a maximized band should hit the card cap, saw ${widest.cardWidth}px`,
-  );
 
   const narrowest = report.measure.find(
     (row) => row.bandWidth === BAND_WIDTHS[0] && row.view === "calendar",
@@ -388,8 +394,8 @@ try {
     .filter((row) => row.cellWidth !== undefined)
     .map((row) => row.cellWidth);
   console.log(
-    `E2E-UI-home-token-meter OK (cell ${Math.min(...cells)}–${Math.max(...cells)}px across band bounds, ` +
-      `card capped at ${CARD_MAX_WIDTH}px under both heroes)`,
+    `E2E-UI-home-token-meter OK (card edge-to-edge with the composer at ${BAND_WIDTHS.join("/")}px bands, ` +
+      `cell ${Math.min(...cells)}–${Math.max(...cells)}px)`,
   );
 } finally {
   await rm(temp, { recursive: true, force: true });

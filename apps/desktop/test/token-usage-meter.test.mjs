@@ -17,6 +17,7 @@ const sidebarSource = await read("../src/components/Sidebar.tsx");
 const settingsSource = await read("../src/features/settings/SettingsPage.tsx");
 const windowActionsSource = await read("../src/features/settings/window-actions.tsx");
 const cardStyles = await read("../src/styles/token-usage.css");
+const composerStyles = await read("../src/styles/composer.css");
 const usageTypesSource = await read("../../../packages/shared/src/types/filesystem.ts");
 
 const item = (date, totalTokens) => ({ date, totalTokens });
@@ -163,29 +164,50 @@ test("zero usage cannot divide by zero in the shares", () => {
   assert.equal(breakdown.scale, 0);
 });
 
-test("the meter reads one host query and lives under the empty-home hero", () => {
+test("the meter reads one host query and lines up with the composer", () => {
   assert.match(cardSource, /getTokenUsageHistory\(\{ bucket: "day" \}\)/);
   assert.doesNotMatch(
     cardSource,
     /startDate|endDate/,
     "the window belongs to the host default, not a second local rule",
   );
-  // Inside the home stack, after the hero and the first-run checklist, so the
-  // glance sits where the user already reads the project name.
+  // The hero and the first-run list stay in the scroller; the meter is stacked
+  // in the composer's own column, so it reads below them and never moves the
+  // input away from the bottom (ADR 0066).
   const hero = homeSource.indexOf('<div className="empty-hero">');
   const checklist = homeSource.indexOf("<OnboardingChecklist />");
+  const wrap = homeSource.indexOf('<div className="home-composer-wrap">');
   const meter = homeSource.indexOf("<TokenUsageCard />");
-  assert.ok(hero > 0 && checklist > 0 && meter > 0, "the home stack lost a member");
-  assert.ok(hero < meter, "the meter belongs below the hero");
-  assert.ok(checklist < meter, "the first-run list keeps priority over the meter");
-  assert.ok(
-    meter < homeSource.indexOf('<div className="home-composer-wrap">'),
-    "the meter belongs above the composer",
-  );
+  const composer = homeSource.indexOf('<StableComposer variant="home" />');
+  assert.ok(hero > 0 && checklist > 0 && wrap > 0, "the home stack lost a member");
+  assert.ok(meter > wrap, "the meter belongs in the composer's column");
+  assert.ok(meter < composer, "the meter belongs above the composer");
+  assert.ok(checklist < wrap, "the first-run list keeps priority over the meter");
   // The sidebar no longer carries it: one surface, one meter.
   assert.doesNotMatch(sidebarSource, /TokenUsageCard/);
-  assert.match(cardStyles, /\.token-usage-card\s*\{[^}]*width:\s*100%/);
-  assert.match(cardStyles, /\.token-usage-card\s*\{[^}]*max-width:\s*880px/);
+
+  // One width envelope, so the two surfaces share their left and right edges at
+  // every band width. A cap of its own is what made the card read as an inset
+  // panel inside the composer instead of an aligned surface.
+  const composerEnvelope =
+    /width:\s*(min\(100%,\s*var\(--chat-composer-max-width,\s*768px\)\))/.exec(
+      composerStyles.match(/\.composer-dock-home \.composer-stack\s*\{[^}]*\}/)?.[0] ??
+        "",
+    )?.[1];
+  assert.ok(composerEnvelope, "the home composer lost its width envelope");
+  const cardRule = /\.token-usage-card\s*\{([^}]*)\}/.exec(cardStyles)?.[1] ?? "";
+  assert.match(
+    cardRule,
+    new RegExp(`width:\\s*${composerEnvelope.replace(/[()]/g, "\\$&")}`),
+    "the meter must use the composer's width rule, not a second one",
+  );
+  assert.doesNotMatch(
+    cardRule,
+    /^\s*max-width\s*:/m,
+    "a cap narrower than the composer re-introduces the inset",
+  );
+  // 8px is what the shell already spends on a surface stacked above the input.
+  assert.match(cardRule, /margin:\s*0 auto 8px/);
 });
 
 // A dev profile can reach a host binary built before D682, which answers with
@@ -294,7 +316,7 @@ test("the meter follows finished turns instead of freezing at mount", () => {
   // Overlapping fetches can land newest-last, so only the newest may write.
   assert.match(cardSource, /const id = \+\+requestId\.current;/);
   assert.match(cardSource, /id !== requestId\.current/);
-  // A narrow sidebar clips the oldest half of the year, so the strip opens on
+  // A narrow band clips the oldest half of the year, so the strip opens on
   // the current week instead of January. A stable ref callback jumps once, when
   // the strip appears, so a refresh cannot drag the view back to January.
   assert.match(cardSource, /const attachHeat = useCallback\(\(node: HTMLDivElement \| null\) => \{/);

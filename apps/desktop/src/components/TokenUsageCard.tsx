@@ -16,8 +16,8 @@ import { cx } from "./ui";
 type UsageView = "calendar" | "model";
 
 /**
- * Token meter under the empty-home hero: one number for the last year, a daily
- * heatmap, and the same total cut by model.
+ * Token meter above the empty-home composer: one number for the last year, a
+ * daily heatmap, and the same total cut by model.
  *
  * Both views come from one host query, so the bars always add up to the strip.
  */

@@ -9476,11 +9476,12 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 - **Preconditions**: A profile whose completed turns span at least two
   different models and at least one idle day inside the last twelve months, and
-  a profile with more than five models in range. The centered chat band can be
-  dragged wider than the card's own 880 px cap, and a squeezed pane can draw the
-  band below its 560 px preference floor.
+  a profile with more than five models in range. The chat band can be dragged
+  from a pane squeezed below its 560 px preference floor up to a maximized
+  window, and the composer's own width follows that same band.
 - **Steps**: 1) Open the app on an empty project home and on a temporary
-  session, and read the card under the hero title, above the composer.
+  session, and read the card in the composer's column — below the hero, above
+  the input.
   2) Switch to the model ranking and back to the daily strip.
   3) Complete a turn on another model, wait for the last running session to
   end, and read both views again without reloading; then restart and read once
@@ -9502,8 +9503,10 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
     not zero.
   - Ink levels split the active days by quartile; a day with no usage keeps the
     base tone, and a range with no usage at all lights nothing up.
-  - Widening the band grows the columns, and the card stops growing at 880 px so
-    a maximized window does not turn a year into tiles. Below the band's 560 px
+  - Widening the band grows the columns, and the card keeps the composer's width
+    at every band: its left and right edges land on the input's, because one
+    width envelope is what makes the two surfaces read as one column rather than
+    a panel inset inside another. Below the band's 560 px
     preference floor — a pane squeezed past it — a column stops at its legibility
     floor and the older weeks scroll sideways out of view on the shell's own
     quiet scrollbar — 6px, trackless, transparent at rest and
@@ -9511,9 +9514,12 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
     than the gutter beside it;
     the strip opens on the week that contains today, and because it scrolls it is
     also a focus target — Tab reaches it and the arrow keys reach the older
-    weeks. Nothing is clipped, the card stays centered in the band and never
-    overflows it, and every cell stays square, so the grid's height follows only
-    the card's width.
+    weeks. Nothing is clipped, the card never overflows the column, and every
+    cell stays square, so the grid's height follows only the card's width.
+  - The meter is stacked in the composer's own bottom region, so the input stays
+    fixed at the bottom of the home column (ADR 0066), the card keeps the
+    shell's 8px gap above it, and the pair stays below the hero. The home column
+    never spends more than half of its height on the meter.
   - A turn that finishes while the card is open shows up without a reload: the
     meter re-reads once no session is running any more, and an older answer
     never overwrites a newer one.
@@ -9542,9 +9548,12 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   gated at 402 / 560 / 760 / 1160 px band widths, on both hero variants and both
   views, by
   `pnpm test:e2e:home-token-meter` (`scripts/e2e-home-token-meter.mjs`),
-  which measures the real built sheet and fails when a cell drops under 5 px,
-  stops being square, escapes the card's 880 px cap or its centered band, leaves
-  the hero above it, overlaps the composer, or reserves a scrollbar lane wider
+  which measures the real built sheet against the real composer markup and
+  fails when a cell drops under 5 px, stops being square, lands within half a
+  pixel of neither the composer's left nor its right edge, spends more than the
+  shell's 8px gap above the input, drops below the hero, overflows the column,
+  takes more than half the home column's height, or reserves a scrollbar lane
+  wider
   than the shared 6px. The card is read from a real
   profile; the full desktop journey is Draft (run only in a capable environment
   when this surface changes).

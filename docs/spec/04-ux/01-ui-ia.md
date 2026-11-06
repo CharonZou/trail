@@ -179,8 +179,10 @@ destination, chat as the home surface, tools and permissions inline.
   checklist, and a bottom-reserved composer. Task entry starts directly in the composer; no
   redundant supporting paragraph, developer starter cards, or contextual
   quick-action row is rendered (D204/D206).
-- **Token meter**: one card under that hero, above the composer, inside the
-  same centered band. It reads `stats.getTokenUsageHistory` with bucket `day`
+- **Token meter**: one card stacked in the composer's own column, directly above
+  the input and edge-to-edge with it, so the home screen reads as one column
+  instead of an inset panel inside another. It reads
+  `stats.getTokenUsageHistory` with bucket `day`
   and no dates, so the total is the host's own default window, and labels the
   range it actually covers. A two-option switch changes what the same numbers
   are drawn as: a daily strip (one square per day in week columns, quartile
@@ -189,9 +191,10 @@ destination, chat as the home surface, tools and permissions inline.
   rather than zero) or a per-model ranking (bars for the largest models plus one
   honest "N other models" row, each with its compact total and share). The two
   views cannot disagree because the host folds both from one pass (D682).
-  Columns grow with the band but never below a legibility floor, cells stay
-  square, and the card stops growing at 880 px so a maximized window does not
-  turn a year into tiles. A squeezed pane can still draw the band narrower than
+  Columns grow with the band but never below a legibility floor and cells stay
+  square, so the meter keeps the input's width at every band instead of capping
+  itself narrower than the surface it is aligned to. A squeezed pane can still
+  draw the band narrower than
   its 560 px preference floor; there the older weeks scroll sideways out of view
   on the shell's own quiet scrollbar, because 53 columns below roughly 7 px each
   would leave a column narrower than the gutter beside it. The strip opens on

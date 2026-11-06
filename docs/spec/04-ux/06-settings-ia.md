@@ -390,8 +390,8 @@ Token usage is **not a Settings destination** (D335 / ADR 0173). Completed-turn
 history stays host-owned (`session.endTurn.usage`, `stats.getTokenUsageHistory`).
 The full dashboard is marketplace plugin `pi.token-insights`, opened from
 the command palette (`usage`, `tokens`, `用量`). Settings search does not index
-a usage tab. The app's own surface is the compact meter under the empty-home
-hero (D682), which is not a destination either: it reads the same host RPC in
+a usage tab. The app's own surface is the compact meter above the empty-home
+composer (D682), which is not a destination either: it reads the same host RPC in
 the default one-year window and switches between the daily strip and the
 per-model ranking in place.
 

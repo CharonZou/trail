@@ -193,10 +193,10 @@ export const ChatSurface = memo(function ChatSurface({
                 </h1>
               </div>
               {!isRemoteSession(activeSession) ? <OnboardingChecklist /> : null}
-              <TokenUsageCard />
             </div>
           </div>
           <div className="home-composer-wrap">
+            <TokenUsageCard />
             <StableComposer variant="home" />
           </div>
         </div>

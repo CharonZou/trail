@@ -7,7 +7,7 @@ export const deEntries: ChangelogEntry[] = [
     highlights: [
       "Jedes Projekt erhält eigenes Workspace-Symbol und eigene Farbe – die Seitenleiste zeigt beides statt überall desselben Ordnersymbols.",
       "Der Workspace-Index lässt sich je Projekt in den Dialogen zum Erstellen und Bearbeiten ausschalten; dann listet @ keine Dateien mehr, ein in einer Unterhaltung referenzierter Pfad bleibt aber auflösbar.",
-      "Token-Nutzung unter der Eingangsfrage der Startseite: eine Gesamtzahl für die letzten 12 Monate, ein Tages-Heatmap-Streifen und dieselbe Gesamtzahl nach Modell aufgeteilt.",
+      "Token-Nutzung auf der Startseite, direkt über dem Eingabefeld: eine Gesamtzahl für die letzten 12 Monate, ein Tages-Heatmap-Streifen und dieselbe Gesamtzahl nach Modell aufgeteilt.",
       "Das neue Fenster-Card in den Einstellungen minimiert das Fenster oder schaltet in den Vollbildmodus – ohne Menüleiste.",
       "Mehrere Anbieter zeigen in den Listen ihre offiziellen Markenzeichen, darunter Mistral, Kimi und Moonshot.",
       "Das App-Symbol ist jetzt auf allen Oberflächen ein sauberes Markenzeichen, auch in der Windows-Taskleiste und bei Alt+Tab.",

@@ -7,7 +7,7 @@ export const enEntries: ChangelogEntry[] = [
     highlights: [
       "Give each project its own workspace icon and colour, and the sidebar row shows them instead of one folder glyph for everything.",
       "Turn the workspace index off per project in the create and edit dialogs; while it is off, @ suggestions list no files, and a path already referenced in a conversation still resolves.",
-      "See token usage under the home screen's opening question: one total for the last 12 months, a day-by-day heat strip, and the same total split by model.",
+      "See token usage on the home screen, just above the composer: one total for the last 12 months, a day-by-day heat strip, and the same total split by model.",
       "Minimize the window or send it full screen from the new Window card in Settings, without the menu bar.",
       "Provider lists show their official marks for more services, including Mistral, Kimi and Moonshot.",
       "The app icon is a clean brand mark on every surface, including the Windows taskbar and Alt+Tab.",

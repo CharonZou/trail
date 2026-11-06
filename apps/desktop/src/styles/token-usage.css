@@ -1,19 +1,22 @@
 /*
  * Empty-home token meter (near a year of usage, daily strip and per-model bars).
  *
- * The card shares the chat band, whose floor is 560px: 53 week columns there
- * are ~8px each, but a squeezed window can still draw the band narrower. So a
- * column keeps a 7px readable floor and the strip scrolls the older weeks
- * sideways rather than collapsing into noise, and the card stops growing at
- * 880px so a maximized window does not turn a year into 20px squares.
+ * The card is stacked in the composer's own column, so it takes the width rule
+ * `.composer-dock-home .composer-stack` uses: one envelope, and the two surfaces
+ * share left and right edges at every band width. A cap of its own is what made
+ * it read as a panel inset inside the composer instead of a surface aligned
+ * with it.
+ *
+ * That band floors at 560px, where 53 week columns are ~8px each, but a squeezed
+ * window can still draw it narrower. So a column keeps a 7px readable floor and
+ * the strip scrolls the older weeks sideways rather than collapsing into noise.
  * `aspect-ratio` keeps every cell square, so the grid's height follows only the
  * card's width.
  */
 
 .token-usage-card {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 880px;
+  width: min(100%, var(--chat-composer-max-width, 768px));
+  margin: 0 auto 8px;
   padding: 9px 10px 10px;
   border: 1px solid var(--ds-border-subtle);
   border-radius: var(--radius-sm);

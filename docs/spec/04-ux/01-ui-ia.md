@@ -95,7 +95,7 @@ destination, chat as the home surface, tools and permissions inline.
   exclusion is unchanged. Header paint fills the excluded lane without an
   opaque overlay hiding tabs or panel actions. The macOS inset uses the shared
   `--ds-window-lead-inset` token — the cluster's 76px right edge (from
-  `@pi-desktop/shared`) plus a 12px gap — and the main process positions the
+  `@trail/shared`) plus a 12px gap — and the main process positions the
   buttons from that same shared geometry.
 - **Work panel**: docked right column (not an overlay) opened by an artifact,
   the viewport-fixed toggle, or `Cmd/Ctrl + J`. File, URL, browser-preview, and
@@ -301,6 +301,23 @@ destination, chat as the home surface, tools and permissions inline.
   cancel a background turn. Background events update only their originating
   session and never change the active session, page, project, or keyboard
   focus.
+- **Token meter**: one card that does not scroll, between the project list and
+  the footer. It reads `stats.getTokenUsageHistory` with bucket `day` and no
+  dates, so the total is the host's own default window, and labels the range it
+  actually covers. A two-option switch changes what the same numbers are drawn
+  as: a daily strip (one square per day in week columns, quartile thresholds
+  computed over the active days, four ink levels above a faint base for days
+  with no usage, and the leading/trailing padding cells invisible rather than
+  zero) or a per-model ranking (bars for the largest models plus one honest
+  "N other models" row, each with its compact total and share). The two views
+  cannot disagree because the host folds both from one pass (D682). Columns grow
+  with the sidebar but never below a legibility floor, cells stay square, and at
+  the narrow bound the older weeks scroll sideways out of view on the shell's own
+  quiet scrollbar — squeezing 53 columns into 240 px would leave each one
+  narrower than the gutter beside it. The strip opens on the week that contains
+  today and is focusable, so the older weeks stay reachable from the keyboard, and a
+  failed read states that usage is unavailable rather than painting an empty
+  year.
 
 ### 3.3 Scheduled
 A task column beside the selected task's page, with an explicit create/edit form, a cadence dropdown, time,

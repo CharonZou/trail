@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const trEntries: ChangelogEntry[] = [
   {
+    version: "1.0.2",
+    date: "2026-11-06",
+    highlights: [
+      "Her proje kendi çalışma alanı simgesini ve rengini seçer; kenar çubuğundaki proje satırı artık her projede aynı klasör simgesi yerine bunu gösterir.",
+      "Proje oluşturma ve düzenleme pencerelerinde çalışma alanı dizini proje bazında kapatılabilir; kapalıyken @ önerileri dosya listelemez, ancak bir konuşmada alıntılanmış bir yol çözümlenmeye devam eder.",
+      "Kenar çubuğunda Token kullanımı: son 12 ay için tek bir toplam, güne göre ısı şeridi ve aynı toplamın modele göre dağılımı.",
+      "Ayarlar'daki yeni Pencere kartıyla menü çubuğuna gerek kalmadan pencereyi küçültün veya tam ekrana alın.",
+      "Daha fazla sağlayıcı listelerde resmi işaretlerini gösterir; Mistral, Kimi ve Moonshot dahil.",
+      "Uygulama simgesi, Windows görev çubuğu ve Alt+Tab dahil her yüzeyde artık temiz bir marka işaretidir.",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-11-04",
     highlights: [
@@ -132,7 +144,7 @@ export const trEntries: ChangelogEntry[] = [
       "Zamanlanmış görevler aralık temposunda çalışabilir: görev kurulduktan sonra 5 dakikadan 24 saate kadar.",
       "Zamanlanmış sayfası görev listesini seçili görevle birlikte sunar: son sonucu, sonraki çalışmayı, talimatı ve çalışma geçmişini.",
       "Bir çalışmanın konuşmasında görevine ve çalışmasına dönen bir satır bulunur ve her görev bir çalışmanın yeni konuşma mı açacağını yoksa mevcut konuşmayı mı sürdüreceğini seçer.",
-      "Composer'a bir pi-desktop://session/<id> bağlantısı yapıştırın ve bir konuşmayı başka bir tura devredin.",
+      "Composer'a bir trail://session/<id> bağlantısı yapıştırın ve bir konuşmayı başka bir tura devredin.",
       "Sohbetten, çalışma panelinden ve paketlenmiş dosya yöneticisinden path:line dosya başvurularını açın ve doğrudan o satıra gidin.",
       "Gerçek bir dosya yoluna çözümlenen satır içi kod artık tıklanabilir bir bağlantıdır; diğer satır içi kodlar ve kod blokları sade kalır.",
       "Her MCP sunucusu kendi bağlantı zaman aşımını (1-600 saniye) ayarlayabilir; temizlemek varsayılan değeri geri getirir.",
@@ -706,7 +718,7 @@ export const trEntries: ChangelogEntry[] = [
       "Birden fazla satıcı hesabında oturum açın ve her sağlayıcı için kullanılan hesabı seçin.",
       "Resim eklerinin ne zaman destekleneceğine karar vermek için her modelin yeteneklerini kullanın.",
       "Ortaya çıkaran modeller için doğrudan bestecinin akıl yürütme çabasını seçin.",
-      "Çakışan oturumları önlemek için veri dizini başına bir PI-Desktop örneğini tutun.",
+      "Çakışan oturumları önlemek için veri dizini başına bir Trail örneğini tutun.",
       "Ayarları daha net gruplar halinde düzenleyin ve sağlayıcı hesap yönetimini basitleştirin.",
       "Yerleşik alt aracıları üst konuşmanın izin moduyla uyumlu tutun."
     ]
@@ -750,7 +762,7 @@ export const trEntries: ChangelogEntry[] = [
       "Daha hızlı erişim için başlatıcıda yakın zamanda kullanılan eklentileri hatırlayın.",
       "Geliştirici modu için içerik menüsüne oturum yolunu kopyala ekleyin.",
       "Yazı tipi seçici kırpmasını ve Sistem varsayılan sıfırlama sorunlarını düzeltin.",
-      "Pencere kapatıldıktan sonra macOS PI-Desktop'u Dock'ta ve Cmd+Sekme'de tutun.",
+      "Pencere kapatıldıktan sonra macOS Trail'u Dock'ta ve Cmd+Sekme'de tutun.",
       "Besteci gönderildikten sonra çöktüğünde sohbet metnini sabit tutun.",
       "Çalışma paneline daha net bir yönlendirmeyle gerçek bir boş durum verin."
     ]
@@ -790,7 +802,7 @@ export const trEntries: ChangelogEntry[] = [
     "date": "2026-08-12",
     "highlights": [
       "Başka bir uygulamaya odaklanıldığında Windows Alt+Space genel eklenti başlatıcısını geri yükleyin.",
-      "MacOS, Windows ve Linux'ta simge durumuna küçültüldüğünde PI-Desktop'un sistem tepsisinde kullanılabilir olmasını sağlayın.",
+      "MacOS, Windows ve Linux'ta simge durumuna küçültüldüğünde Trail'un sistem tepsisinde kullanılabilir olmasını sağlayın.",
       "Açık ve koyu temalarda yerel seçim menüsünün okunabilirliğini iyileştirin."
     ]
   },
@@ -866,8 +878,8 @@ export const trEntries: ChangelogEntry[] = [
     "version": "0.4.1",
     "date": "2026-08-02",
     "highlights": [
-      "GitHub Sürümlerini güncelleyin ve standart PI-Desktop deposuna olan bağlantıları otomatik olarak güncelleyin.",
-      "PI-Desktop veri havuzu adını kullanmak için projeyi, eklentiyi ve sürüm belgelerini yenileyin."
+      "GitHub Sürümlerini güncelleyin ve standart Trail deposuna olan bağlantıları otomatik olarak güncelleyin.",
+      "Trail veri havuzu adını kullanmak için projeyi, eklentiyi ve sürüm belgelerini yenileyin."
     ]
   },
   {

@@ -69,8 +69,8 @@ const { appDir, electronBinary } = resolveElectronBinary();
 const port = Number(process.env.PI_SCHEDULED_CDP_PORT || 9378);
 const env = {
   ...process.env,
-  PI_DESKTOP_DATA_DIR: dataDir,
-  PI_DESKTOP_START_MAXIMIZED: "0",
+  TRAIL_DATA_DIR: dataDir,
+  TRAIL_START_MAXIMIZED: "0",
   ELECTRON_RENDERER_URL: "",
 };
 delete env.ELECTRON_RUN_AS_NODE;

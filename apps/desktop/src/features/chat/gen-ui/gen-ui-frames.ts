@@ -15,7 +15,7 @@ import {
   GEN_UI_WHEEL_MESSAGE,
   isGenUiErrorCode,
   type GenUiErrorCode,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 type FrameMessageEvent = { source: unknown; data: unknown };
 

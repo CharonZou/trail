@@ -74,7 +74,7 @@ The client sends:
   "params": {
     "protocolVersion": "1.0",
     "client": {
-      "name": "pi-desktop-web",
+      "name": "trail-web",
       "version": "0.1.0"
     },
     "bindings": ["RACP-WS", "RACP-HTTP"],
@@ -103,7 +103,7 @@ The Host returns:
   "result": {
     "protocolVersion": "1.0",
     "server": {
-      "name": "pi-desktop-agent-host",
+      "name": "trail-agent-host",
       "version": "0.1.0"
     },
     "connectionId": "conn_01J...",

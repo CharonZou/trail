@@ -23,7 +23,7 @@ pub struct SystemGrep<'a> {
     pub pattern: &'a str,
     pub search_dir: &'a Path,
     pub workspace_root: &'a Path,
-    /// Root whose `.pi-desktopignore` applies (workspace root, or the search
+    /// Root whose `.trailignore` applies (workspace root, or the search
     /// root for scratch/external searches).
     pub ignore_root: &'a Path,
     pub root_kind: ToolRoot,
@@ -72,10 +72,10 @@ fn resolve_rg() -> Option<PathBuf> {
     }
     #[cfg(not(test))]
     {
-        if std::env::var_os("PI_DESKTOP_DISABLE_RG").is_some() {
+        if std::env::var_os("TRAIL_DISABLE_RG").is_some() {
             return None;
         }
-        if let Some(overridden) = std::env::var_os("PI_DESKTOP_RG") {
+        if let Some(overridden) = std::env::var_os("TRAIL_RG") {
             let path = PathBuf::from(overridden);
             return path.is_file().then_some(path);
         }

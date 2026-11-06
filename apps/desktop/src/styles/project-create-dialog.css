@@ -270,6 +270,68 @@
   line-height: var(--leading-compact);
 }
 
+/* The workspace-index switch reads as one row: label left, switch right. */
+.project-create-dialog-index-toggle {
+  flex: 0 0 auto;
+}
+
+.project-create-dialog-index-hint {
+  margin: 0;
+  color: var(--ds-text-muted);
+  font-size: var(--text-xs-plus);
+  line-height: var(--leading-compact);
+}
+
+/* Icon and colour rows: one tile per choice, laid out as fluid tracks, so the
+   dialog's own width decides how many columns fit — fifteen at 438px. The colour
+   row is then a single line and the longer icon row continues on a full second
+   one, instead of a ragged tail. Tracks only shrink below fifteen columns when the
+   dialog is too narrow for a bare 23px tile, which is the point where wrapping
+   beats clipping. */
+.project-appearance-row {
+  --appearance-tile: 23px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--appearance-tile), 1fr));
+  grid-auto-rows: var(--appearance-tile);
+  gap: 6px;
+}
+
+.project-appearance-tile,
+.project-appearance-swatch {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--ds-tile);
+  color: var(--ds-text-primary);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.project-appearance-tile:hover:not(:disabled),
+.project-appearance-swatch:hover:not(:disabled) {
+  background: var(--ds-tile-hover);
+}
+
+/* The chosen tile carries the deeper fill and the ring; the glyph itself keeps
+   the text colour so the row never reads as fifteen competing hues. */
+.project-appearance-tile.is-selected,
+.project-appearance-swatch.is-selected {
+  background: var(--ds-tile-deep);
+  border-color: var(--ds-focus);
+  box-shadow: 0 0 0 1px var(--ds-focus);
+}
+
+.project-appearance-swatch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
 .project-create-dialog-count {
   display: inline-flex;
   min-width: 18px;
@@ -546,7 +608,9 @@
   .project-create-folder-row,
   .project-create-folder-remove,
   .project-create-folder-primary,
-  .project-create-add-folder {
+  .project-create-add-folder,
+  .project-appearance-tile,
+  .project-appearance-swatch {
     transition: none;
   }
 }

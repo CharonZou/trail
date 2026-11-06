@@ -10,8 +10,8 @@
 | Lane | Command | Signing | Use |
 |---|---|---|---|
 | Dev | `pnpm dev` | none | daily development |
-| Local package | `pnpm --filter @pi-desktop/desktop pack` | unsigned without a configured certificate | packaging smoke (`--dir` output) |
-| Local DMG | `pnpm --filter @pi-desktop/desktop dist` | unsigned without a configured certificate | local install test |
+| Local package | `pnpm --filter @trail/desktop pack` | unsigned without a configured certificate | packaging smoke (`--dir` output) |
+| Local DMG | `pnpm --filter @trail/desktop dist` | unsigned without a configured certificate | local install test |
 | Release | `scripts/release-macos.sh` | Developer ID + mandatory notarization | distributable artifact |
 
 The static electron-builder config does not embed a certificate identity, so
@@ -31,7 +31,7 @@ same `net.aiuo.pi-desktop` AppUserModelID used by the NSIS package before
 Electron readiness, preventing the stock host identity from owning native
 notifications or taskbar groups. The Windows package additionally pins the
 `Trail` executable and Start menu shortcut names. The launcher sets
-`PI_DESKTOP_DEV=1` so runtime packaging checks keep update delivery disabled
+`TRAIL_DEV=1` so runtime packaging checks keep update delivery disabled
 and preserve developer workspace defaults despite the branded executable name.
 The first `pnpm dev` on Electron 43+ downloads the Electron binary on demand
 (the package no longer installs it during `pnpm install`).
@@ -39,9 +39,13 @@ Packaged lanes use `build/icon.icns` through electron-builder on macOS and
 `build/icon.ico` for the Windows executable and native window icon. The
 renderer imports the same PNG through `BrandLogo`. The PNG is canonical;
 `scripts/make-icon.py` derives the multi-size Windows ICO, the 512px
-Windows/Linux package PNG, the
+Windows/Linux package PNG, the 1254px `build/logo_dark.png` documentation
+lockup, the
 transparent monochrome `build/tray-icon-mac.png` template, and the iconset/ICNS
 when macOS `iconutil` is available, without overwriting the canonical source.
+That source is a flat render of the `docs/public/brand-mark.svg` vector master:
+regenerating it from a screenshot or any other raster re-introduces soft edges
+that turn the Windows taskbar and Alt+Tab icon into grey mush at 24px.
 
 ## 2. Prerequisites (release lane)
 
@@ -70,8 +74,8 @@ when macOS `iconutil` is available, without overwriting the canonical source.
   agent sidecar — without it, LAN provider requests from the sidecar fail with
   `EHOSTUNREACH` even though the main process's Test Provider fetch succeeds
   (issue #573).
-- `Resources/bin/pi-desktop-host-core` — Rust host binary (release build).
-- Windows NSIS builds include an x64 `pi-desktop-host-core.exe` statically
+- `Resources/bin/trail-host-core` — Rust host binary (release build).
+- Windows NSIS builds include an x64 `trail-host-core.exe` statically
   linked to the MSVC CRT, so a clean Windows x64 or Windows 11 ARM64
   (x64-emulated) installation does not need a separate Visual C++
   Redistributable before the local service can start.
@@ -87,8 +91,8 @@ when macOS `iconutil` is available, without overwriting the canonical source.
   independently of Chromium locales.
 - App icons `build/icon.icns` and `build/icon.ico` (derived from canonical
   `build/icon_1024.png` by `scripts/make-icon.py`).
-- macOS menu bar template `build/tray-icon-mac.png`, derived from the dark PI
-  mark with a transparent background; Windows/Linux use the product PNG tray
+- macOS menu bar template `build/tray-icon-mac.png`, derived from the bar glyph
+  with a transparent background; Windows/Linux use the product PNG tray
   resource.
 
 ## 4. Release steps
@@ -147,7 +151,7 @@ Blocking steps:
    this cut.
 4. Sync the newest-first version list in
    `packages/shared/src/changelog.test.ts` (add the new stable version at the
-   top), then run `pnpm --filter @pi-desktop/shared test` and confirm catalog
+   top), then run `pnpm --filter @trail/shared test` and confirm catalog
    alignment (version sets + highlight counts) still passes.
 5. Update `README.md` and `README.zh-CN.md` when the release line changes
    (`0.10.x` → `0.11.x`) and whenever the release ships user-visible behavior
@@ -212,7 +216,7 @@ inputs are prepared.
 On every platform, the release preparation step starts the locked Rust host
 build in parallel with pnpm installation and native dependency rebuilding. It
 then builds only the workspace dependencies selected by
-`@pi-desktop/desktop^...`, failing if that dependency selection is unexpectedly
+`@trail/desktop^...`, failing if that dependency selection is unexpectedly
 empty. The platform `dist:*` command remains responsible for bundling the agent
 runtime, verifying the host build, building the Desktop application once, and
 invoking electron-builder. This avoids a redundant Desktop build without
@@ -228,7 +232,7 @@ stays unsigned without a configured certificate (D078).
 
 The macOS matrix uses `macos-15` for arm64 and `macos-15-intel` for Intel x64.
 Each job verifies `uname -m`, passes the matching `--arm64` or `--x64` flag to
-electron-builder, and builds `pi-desktop-host-core` on that same native
+electron-builder, and builds `trail-host-core` on that same native
 runner. Tag builds and `sign_macos: true` (the dispatch default) receive
 `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and
 `APPLE_TEAM_ID` only from GitHub Actions secrets, pin the certificate through
@@ -238,7 +242,7 @@ the `Developer ID Application:` prefix), force code signing and
 same service on its own (`scripts/notarize-and-staple-macos-release-dmg.sh`),
 and only an `Accepted` status allows the ticket to be stapled. Verification
 then checks the identity, code-signing integrity (including
-`pi-desktop-host-core`), Gatekeeper `Notarized Developer ID`, and both stapled
+`trail-host-core`), Gatekeeper `Notarized Developer ID`, and both stapled
 tickets before any artifact upload. The per-architecture `latest-mac.yml` files
 are renamed before upload; the publish job merges them into one feed after
 downloading both artifacts.
@@ -318,7 +322,7 @@ electron-updater feeds.
 
 ### 4.6 GitHub Actions secrets for macOS signing
 
-Create these under GitHub → repository `vastsa/PI-Desktop` → Settings →
+Create these under GitHub → repository `CharonZou/trail` → Settings →
 Secrets and variables → Actions. Never commit the p12, password, Apple ID, or
 app-specific password. Never `echo` these values in CI.
 
@@ -555,7 +559,7 @@ legacy `woff`/`truetype` strip stays because KaTeX still declares those sources.
 The three-controls table above is the `v0.10.8` record and predates the removal,
 so its `woff2` row is no longer current.
 
-Manual smoke on a clean profile (`PI_DESKTOP_DATA_DIR=$(mktemp -d)`):
+Manual smoke on a clean profile (`TRAIL_DATA_DIR=$(mktemp -d)`):
 
 1. `pnpm dev` launches with `Trail` in the macOS application menu and the
    canonical icon in both the Dock and native About panel; no Electron brand is
@@ -568,7 +572,7 @@ Manual smoke on a clean profile (`PI_DESKTOP_DATA_DIR=$(mktemp -d)`):
 4. Onboarding checklist appears; configure provider; one streamed chat turn.
 5. One permissioned tool call (Write) allow + deny paths.
 6. Quit/relaunch → session history restored, window bounds restored.
-7. `~/.pi-desktop/logs/` contains categorized NDJSON under `app/`, `host/`,
+7. `~/.trail/logs/` contains categorized NDJSON under `app/`, `host/`,
    and `agent/`; key lifecycle, tool, provider, plugin, and error records are
    available without dedicated timing files.
 8. With network access disabled, the shell still starts; English/Chinese
@@ -584,19 +588,19 @@ runtime and Electron app. D126/D285/D603 tag workflows publish these outputs and
 their electron-updater manifests. Run a target command on that target OS:
 
 ```text
-macOS Apple Silicon: pnpm --filter @pi-desktop/desktop run dist:mac -- --arm64
-macOS Intel:         pnpm --filter @pi-desktop/desktop run dist:mac -- --x64
-Windows: pnpm --filter @pi-desktop/desktop dist:win
-Linux:   pnpm --filter @pi-desktop/desktop dist:linux -- --x64|--arm64
+macOS Apple Silicon: pnpm --filter @trail/desktop run dist:mac -- --arm64
+macOS Intel:         pnpm --filter @trail/desktop run dist:mac -- --x64
+Windows: pnpm --filter @trail/desktop dist:win
+Linux:   pnpm --filter @trail/desktop dist:linux -- --x64|--arm64
 ```
 
 The Windows `dist:win` command runs `scripts/build-desktop-release.mjs`,
 which invokes electron-builder once for NSIS and once for ZIP so each package
 gets the correct updater distribution marker.
 
-The macOS packages include `bin/pi-desktop-host-core` built for their runner
+The macOS packages include `bin/trail-host-core` built for their runner
 architecture; the Linux packages do the same on their native x64 and arm64
-runners; Windows includes `bin/pi-desktop-host-core.exe`. Signing, rollback,
+runners; Windows includes `bin/trail-host-core.exe`. Signing, rollback,
 and installer upgrade
 qualification remain release hardening work; publication is active under
 D126/D285/D603.
@@ -641,7 +645,7 @@ Shell smoke on each native runner:
 2. Verify F10 and Shift+F10 remain available to focused content.
 3. Execute application and editing shortcuts from a focused editor.
 4. Minimize, maximize, restore, and close from the custom controls.
-5. Relaunch with `PI_DESKTOP_START_MAXIMIZED=1`; confirm the initial
+5. Relaunch with `TRAIL_START_MAXIMIZED=1`; confirm the initial
    maximize/restore glyph matches the queried native state.
 6. Verify unknown menu/window IPC actions fail with the window open and closed.
 

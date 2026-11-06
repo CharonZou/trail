@@ -4,7 +4,7 @@ import type {
   ConfigSyncHistoryEntry,
   ConfigSyncMode,
   ConfigSyncState,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 /**
  * The draft is deliberately limited to non-sensitive connection fields.

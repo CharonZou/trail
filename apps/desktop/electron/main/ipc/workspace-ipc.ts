@@ -13,11 +13,11 @@ import {
   type ProjectGroupRecord,
   type RemoteWorkspace,
   type WorkspaceFilesRequest,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   loadComposerTemplates,
   type ComposerTemplate,
-} from "@pi-desktop/agent-runtime";
+} from "@trail/agent-runtime";
 import { remoteWorkspaceForFiles } from "../remote/workspace-file-scope";
 import { getActiveRemoteHostsBoot } from "../bootstrap/remote-hosts";
 import { cloneGitRepository } from "../git-clone";
@@ -29,7 +29,7 @@ import {
   consumeComposerPickerSelection,
   rememberComposerPickerSelection,
 } from "../composer-picker";
-import { collectWorkspaceDiff } from "@pi-desktop/host-runtime";
+import { collectWorkspaceDiff } from "@trail/host-runtime";
 import { parseAllowedExternalUrl } from "../safe-open-external";
 import {
   isAttachmentBlobRef,
@@ -37,15 +37,17 @@ import {
   readOpenableFile,
   readOpenableImage,
   resolveRealOpenablePath,
-} from "@pi-desktop/host-runtime";
+} from "@trail/host-runtime";
 import { openableMp4Path } from "../open-attachment-video";
 import { isChatRefOutsideRoots, resolveChatFileRef } from "../chat-ref-resolve";
 import { rebaseWorktreeRef, type WorktreeRefContext } from "../worktree-ref";
 import { getWorkspaceFileIndex, searchWorkspaceFiles } from "../fs-index";
 import {
+  knownProjectGroups,
   projectFolderPaths,
   refreshProjectGroups,
   rememberProjectGroups,
+  workspaceIndexEnabledFor,
   workspaceRootsFor,
 } from "../workspace-roots";
 import { BROWSER_PLUGIN_ID, type BrowserHost } from "../browser-host";
@@ -58,6 +60,25 @@ import type { PluginRuntime } from "../plugin-runtime";
 import type { IpcRegistrar } from "./types";
 
 type WorkspaceRecord = { path: string; name: string };
+
+/**
+ * Read the icon and tint the project pickers send. The host replaces the whole
+ * pair in one write, so both keys always travel together, and a value that is
+ * neither a string nor null drops the pair instead of resetting the project.
+ */
+function appearanceParams(
+  input: { icon?: unknown; color?: unknown },
+): { icon: string | null; color: string | null } | undefined {
+  if (!("icon" in input) && !("color" in input)) return undefined;
+  const choice = (value: unknown): string | null | undefined => {
+    if (value === undefined || value === null) return null;
+    if (typeof value !== "string") return undefined;
+    return value.trim() || null;
+  };
+  const icon = choice(input.icon);
+  const color = choice(input.color);
+  return icon === undefined || color === undefined ? undefined : { icon, color };
+}
 
 export function createComposerTemplateLoader(
   logger: Pick<Logger, "app">,
@@ -208,8 +229,8 @@ export function registerWorkspaceIpc({
     // Dev convenience only: never auto-open the app bundle directory as the
     // workspace in a packaged build.
     const seed =
-      process.env.PI_DESKTOP_SEED_WORKSPACE ||
-      process.env.PI_DESKTOP_WORKSPACE ||
+      process.env.TRAIL_SEED_WORKSPACE ||
+      process.env.TRAIL_WORKSPACE ||
       (isDevelopmentBuild
         ? join(getModuleDirectory(import.meta.url), "../../..")
         : "");
@@ -256,12 +277,22 @@ export function registerWorkspaceIpc({
   });
   handle(
     IPC.invoke.projectGroupCreate,
-    async (input: { name?: unknown; folders?: unknown } = {}) => {
+    async (input: {
+      name?: unknown;
+      folders?: unknown;
+      workspaceIndex?: unknown;
+      icon?: unknown;
+      color?: unknown;
+    } = {}) => {
       if (!host) throw new Error("host unavailable");
       const name = typeof input.name === "string" ? input.name.trim() : "";
       const folders = Array.isArray(input.folders)
         ? input.folders.filter((path): path is string => typeof path === "string")
         : [];
+      // An absent or malformed choice keeps the host default, which is on.
+      const workspaceIndex =
+        typeof input.workspaceIndex === "boolean" ? input.workspaceIndex : undefined;
+      const appearance = appearanceParams(input);
       if (!name || folders.length === 0) {
         throw Object.assign(new Error("project group name and folders required"), {
           errorCode: ErrorCodes.INVALID_ARGUMENT,
@@ -283,6 +314,8 @@ export function registerWorkspaceIpc({
       const created = await host.call("project.group.create", {
         name,
         folders: safeFolders,
+        ...(workspaceIndex === undefined ? {} : { workspaceIndex }),
+        ...(appearance ? appearance : {}),
       });
       void refreshProjectGroups(host);
       return created;
@@ -295,6 +328,9 @@ export function registerWorkspaceIpc({
       name?: unknown;
       folders?: unknown;
       primary?: unknown;
+      workspaceIndex?: unknown;
+      icon?: unknown;
+      color?: unknown;
     } = {}) => {
       if (!host) throw new Error("host unavailable");
       const groupId = typeof input.groupId === "string" ? input.groupId.trim() : "";
@@ -303,6 +339,9 @@ export function registerWorkspaceIpc({
         ? input.folders.filter((path): path is string => typeof path === "string")
         : [];
       const primary = typeof input.primary === "string" ? input.primary.trim() : "";
+      const workspaceIndex =
+        typeof input.workspaceIndex === "boolean" ? input.workspaceIndex : undefined;
+      const appearance = appearanceParams(input);
       if (!groupId || !name || folders.length === 0) {
         throw Object.assign(new Error("project group id, name and folders required"), {
           errorCode: ErrorCodes.INVALID_ARGUMENT,
@@ -342,6 +381,8 @@ export function registerWorkspaceIpc({
         name,
         folders: safeFolders,
         ...(safePrimary ? { primary: safePrimary } : {}),
+        ...(workspaceIndex === undefined ? {} : { workspaceIndex }),
+        ...(appearance ? appearance : {}),
       });
       void refreshProjectGroups(host);
       return updated;
@@ -915,6 +956,17 @@ export function registerWorkspaceIpc({
     }
   };
 
+  /**
+   * Whether this workspace may be indexed at all (the project's workspace-index
+   * switch). Group mutations refresh the snapshot, so the only gap is a cold
+   * start; there the answer is fetched rather than guessed, because guessing
+   * would silently index a project whose owner turned it off.
+   */
+  const workspaceIndexAllowed = async (root: string): Promise<boolean> => {
+    if (!knownProjectGroups() && host) await refreshProjectGroups(host);
+    return workspaceIndexEnabledFor(root);
+  };
+
   handle(
     IPC.invoke.fsRead,
     async (input: { path?: string; mimeType?: string; sessionId?: string } = {}) => {
@@ -1018,6 +1070,7 @@ export function registerWorkspaceIpc({
     if (remote) return readRemoteFiles(remote, "index");
     const root = await optionalWorkspaceRoot(input.sessionId);
     if (!root) return { entries: [], truncated: false };
+    if (!(await workspaceIndexAllowed(root))) return { entries: [], truncated: false };
     return getWorkspaceFileIndex(root);
   });
 
@@ -1027,6 +1080,7 @@ export function registerWorkspaceIpc({
     if (await remoteFileWorkspace(input.sessionId)) return { entries: [], truncated: true };
     const root = await optionalWorkspaceRoot(input.sessionId);
     if (!root) return { entries: [], truncated: false };
+    if (!(await workspaceIndexAllowed(root))) return { entries: [], truncated: false };
     return searchWorkspaceFiles(root, String(input.query ?? ""));
   });
 

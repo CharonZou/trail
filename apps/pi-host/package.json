@@ -1,6 +1,6 @@
 {
-  "name": "@pi-desktop/pi-host",
-  "version": "1.0.1",
+  "name": "@trail/pi-host",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "Headless PI Agent Host: RACP-WS server over the Agent Host module, the pi sidecar, and host-core",
@@ -17,12 +17,12 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('dist-bundle',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/host-runtime": "workspace:*",
-    "@pi-desktop/plugin-sdk": "workspace:*",
-    "@pi-desktop/racp": "workspace:*",
-    "@pi-desktop/shared": "workspace:*",
+    "@trail/agent-host": "workspace:*",
+    "@trail/agent-runtime": "workspace:*",
+    "@trail/host-runtime": "workspace:*",
+    "@trail/plugin-sdk": "workspace:*",
+    "@trail/racp": "workspace:*",
+    "@trail/shared": "workspace:*",
     "ws": "8.21.1"
   },
   "optionalDependencies": {

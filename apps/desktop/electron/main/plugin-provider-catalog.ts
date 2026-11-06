@@ -1,8 +1,8 @@
-import type { PluginProviderCatalogMeta } from "@pi-desktop/shared";
+import type { PluginProviderCatalogMeta } from "@trail/shared";
 import {
   resolvePluginLocalizedString,
   type PluginManifest,
-} from "@pi-desktop/plugin-sdk";
+} from "@trail/plugin-sdk";
 
 type PluginProviderCatalogSource = {
   manifest: PluginManifest;

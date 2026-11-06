@@ -39,8 +39,8 @@ function screenshot(seed) {
   return Buffer.concat([Buffer.from("89504e470d0a1a0a", "hex"), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]).toString("base64");
 }
 
-const binaryPath = process.env.PI_DESKTOP_HOST_BIN;
-assert.ok(binaryPath, "PI_DESKTOP_HOST_BIN must name the candidate's built Host binary");
+const binaryPath = process.env.TRAIL_HOST_BIN;
+assert.ok(binaryPath, "TRAIL_HOST_BIN must name the candidate's built Host binary");
 const dataDir = await mkdtemp(join(tmpdir(), "pi-tool-image-e2e-"));
 const createdAt = "2026-10-24T19:00:00.000Z";
 let host;

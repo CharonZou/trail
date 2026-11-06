@@ -15,7 +15,7 @@ import {
   bindingFromModelInfo,
   type ModelBinding,
   type ModelInfo,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { describeModelsFetchError } from "./model-fetch-error";
 import type { ProviderModelsState } from "./useProviderModels";
 

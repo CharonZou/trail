@@ -9,7 +9,7 @@
  * SQLite, and reopening the session restores the same history.
  *
  * Requirements (all three, from the environment or the repository `.env`):
- *   PI_DESKTOP_TEST_BASE_URL, PI_DESKTOP_TEST_MODEL, PI_DESKTOP_TEST_API_KEY
+ *   TRAIL_TEST_BASE_URL, TRAIL_TEST_MODEL, TRAIL_TEST_API_KEY
  *
  * Env knobs:
  *   PI_LONG_CHAT_TURNS          planned turns (default 110, must be >= 100 for a full run)
@@ -52,14 +52,14 @@ function loadEnvFile() {
 }
 loadEnvFile();
 
-const rawBaseUrl = (process.env.PI_DESKTOP_TEST_BASE_URL ?? "").trim().replace(/\/+$/, "");
+const rawBaseUrl = (process.env.TRAIL_TEST_BASE_URL ?? "").trim().replace(/\/+$/, "");
 const baseUrl = rawBaseUrl.endsWith("/v1") ? rawBaseUrl : `${rawBaseUrl}/v1`;
-const modelId = (process.env.PI_DESKTOP_TEST_MODEL ?? "").trim();
-const apiKey = (process.env.PI_DESKTOP_TEST_API_KEY ?? "").trim();
+const modelId = (process.env.TRAIL_TEST_MODEL ?? "").trim();
+const apiKey = (process.env.TRAIL_TEST_API_KEY ?? "").trim();
 const missing = [
-  ["PI_DESKTOP_TEST_BASE_URL", rawBaseUrl],
-  ["PI_DESKTOP_TEST_MODEL", modelId],
-  ["PI_DESKTOP_TEST_API_KEY", apiKey],
+  ["TRAIL_TEST_BASE_URL", rawBaseUrl],
+  ["TRAIL_TEST_MODEL", modelId],
+  ["TRAIL_TEST_API_KEY", apiKey],
 ].filter(([, value]) => !value);
 if (missing.length > 0) {
   console.error(`missing required environment variables: ${missing.map(([name]) => name).join(", ")}`);
@@ -192,10 +192,10 @@ await new Promise((resolve) => debugServer.close(resolve));
 
 const electronEnv = {
   ...process.env,
-  PI_DESKTOP_DATA_DIR: dataDir,
-  PI_DESKTOP_HOST_BIN: resolveHostBinary(root),
+  TRAIL_DATA_DIR: dataDir,
+  TRAIL_HOST_BIN: resolveHostBinary(root),
   ELECTRON_RENDERER_URL: "",
-  PI_DESKTOP_START_MAXIMIZED: "0",
+  TRAIL_START_MAXIMIZED: "0",
 };
 delete electronEnv.ELECTRON_RUN_AS_NODE;
 
@@ -311,7 +311,7 @@ async function attach() {
   await waitFor(
     () =>
       evaluate(
-        'Boolean(window.__PI_DESKTOP__ && window.piDesktop && !document.querySelector(".app-shell.is-booting"))',
+        'Boolean(window.__TRAIL__ && window.piDesktop && !document.querySelector(".app-shell.is-booting"))',
       ),
     "desktop ready",
     60_000,
@@ -320,8 +320,8 @@ async function attach() {
 }
 
 async function openSession(id) {
-  await evaluate(`window.__PI_DESKTOP__.refreshProviders()`);
-  await evaluate(`window.__PI_DESKTOP__.selectSession(${JSON.stringify(id)})`);
+  await evaluate(`window.__TRAIL__.refreshProviders()`);
+  await evaluate(`window.__TRAIL__.selectSession(${JSON.stringify(id)})`);
   await waitFor(() => evaluate('Boolean(document.querySelector(".composer-input"))'), "composer ready");
 }
 

@@ -43,7 +43,7 @@
 「插件 → 市场」始终使用插件中心的官方目录
 `https://plugins.aiuo.net/catalog.json`，页面不提供来源选择器。旧版本持久化的
 `pluginMarketSource` 和 `pluginMarketCustomUrl` 仍保留以兼容设置读取，但会被忽略；
-无需迁移数据。开发与测试仍可通过 `PI_DESKTOP_PLUGIN_MARKET_URL` 指向本地目录，
+无需迁移数据。开发与测试仍可通过 `TRAIL_PLUGIN_MARKET_URL` 指向本地目录，
 但已发布界面不会因此开放目录配置。
 
 市场目录与安装包下载遵循设置 → 常规 → 网络。系统模式会让 host-core 的 `curl`
@@ -168,7 +168,7 @@ interface MarketProvider {
 ```
 
 已发布客户端目前只提供 `official` 提供商。开发专用的
-`PI_DESKTOP_PLUGIN_MARKET_URL` 覆盖允许本地测试目录，但不会在产品界面增加来源控制。
+`TRAIL_PLUGIN_MARKET_URL` 覆盖允许本地测试目录，但不会在产品界面增加来源控制。
 
 ## 4. 数据模型
 
@@ -454,7 +454,7 @@ UI 必须使信任级别可见。
 
 ## 9. 私有来源（未来的企业支持）
 
-已发布客户端不提供或持久化私有目录来源。`PI_DESKTOP_PLUGIN_MARKET_URL` 覆盖仅供本地
+已发布客户端不提供或持久化私有目录来源。`TRAIL_PLUGIN_MARKET_URL` 覆盖仅供本地
 开发与测试使用，不是产品设置。企业来源支持需要未来的产品决策，并需明确设计安全与授权。
 
 ## 10. 远程 API 草稿 (HTTP)
@@ -540,7 +540,7 @@ API 不可用，浏览、安装和更新依然可用。
 使用 env 覆盖目录 URL：
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+TRAIL_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 

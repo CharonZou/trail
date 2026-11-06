@@ -1,4 +1,5 @@
 import { readMainSource, readMainModule } from "./helpers/source-contracts.mjs";
+import { decodeRgbaPng } from "./helpers/png-pixels.mjs";
 import assert from "node:assert/strict";
 import {
   mkdir,
@@ -39,6 +40,12 @@ const protocolSource = await readFile(
 const windowsIcon = await readFile(
   new URL("../build/icon.ico", import.meta.url),
 );
+const logoDark = decodeRgbaPng(
+  await readFile(new URL("../build/logo_dark.png", import.meta.url)),
+);
+const trayTemplate = decodeRgbaPng(
+  await readFile(new URL("../build/tray-icon-mac.png", import.meta.url)),
+);
 
 test("Windows runtime registers the canonical native application identity", () => {
   const appId = protocolSource.match(/APP_ID = "([^"]+)"/)?.[1];
@@ -75,8 +82,127 @@ test("Windows packages and windows use the canonical Trail icon", () => {
   assert.match(windowSource, /icon: windowsIconPath\(\)/);
 });
 
+/** The alpha split of a decoded image: the brand mark is flat, so only
+ *  anti-aliased edges may sit between fully opaque and fully transparent. */
+function alphaProfile({ width, height, pixels }) {
+  let solid = 0;
+  let speckled = 0;
+  for (let index = 3; index < pixels.length; index += 4) {
+    if (pixels[index] === 255) solid += 1;
+    else if (pixels[index] !== 0) speckled += 1;
+  }
+  return { solid, speckled, area: width * height };
+}
+
+function alphaAt({ width, pixels }, x, y) {
+  return pixels[(y * width + x) * 4 + 3];
+}
+
+/** Smallest box that contains every non-transparent pixel. */
+function inkBounds(image) {
+  let minX = image.width;
+  let minY = image.height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < image.height; y += 1) {
+    for (let x = 0; x < image.width; x += 1) {
+      if (alphaAt(image, x, y) === 0) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/** The images an ICO carries, with each entry's payload. */
+function icoEntries(buf) {
+  const entries = [];
+  for (let index = 0; index < buf.readUInt16LE(4); index += 1) {
+    const entry = 6 + index * 16;
+    const offset = buf.readUInt32LE(entry + 12);
+    entries.push({
+      width: buf[entry] || 256,
+      height: buf[entry + 1] || 256,
+      payload: buf.subarray(offset, offset + buf.readUInt32LE(entry + 8)),
+    });
+  }
+  return entries;
+}
+
+test("the Windows icon paints the flat brand mark, not a speckled plate", () => {
+  // The taskbar and Alt+Tab ask for the mark at 24px, where artwork that was
+  // dithered into semi-transparent noise reads as grey mush: the icon this
+  // build shipped once carried 43% partial-alpha pixels and 8% solid ones.
+  // The brand mark is flat, so only the rounded corners anti-alias.
+  const entries = icoEntries(windowsIcon);
+  assert.deepEqual(
+    entries.map((entry) => entry.width).sort((a, b) => a - b),
+    [16, 24, 32, 48, 64, 128, 256],
+  );
+
+  for (const entry of entries) {
+    const image = decodeRgbaPng(entry.payload);
+    assert.deepEqual([image.width, image.height], [entry.width, entry.height]);
+    const { solid, speckled, area } = alphaProfile(image);
+    assert.ok(solid * 2 > area, `${image.width}px: only ${solid} solid pixels`);
+    assert.ok(
+      speckled * 4 < area,
+      `${image.width}px: ${speckled} partial-alpha pixels`,
+    );
+  }
+
+  // The mark is a rounded square, so the corner falls outside the plate.
+  const tile = decodeRgbaPng(
+    entries.find((entry) => entry.width === 32).payload,
+  );
+  assert.equal(alphaAt(tile, 0, 0), 0, "corner outside the rounded plate");
+  assert.equal(alphaAt(tile, 16, 16), 255, "plate");
+});
+
+test("the documentation logo paints the same flat mark as the icons", () => {
+  const { solid, speckled, area } = alphaProfile(logoDark);
+  assert.deepEqual([logoDark.width, logoDark.height], [1254, 1254]);
+  assert.ok(solid * 2 > area, `only ${solid} solid pixels`);
+  assert.ok(speckled * 4 < area, `${speckled} partial-alpha pixels`);
+  assert.equal(alphaAt(logoDark, 0, 0), 0, "corner outside the rounded plate");
+  assert.equal(alphaAt(logoDark, 627, 627), 255, "plate");
+});
+
+test("the macOS tray template carries the bar glyph, never the app plate", () => {
+  // A template image is tinted by the system wherever it is opaque, so the
+  // black plate must not survive into this asset: it would paint a solid
+  // rounded square in the menu bar. Only the bars may be opaque.
+  assert.deepEqual([trayTemplate.width, trayTemplate.height], [1024, 1024]);
+  for (const [x, y] of [
+    [0, 0],
+    [1023, 0],
+    [0, 1023],
+    [1023, 1023],
+    [60, 60],
+    [512, 512],
+    [240, 700],
+  ]) {
+    assert.equal(alphaAt(trayTemplate, x, y), 0, `plate stays clear at ${x},${y}`);
+  }
+  // The bars themselves, at the tallest and the shortest column.
+  assert.equal(alphaAt(trayTemplate, 815, 200), 255, "tallest bar");
+  assert.equal(alphaAt(trayTemplate, 150, 700), 255, "shortest bar");
+
+  // The glyph is normalised to three quarters of the tile so it keeps the same
+  // menu bar weight the app icon has, and stays centred.
+  const bounds = inkBounds(trayTemplate);
+  const width = bounds.maxX - bounds.minX + 1;
+  const height = bounds.maxY - bounds.minY + 1;
+  assert.ok(Math.abs(width - 768) <= 2, `glyph is ${width}px wide`);
+  assert.ok(Math.abs(height - 678) <= 2, `glyph is ${height}px tall`);
+  assert.ok(Math.abs(bounds.minX - (1024 - width) / 2) <= 2, "centred");
+  assert.ok(Math.abs(bounds.minY - (1024 - height) / 2) <= 2, "centred");
+});
+
 test("Linux packages align the desktop entry with the Wayland app identity", () => {
-  assert.equal(packageJson.desktopName, "pi-desktop.desktop");
+  assert.equal(packageJson.desktopName, "trail.desktop");
   assert.equal(packageJson.build.linux.syncDesktopName, true);
 });
 
@@ -108,6 +234,12 @@ test("macOS icon derivation preserves the canonical renderer asset", () => {
     iconScriptSource,
     /\.save\(BUILD \/ "icon_1024\.png"\)/,
   );
+  // The documented pipeline is the only producer of the derived assets, and the
+  // tray template follows the current mark: the bars, not a hand-drawn clip
+  // around the retired PI artwork.
+  assert.match(iconScriptSource, /logo_dark = BUILD \/ "logo_dark\.png"/);
+  assert.match(iconScriptSource, /does not contain the bar glyph/);
+  assert.doesNotMatch(iconScriptSource, /mark_clip|ImageDraw/);
 });
 
 test("development launcher resolves Electron before platform-specific setup", () => {
@@ -120,7 +252,7 @@ test("development launcher resolves Electron before platform-specific setup", ()
 test("macOS development launches from a branded host bundle", () => {
   assert.equal(packageJson.scripts.dev, "node ../../scripts/dev-electron.mjs");
   assert.match(devScriptSource, /process\.platform === "darwin"/);
-  assert.match(devScriptSource, /PI_DESKTOP_DEV: "1"/);
+  assert.match(devScriptSource, /TRAIL_DEV: "1"/);
   assert.match(devScriptSource, /ELECTRON_EXEC_PATH/);
   assert.match(devScriptSource, /CFBundleDisplayName", APP_NAME/);
   assert.match(devScriptSource, /CFBundleName", APP_NAME/);
@@ -161,7 +293,7 @@ test(
   "macOS development bundle rewrites native identity and reuses its cache",
   { skip: process.platform !== "darwin" },
   async () => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-dev-bundle-"));
+    const root = await mkdtemp(join(tmpdir(), "trail-dev-bundle-"));
     const sourceBundle = join(root, "Electron.app");
     const contents = join(sourceBundle, "Contents");
     const macos = join(contents, "MacOS");

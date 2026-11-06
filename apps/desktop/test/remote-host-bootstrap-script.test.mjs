@@ -379,8 +379,8 @@ async function seedVerifiedInstall(root, sandbox) {
   await copyFile(join(root, "bin/node"), join(current, "bin/node"));
   await copyFile(fileURLToPath(new URL("../../pi-host/scripts/install.sh", import.meta.url)), join(current, "install.sh"));
   await chmod(join(current, "install.sh"), 0o755);
-  const files = ["bin/node", "bin/pi-host", "bin/pi-desktop-host-core", "pi-host.js", "install.sh"];
-  for (const file of ["bin/pi-host", "bin/pi-desktop-host-core", "pi-host.js"]) {
+  const files = ["bin/node", "bin/pi-host", "bin/trail-host-core", "pi-host.js", "install.sh"];
+  for (const file of ["bin/pi-host", "bin/trail-host-core", "pi-host.js"]) {
     await writeFile(join(current, file), "#!/bin/sh\nexit 0\n", { mode: 0o755 });
   }
   const manifest = (await Promise.all(files.map(async (file) => `${createHash("sha256").update(await readFile(join(current, file))).digest("hex")}  ${file}\n`))).join("");

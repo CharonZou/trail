@@ -206,7 +206,7 @@ overrides:
 
 patchedDependencies:
   '@earendil-works/pi-agent-core@1.4.0': 1c7a511abc3f1c12f04cfa06c44fbbd902b4ef3516b5b416db7d284e13371227
-  '@earendil-works/pi-ai@1.4.0': 1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590
+  '@earendil-works/pi-ai@1.4.0': e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6
   '@earendil-works/pi-coding-agent@1.4.0': 1f1a1efed2ccd6fccef2608bf0cd304cd6af4c91824839189c73ab88953e5635
 
 importers:
@@ -216,7 +216,7 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.13
         version: 2.5.13
-      '@pi-desktop/plugin-devkit':
+      '@trail/plugin-devkit':
         specifier: workspace:*
         version: link:packages/plugin-devkit
 
@@ -234,40 +234,40 @@ importers:
     devDependencies:
       '@earendil-works/pi-ai':
         specifier: 1.4.0
-        version: 1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@6.29.0)(ws@8.21.1)(zod@4.4.3)
+        version: 1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@6.29.0)(ws@8.21.1)(zod@4.4.3)
       '@earendil-works/pi-mcp':
         specifier: 1.4.0
         version: 1.4.0
-      '@pi-desktop/agent-host':
-        specifier: workspace:*
-        version: link:../../packages/agent-host
-      '@pi-desktop/agent-runtime':
-        specifier: workspace:*
-        version: link:../../packages/agent-runtime
-      '@pi-desktop/host-runtime':
-        specifier: workspace:*
-        version: link:../../packages/host-runtime
-      '@pi-desktop/i18n':
-        specifier: workspace:*
-        version: link:../../packages/i18n
-      '@pi-desktop/plugin-devkit':
-        specifier: workspace:*
-        version: link:../../packages/plugin-devkit
-      '@pi-desktop/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      '@pi-desktop/racp':
-        specifier: workspace:*
-        version: link:../../packages/racp
-      '@pi-desktop/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      '@pi-desktop/voice-runtime':
-        specifier: workspace:*
-        version: link:../../packages/voice-runtime
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0))
+      '@trail/agent-host':
+        specifier: workspace:*
+        version: link:../../packages/agent-host
+      '@trail/agent-runtime':
+        specifier: workspace:*
+        version: link:../../packages/agent-runtime
+      '@trail/host-runtime':
+        specifier: workspace:*
+        version: link:../../packages/host-runtime
+      '@trail/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@trail/plugin-devkit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-devkit
+      '@trail/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@trail/racp':
+        specifier: workspace:*
+        version: link:../../packages/racp
+      '@trail/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@trail/voice-runtime':
+        specifier: workspace:*
+        version: link:../../packages/voice-runtime
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
@@ -361,22 +361,22 @@ importers:
 
   apps/pi-host:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@trail/agent-host':
         specifier: workspace:*
         version: link:../../packages/agent-host
-      '@pi-desktop/agent-runtime':
+      '@trail/agent-runtime':
         specifier: workspace:*
         version: link:../../packages/agent-runtime
-      '@pi-desktop/host-runtime':
+      '@trail/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
-      '@pi-desktop/plugin-sdk':
+      '@trail/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
-      '@pi-desktop/racp':
+      '@trail/racp':
         specifier: workspace:*
         version: link:../../packages/racp
-      '@pi-desktop/shared':
+      '@trail/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       ws:
@@ -411,7 +411,7 @@ importers:
 
   packages/agent-host:
     dependencies:
-      '@pi-desktop/shared':
+      '@trail/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -432,11 +432,11 @@ importers:
         version: 1.4.0(patch_hash=1c7a511abc3f1c12f04cfa06c44fbbd902b4ef3516b5b416db7d284e13371227)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
       '@earendil-works/pi-ai':
         specifier: 1.4.0
-        version: 1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
+        version: 1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
       '@earendil-works/pi-coding-agent':
         specifier: 1.4.0
         version: 1.4.0(patch_hash=1f1a1efed2ccd6fccef2608bf0cd304cd6af4c91824839189c73ab88953e5635)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(ws@8.21.1)(zod@4.4.3)
-      '@pi-desktop/shared':
+      '@trail/shared':
         specifier: workspace:*
         version: link:../shared
       jiti:
@@ -467,13 +467,13 @@ importers:
 
   packages/host-runtime:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@trail/agent-host':
         specifier: workspace:*
         version: link:../agent-host
-      '@pi-desktop/agent-runtime':
+      '@trail/agent-runtime':
         specifier: workspace:*
         version: link:../agent-runtime
-      '@pi-desktop/shared':
+      '@trail/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -498,7 +498,7 @@ importers:
 
   packages/plugin-devkit:
     dependencies:
-      '@pi-desktop/plugin-sdk':
+      '@trail/plugin-sdk':
         specifier: workspace:*
         version: link:../plugin-sdk
     devDependencies:
@@ -527,10 +527,10 @@ importers:
 
   packages/racp:
     dependencies:
-      '@pi-desktop/agent-host':
+      '@trail/agent-host':
         specifier: workspace:*
         version: link:../agent-host
-      '@pi-desktop/shared':
+      '@trail/shared':
         specifier: workspace:*
         version: link:../shared
       typebox:
@@ -5075,7 +5075,7 @@ snapshots:
 
   '@earendil-works/pi-agent-core@1.4.0(patch_hash=1c7a511abc3f1c12f04cfa06c44fbbd902b4ef3516b5b416db7d284e13371227)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)':
     dependencies:
-      '@earendil-works/pi-ai': 1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
+      '@earendil-works/pi-ai': 1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
       typebox: 1.3.27
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
@@ -5090,7 +5090,7 @@ snapshots:
       - ws
       - zod
 
-  '@earendil-works/pi-ai@1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@6.29.0)(ws@8.21.1)(zod@4.4.3)':
+  '@earendil-works/pi-ai@1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@6.29.0)(ws@8.21.1)(zod@4.4.3)':
     dependencies:
       '@anthropic-ai/sdk': 0.129.0(zod@4.4.3)
       '@aws-sdk/client-bedrock-runtime': 3.1127.0
@@ -5115,7 +5115,7 @@ snapshots:
       - ws
       - zod
 
-  '@earendil-works/pi-ai@1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)':
+  '@earendil-works/pi-ai@1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)':
     dependencies:
       '@anthropic-ai/sdk': 0.129.0(zod@4.4.3)
       '@aws-sdk/client-bedrock-runtime': 3.1127.0
@@ -5147,7 +5147,7 @@ snapshots:
   '@earendil-works/pi-coding-agent@1.4.0(patch_hash=1f1a1efed2ccd6fccef2608bf0cd304cd6af4c91824839189c73ab88953e5635)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(ws@8.21.1)(zod@4.4.3)':
     dependencies:
       '@earendil-works/pi-agent-core': 1.4.0(patch_hash=1c7a511abc3f1c12f04cfa06c44fbbd902b4ef3516b5b416db7d284e13371227)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
-      '@earendil-works/pi-ai': 1.4.0(patch_hash=1e726823109142d7f5631ab4eadbe09b798ee04ed0fa05c50092a0278be60590)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
+      '@earendil-works/pi-ai': 1.4.0(patch_hash=e1dcbadfc04942ad1d1f1e9ff8b57d691ef5c8711f43d8b818aecab80b7465e6)(@aws-sdk/credential-provider-node@3.972.83)(@smithy/signature-v4@5.7.3)(supports-color@7.2.0)(undici@8.10.2)(ws@8.21.1)(zod@4.4.3)
       '@earendil-works/pi-codemode': 1.4.0
       '@earendil-works/pi-mcp': 1.4.0
       '@earendil-works/pi-tui': 1.4.0

@@ -13,8 +13,8 @@
 | 通道 | 命令 | 签名 | 用途 |
 |---|---|---|---|
 | 开发 | `pnpm dev` | 无 | 日常开发 |
-| 本地打包 | `pnpm --filter @pi-desktop/desktop pack` | 未配置证书时未签名 | 打包冒烟测试（`--dir` 输出） |
-| 本地 DMG | `pnpm --filter @pi-desktop/desktop dist` | 未配置证书时未签名 | 本地安装测试 |
+| 本地打包 | `pnpm --filter @trail/desktop pack` | 未配置证书时未签名 | 打包冒烟测试（`--dir` 输出） |
+| 本地 DMG | `pnpm --filter @trail/desktop dist` | 未配置证书时未签名 | 本地安装测试 |
 | 发布 | `scripts/release-macos.sh` | Developer ID + 强制公证 | 可分发产物 |
 
 静态 electron-builder 配置不嵌入证书身份，因此没有证书的贡献者仍可在本地打包。
@@ -32,15 +32,20 @@
 Electron 准备就绪，防止库存主机身份拥有本机
 通知或任务栏组。 Windows 封装另外引脚
 `Trail` 可执行文件和“开始”菜单快捷方式名称。启动器设置
-`PI_DESKTOP_DEV=1` 因此运行时打包检查会禁用更新传送
+`TRAIL_DEV=1` 因此运行时打包检查会禁用更新传送
 并保留开发人员工作区默认值，尽管有品牌可执行文件名称。
 Electron 43+ 上的首次 `pnpm dev` 会按需下载 Electron 二进制文件
 （该包不再在 `pnpm install` 期间安装它）。
 打包通道在 macOS 上通过 electron-builder 使用 `build/icon.icns`，并在
 Windows 可执行文件和原生窗口图标中使用 `build/icon.ico`。渲染器通过
 `BrandLogo` 导入相同的 PNG。PNG 是规范来源；`scripts/make-icon.py` 派生
-多尺寸 Windows ICO、512px Windows/Linux 包 PNG，以及 iconset/ICNS（当 macOS
+多尺寸 Windows ICO、512px Windows/Linux 包 PNG、1254px
+`build/logo_dark.png` 文档标识、透明的单色 `build/tray-icon-mac.png` 模板，
+以及 iconset/ICNS（当 macOS
 `iconutil` 可用时），无需覆盖规范来源。
+该规范来源是 `docs/public/brand-mark.svg` 矢量母版的平面渲染：用截图或其他
+位图重新生成它，会带回柔和边缘，让 Windows 任务栏和 Alt+Tab 图标在 24px
+时糊成一片灰色。
 
 ## 2. 先决条件（发布通道）
 
@@ -61,9 +66,9 @@ Windows 可执行文件和原生窗口图标中使用 `build/icon.ico`。渲染�
   Chromium 主进程与 `ELECTRON_RUN_AS_NODE` 的 agent sidecar；否则主进程的
   Test Provider 能过，但 sidecar 走局域网请求会以 `EHOSTUNREACH` 失败
   （issue #573）。
-- `Resources/bin/pi-desktop-host-core` — Rust 主机二进制文件（发布版本）。
+- `Resources/bin/trail-host-core` — Rust 主机二进制文件（发布版本）。
 - Windows NSIS 构建包含静态链接 MSVC CRT 的 x64
-  `pi-desktop-host-core.exe`，因此全新的 Windows x64 或 Windows 11 ARM64
+  `trail-host-core.exe`，因此全新的 Windows x64 或 Windows 11 ARM64
   （x64 模拟）安装无需在本地服务启动前单独安装 Visual C++ Redistributable。
 - `Resources/agent-runtime/` — 捆绑的 sidecar，执行
   `ELECTRON_RUN_AS_NODE=1`（未发货单独的 Node）。
@@ -122,7 +127,7 @@ Windows 可执行文件和原生窗口图标中使用 `build/icon.ico`。渲染�
    才省略目录。
 4. 同步 `packages/shared/src/changelog.test.ts` 中的最新优先版本清单
    （把新的稳定版本加到首位），然后运行
-   `pnpm --filter @pi-desktop/shared test`，确认目录对齐（版本集合与亮点
+   `pnpm --filter @trail/shared test`，确认目录对齐（版本集合与亮点
    条数）仍然通过。
 5. 版本线发生变化（`0.10.x` → `0.11.x`）时更新 `README.md` 与
    `README.zh-CN.md`；当本次发布交付了用户可见行为，使亮点、下载、快速上手、
@@ -182,7 +187,7 @@ GitHub Release 工作流程启动所有本机平台运行程序，无需
 在每个平台上，发布准备步骤都会启动锁定的 Rust 主机
 与 pnpm 安装和本机依赖项重建并行构建。它
 然后仅构建由选择的工作区依赖项
-`@pi-desktop/desktop^...`，如果该依赖项选择意外则失败
+`@trail/desktop^...`，如果该依赖项选择意外则失败
 空的。平台 `dist:*` 命令仍然负责捆绑代理
 运行时，验证主机构建，构建一次桌面应用程序，以及
 调用电子构建器。这避免了多余的桌面构建，而无需
@@ -193,7 +198,7 @@ GitHub Release 工作流程启动所有本机平台运行程序，无需
 macOS 矩阵使用 arm64 的 `macos-15` 和 Intel x64 的
 `macos-15-intel`。每个作业验证 `uname -m`，向 electron-builder 传入匹配
 的 `--arm64` 或 `--x64`，并在同一本机运行器上构建
-`pi-desktop-host-core`。每个架构的 `latest-mac.yml` 会在上传前重命名，
+`trail-host-core`。每个架构的 `latest-mac.yml` 会在上传前重命名，
 发布作业下载两个工件后再合并为一个更新源。
 
 共享的 electron-builder 配置在 macOS 平台级别为 ZIP 应用带架构后缀的命名模板，
@@ -212,7 +217,7 @@ macOS ZIP 在安装包根目录包含 `Trail.app`。DMG 和 ZIP 都不附带打�
 启动命令助手，本地与未签名调试构建也一样。标签发布工件仍会签名并公证；未签名通道
 仅用于调试，不代表已通过 Gatekeeper 验证。
 
-标签构建和 `sign_macos: true`（手动运行的默认值）仅从 GitHub Actions 密钥接收 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD` 和 `APPLE_TEAM_ID`，通过 `CSC_NAME=XingYu Liu (DUV63RKYTW)`（裸通用名——electron-builder 拒绝 `Developer ID Application:` 前缀）固定证书，强制代码签名与 `notarytool` 公证 `Trail.app`。随后 DMG 会由 `scripts/notarize-and-staple-macos-release-dmg.sh` 单独提交到同一个服务，只有返回 `Accepted` 才允许装订票据。之后验证身份、代码签名完整性（含 `pi-desktop-host-core`）、Gatekeeper `Notarized Developer ID` 以及两份已装订票据，再进行任何工件上传。
+标签构建和 `sign_macos: true`（手动运行的默认值）仅从 GitHub Actions 密钥接收 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD` 和 `APPLE_TEAM_ID`，通过 `CSC_NAME=XingYu Liu (DUV63RKYTW)`（裸通用名——electron-builder 拒绝 `Developer ID Application:` 前缀）固定证书，强制代码签名与 `notarytool` 公证 `Trail.app`。随后 DMG 会由 `scripts/notarize-and-staple-macos-release-dmg.sh` 单独提交到同一个服务，只有返回 `Accepted` 才允许装订票据。之后验证身份、代码签名完整性（含 `trail-host-core`）、Gatekeeper `Notarized Developer ID` 以及两份已装订票据，再进行任何工件上传。
 
 对于 app 票据，当设置 `PI_STAPLER_MAX_ATTEMPTS` 时，签名看门狗会注入临时 `xcrun` shim。它只重试确切的 `stapler staple` 操作，最多总计六次、间隔 10 秒；`notarytool` 和其他 `xcrun` 命令会原样透传。electron-notarize 仅会在 Apple 接受 app 提交后调用该命令。DMG 脚本会在其单独提交被接受后执行自己的有界重试。任一重试耗尽都会让作业失败；工件验证仍要求 app 和 DMG 都包含有效的装订票据。
 
@@ -250,7 +255,7 @@ https://cnb.cool/aixk/Pi-Desktop 拉取的用户使用。
 
 ### 4.5 GitHub Actions 中的 macOS 签名密钥
 
-在 GitHub → 仓库 `vastsa/PI-Desktop` → Settings → Secrets and variables →
+在 GitHub → 仓库 `CharonZou/trail` → Settings → Secrets and variables →
 Actions 中创建下列密钥。不要把 p12、密码、Apple ID 或应用专用密码提交进仓库。
 不要在 CI 中 `echo` 这些值。
 
@@ -460,7 +465,7 @@ Inter、Noto Sans SC、LXGW WenKai），因此 `out/renderer` 中只剩 KaTeX �
 
 上表是三控件的 `v0.10.8` 记录，早于本次移除，其 `woff2` 行已不再反映现状。
 
-在干净的轮廓上手动烟雾 (`PI_DESKTOP_DATA_DIR=$(mktemp -d)`)：
+在干净的轮廓上手动烟雾 (`TRAIL_DATA_DIR=$(mktemp -d)`)：
 
 1. `pnpm dev` 与 `Trail` 一起在 macOS 应用程序菜单中启动，
    Dock 和本机“关于”面板中的规范图标；没有 Electron 品牌
@@ -473,7 +478,7 @@ project/Temporary 使用消息加会话图标创建控件。
 4. 出现新手引导清单；配置提供商；一轮流式聊天。
 5. 一种授权工具调用（写入）允许 + 拒绝路径。
 6. Quit/relaunch → 恢复会话历史记录，恢复窗口边界。
-7. `~/.pi-desktop/logs/` 包含 `app/`、`host/` 和 `agent/` 下分类的 NDJSON；
+7. `~/.trail/logs/` 包含 `app/`、`host/` 和 `agent/` 下分类的 NDJSON；
    关键的生命周期、工具、provider、plugin 和错误记录可用，不再创建独立的计时文件。
 8. 禁用网络访问后，shell 仍然启动； English/Chinese
    切换、语法高亮、shell 高亮、KaTeX、Mermaid fallback/rendering、
@@ -487,18 +492,18 @@ project/Temporary 使用消息加会话图标创建控件。
 电子更新程序清单。在该目标操作系统上运行目标命令：
 
 ```text
-macOS Apple Silicon: pnpm --filter @pi-desktop/desktop run dist:mac -- --arm64
-macOS Intel:         pnpm --filter @pi-desktop/desktop run dist:mac -- --x64
-Windows: pnpm --filter @pi-desktop/desktop dist:win
-Linux:   pnpm --filter @pi-desktop/desktop dist:linux -- --x64|--arm64
+macOS Apple Silicon: pnpm --filter @trail/desktop run dist:mac -- --arm64
+macOS Intel:         pnpm --filter @trail/desktop run dist:mac -- --x64
+Windows: pnpm --filter @trail/desktop dist:win
+Linux:   pnpm --filter @trail/desktop dist:linux -- --x64|--arm64
 ```
 
 Windows 的 `dist:win` 命令会运行 `scripts/build-desktop-release.mjs`，分别调用
 一次 electron-builder 构建 NSIS 和 ZIP，确保每个包写入正确的更新器发行类型标记。
 
-macOS 软件包包括按本机架构构建的 `bin/pi-desktop-host-core`；
+macOS 软件包包括按本机架构构建的 `bin/trail-host-core`；
 Linux 软件包在其本机 x64 与 arm64 运行器上做同样的事；Windows
-软件包包括 `bin/pi-desktop-host-core.exe`。签名、回滚和安装程序升级资质仍保持发布
+软件包包括 `bin/trail-host-core.exe`。签名、回滚和安装程序升级资质仍保持发布
 硬化工作；发布本身已在 D126/D285/D603 下启用。
 
 Native-runner 输出矩阵：
@@ -537,7 +542,7 @@ electron Trail-<version>-linux-<arch>.asar
 2. 验证 F10 和 Shift+F10 对焦点内容仍然可用。
 3. 从焦点编辑器执行应用程序和编辑快捷方式。
 4. 最小化、最大化、恢复和关闭自定义控件。
-5. 使用 `PI_DESKTOP_START_MAXIMIZED=1` 重新启动；确认初始
+5. 使用 `TRAIL_START_MAXIMIZED=1` 重新启动；确认初始
    maximize/restore 字形与查询的本机状态匹配。
 6. 验证未知的 menu/window IPC 操作在窗口打开和关闭时失败。
 

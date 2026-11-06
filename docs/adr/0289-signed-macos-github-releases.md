@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-18
-- Deciders: PI-Desktop core
+- Deciders: Trail core
 - Decision: D450
 - Amends: ADR 0022, ADR 0145, ADR 0191, ADR 0204, D078
 - Related: D120, D126, D164, D364, ADR 0197, ADR 0232, ADR 0257, ADR 0278, E2E-196a, E2E-196c, E2E-067A
@@ -55,7 +55,7 @@ for the official `vastsa/PI-Desktop` release lane.
    timing are unchanged.
 6. Do not reintroduce `afterPack` / `afterSign` adhoc codesign (ADR 0278).
    electron-builder's Developer ID pass signs the app, helpers, and the
-   `pi-desktop-host-core` sidecar.
+   `trail-host-core` sidecar.
 7. The unsigned first-launch note and ZIP helper remain for trusted local or
    debug unsigned builds. Official GitHub Release DMGs are signed and
    notarized and must not claim otherwise.
@@ -67,7 +67,7 @@ for the official `vastsa/PI-Desktop` release lane.
 
 ## Consequences
 
-- Users who download a tagged DMG should open PI-Desktop without a
+- Users who download a tagged DMG should open Trail without a
   Gatekeeper “unidentified developer” or quarantine-damaged warning.
 - Packaged macOS installs can check GitHub Releases, download the arch ZIP,
   and restart into the new version. Existing unsigned installs may still need

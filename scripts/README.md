@@ -59,7 +59,7 @@ The scenarios are specified in
 | `e2e-plan-ui.mjs` | `pnpm test:e2e:plan-ui` | Plan approval through the rendered UI |
 | `e2e-electron-boot.mjs` | `pnpm test:e2e:boot` | Electron boot probe |
 | `e2e-provider-client-certificate.mjs` | `pnpm test:e2e:provider-client-certificate` | Isolated Electron 43 model discovery with optional client certificates, authenticated proxy routing, redirects and cancellation |
-| `e2e-provider-recovery.mjs` | `node scripts/e2e-provider-recovery.mjs` | Isolated desktop with a localhost fault-injection provider: socket failures, interrupted streams, Responses recovery, exhausted retries, Continue, and recovery across eleven real Read calls. Requires a built desktop/runtime and host binary (`PI_DESKTOP_HOST_BIN` when outside the checkout); retains screenshots and JSON under `.artifacts/issue-699/` |
+| `e2e-provider-recovery.mjs` | `node scripts/e2e-provider-recovery.mjs` | Isolated desktop with a localhost fault-injection provider: socket failures, interrupted streams, Responses recovery, exhausted retries, Continue, and recovery across eleven real Read calls. Requires a built desktop/runtime and host binary (`TRAIL_HOST_BIN` when outside the checkout); retains screenshots and JSON under `.artifacts/issue-699/` |
 | `e2e-settings-scroll.mjs` | `pnpm test:e2e:settings-scroll` | Production Settings component navigation, search anchoring, focus-on-mount, and scroll behavior |
 | `e2e-transcript-render.mjs` | `pnpm test:e2e:transcript` | Production transcript render boundaries, runtime status geometry, and deterministic smooth-text cadence |
 | `e2e-gen-ui.mjs` | `pnpm test:e2e:gen-ui` | Offline production GenUI card/protocol journey: slider, theme, expand/Escape, viewport cleanup, global frame quota, and response-level cross-session sandbox |
@@ -67,13 +67,13 @@ The scenarios are specified in
 | `e2e-config-sync-multidevice.mjs` | `pnpm test:e2e:config-sync` | Four isolated host-core processes against a SigV4-validating local S3 fixture; covers credential opt-out, approvals, concurrent edits/conflict resolution, mapped skill resources, deletion, sync/backup restore, restart, password rewrap, encrypted storage and cleanup |
 | `e2e-supervision.mjs` | `pnpm test:e2e:supervision` | Process supervision and restart behavior |
 | `e2e-subagents.mjs` | `pnpm test:e2e:subagents` | Subagent registry over RPC, then through the real loader (D202) |
-| `e2e-send-now-subagents.mjs` | `pnpm test:e2e:send-now-subagents` | Production Composer queue and Main IPC with real Rust Host/agent sidecar and a local SSE fixture; Send now wakes TaskWait, preserves two live delegates and reports, and retains ordinary FIFO input. Uses temporary HOME/data and accepts `PI_DESKTOP_HOST_BIN` for a reused Host binary. |
-| `e2e-agent-live.mjs` | `node scripts/e2e-agent-live.mjs` | Live streaming chat through agent-runtime + host-core. Requires `PI_DESKTOP_TEST_API_KEY`, `PI_DESKTOP_TEST_BASE_URL`, and `PI_DESKTOP_TEST_MODEL` (no defaults), so it has no `pnpm` alias |
+| `e2e-send-now-subagents.mjs` | `pnpm test:e2e:send-now-subagents` | Production Composer queue and Main IPC with real Rust Host/agent sidecar and a local SSE fixture; Send now wakes TaskWait, preserves two live delegates and reports, and retains ordinary FIFO input. Uses temporary HOME/data and accepts `TRAIL_HOST_BIN` for a reused Host binary. |
+| `e2e-agent-live.mjs` | `node scripts/e2e-agent-live.mjs` | Live streaming chat through agent-runtime + host-core. Requires `TRAIL_TEST_API_KEY`, `TRAIL_TEST_BASE_URL`, and `TRAIL_TEST_MODEL` (no defaults), so it has no `pnpm` alias |
 
 ### Configuration-sync live S3 opt-in
 
 Build the task's Host binary and shared package first, reusing the existing
-development toolchain. Set `PI_DESKTOP_HOST_BIN` if the binary is outside the
+development toolchain. Set `TRAIL_HOST_BIN` if the binary is outside the
 worktree. The default command uses only local S3 and temporary Host profiles.
 With explicit authorization, run:
 
@@ -85,7 +85,7 @@ Live administration needs an existing Python 3 + boto3 environment. The file
 must provide `S3_HOST`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY`,
 `S3_SECRET_KEY`, `S3_DOMAIN_MODE` (`false` = path-style), and optionally
 `S3_SESSION_TOKEN`. Credentials stay in memory/stdin, never arguments or logs.
-The harness creates its own UUID prefix under `pi-desktop-tests/`, checks
+The harness creates its own UUID prefix under `trail-tests/`, checks
 initial emptiness, then runs the same actual Host journey. It needs scoped
 list/get/put/delete and bucket-versioning read permission; versioned buckets
 also need version listing/deletion. It stops every Host before deleting only
@@ -101,7 +101,7 @@ and on manual dispatch, skipping both when a change touches only `docs/**` or
 `**/*.md`:
 
 - **JS build / typecheck / lint / test** — `pnpm install --frozen-lockfile`,
-  `pnpm build:js`, `pnpm --filter @pi-desktop/desktop typecheck`, `pnpm lint`,
+  `pnpm build:js`, `pnpm --filter @trail/desktop typecheck`, `pnpm lint`,
   `pnpm -r --if-present test`
 - **Rust host-core test** — `cargo test -p host-core --locked`
 

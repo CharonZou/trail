@@ -1,4 +1,4 @@
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@trail/shared";
 import type { HostProcess } from "./host-process";
 import type { PluginRuntime } from "./plugin-runtime";
 

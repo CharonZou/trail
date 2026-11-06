@@ -28,7 +28,7 @@ test("Electron main applies Chromium proxy and net.fetch", () => {
   assert.match(electronProxy, /net\.fetch\.bind\(net\)/);
   assert.match(electronProxy, /session-created/);
   assert.match(electronProxy, /pi-desktop\/network\/testProxy|PROXY_TEST_URL/);
-  assert.match(electronProxy, /PI_DESKTOP_PROXY_JSON/);
+  assert.match(electronProxy, /TRAIL_PROXY_JSON/);
   assert.match(electronProxy, /startAuthenticatedProxyRelay/);
   assert.match(electronProxy, /proxyHasCredentials/);
 });

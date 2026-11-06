@@ -6,10 +6,10 @@
  * throwaway data directory. Nothing outside the temp directory is touched.
  *
  * Env (no defaults: this sends real prompts with a real key), either
- *  PI_DESKTOP_TEST_API_KEY, PI_DESKTOP_TEST_BASE_URL (OpenAI-compatible) and
- *  PI_DESKTOP_TEST_MODEL, or PI_DESKTOP_TEST_PROVIDER_DATA_DIR: a *copy* of a
+ *  TRAIL_TEST_API_KEY, TRAIL_TEST_BASE_URL (OpenAI-compatible) and
+ *  TRAIL_TEST_MODEL, or TRAIL_TEST_PROVIDER_DATA_DIR: a *copy* of a
  *  Trail data directory whose default provider and model are used (the
- *  copy may be migrated). Optional: PI_DESKTOP_HOST_BIN, PI_DESKTOP_KEEP_TEMP.
+ *  copy may be migrated). Optional: TRAIL_HOST_BIN, TRAIL_KEEP_TEMP.
  */
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -48,10 +48,10 @@ async function providerFromDataDir(dir) {
 }
 
 let live;
-if (process.env.PI_DESKTOP_TEST_PROVIDER_DATA_DIR?.trim()) {
-  live = await providerFromDataDir(process.env.PI_DESKTOP_TEST_PROVIDER_DATA_DIR.trim());
+if (process.env.TRAIL_TEST_PROVIDER_DATA_DIR?.trim()) {
+  live = await providerFromDataDir(process.env.TRAIL_TEST_PROVIDER_DATA_DIR.trim());
 } else {
-  const REQUIRED_ENV = ["PI_DESKTOP_TEST_API_KEY", "PI_DESKTOP_TEST_BASE_URL", "PI_DESKTOP_TEST_MODEL"];
+  const REQUIRED_ENV = ["TRAIL_TEST_API_KEY", "TRAIL_TEST_BASE_URL", "TRAIL_TEST_MODEL"];
   const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name]?.trim());
   if (missingEnv.length > 0) {
     console.error(`missing required environment variables: ${missingEnv.join(", ")}`);
@@ -59,9 +59,9 @@ if (process.env.PI_DESKTOP_TEST_PROVIDER_DATA_DIR?.trim()) {
   }
   live = {
     name: "Live",
-    baseUrl: process.env.PI_DESKTOP_TEST_BASE_URL,
-    model: process.env.PI_DESKTOP_TEST_MODEL,
-    apiKey: process.env.PI_DESKTOP_TEST_API_KEY,
+    baseUrl: process.env.TRAIL_TEST_BASE_URL,
+    model: process.env.TRAIL_TEST_MODEL,
+    apiKey: process.env.TRAIL_TEST_API_KEY,
     apiStyle: "chat_completions",
     protocol: "openai_compatible",
   };
@@ -70,7 +70,7 @@ console.log(`model: ${live.name} / ${live.model} (${live.apiStyle})`);
 // The host inherits this process's environment and the live model runs Bash
 // with it, so the key must not be in it (`env` would print it).
 for (const name of Object.keys(process.env)) {
-  if (name.startsWith("PI_DESKTOP_TEST_")) delete process.env[name];
+  if (name.startsWith("TRAIL_TEST_")) delete process.env[name];
 }
 
 const temp = mkdtempSync(join(tmpdir(), "pi-worktree-live-"));
@@ -317,7 +317,7 @@ try {
 } finally {
   for (const runtime of runtimes.values()) await runtime.dispose().catch(() => {});
   await host.stop().catch(() => {});
-  if (process.env.PI_DESKTOP_KEEP_TEMP) {
+  if (process.env.TRAIL_KEEP_TEMP) {
     console.log(`kept ${temp} (its data directory holds the provider key; delete it when done)`);
   }
   else rmSync(temp, { recursive: true, force: true });

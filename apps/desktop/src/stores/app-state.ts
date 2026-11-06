@@ -1,5 +1,6 @@
 import type { RecentModel } from "../lib/recent-models";
 import type { RemoteProjectTarget } from "../lib/remote-project-session";
+import type { ProjectGroupChoices } from "../lib/api";
 import type {
   AgentEventEnvelope,
   BrowserState,
@@ -22,6 +23,7 @@ import type {
   PluginSummary,
   PluginTheme,
   PluginViewMeta,
+  ProjectGroupAppearance,
   ProjectWorkspace,
   ProviderPublic,
   ReviewRollbackResult,
@@ -29,7 +31,7 @@ import type {
   SessionThinkingLevel,
   SessionTodoSnapshot,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type { SettingsTabId } from "../lib/settings-search";
 import type { TranscriptSearchTarget, TranscriptView } from "../lib/transcript-reading";
 import type { TranscriptReadingPosition } from "../lib/transcript-reading-position";
@@ -137,6 +139,8 @@ export type AppState = {
   projectMeta: Record<string, ProjectMeta>;
   /** Kept as a flat map for lightweight consumers (Sidebar). */
   projectCollapsed: Record<string, boolean>;
+  /** Host-owned icon and tint per project, keyed by normalized primary path. */
+  projectAppearance: Record<string, ProjectGroupAppearance>;
   projectSort: ProjectSort;
   activeSessionId?: string;
   /** Composer toolbar choices retained on the draft while it has no session. */
@@ -292,14 +296,18 @@ export type AppState = {
     name: string;
     folders: string[];
     primaryPath: string;
+    choices?: ProjectGroupChoices;
   }) => Promise<void>;
   /** Clone a public git remote into a chosen folder, then create its project. */
   createProjectFromGit: (input: {
     name: string;
     url: string;
     parentPath: string;
+    choices?: ProjectGroupChoices;
   }) => Promise<void>;
   cloneProject: (url: string) => Promise<ProjectWorkspace | null>;
+  /** Re-read the host's icon and tint choices for every durable project group. */
+  refreshProjectGroups: () => Promise<void>;
   /** Re-read the active workspace metadata without changing the visible project. */
   refreshProject: (path: string) => Promise<ProjectWorkspace | null>;
   activateProject: (

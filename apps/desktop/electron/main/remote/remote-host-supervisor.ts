@@ -1,4 +1,8 @@
-import { shellQuote, type PiHostReadyLine } from "./pi-host-bootstrap-script.js";
+import {
+  REMOTE_PI_HOST_HOME_PATH,
+  shellQuote,
+  type PiHostReadyLine,
+} from "./pi-host-bootstrap-script.js";
 import { REMOTE_DEPLOY_LOCK_SCRIPT } from "./remote-deploy-lock.js";
 import type { SshTransport } from "./ssh-transport.js";
 
@@ -30,7 +34,7 @@ set -eu
 umask 077
 die() { printf '%s\\n' "PI_HOST_SUPERVISOR_FAILED $1" >&2; exit 1; }
 [ -n "\${HOME:-}" ] || die no-home
-base="$HOME/.pi-desktop/pi-host"
+base="$HOME/${REMOTE_PI_HOST_HOME_PATH}"
 entry="$base/current/pi-host.js"
 work="$base/.bootstrap"
 [ ! -L "$work" ] || die unsafe-work-directory

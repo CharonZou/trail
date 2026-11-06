@@ -43,7 +43,7 @@ test("project edit dialog updates names and adjusts folder roots", () => {
   assert.match(dialogSource, /listProjectGroups\(\)/);
   assert.match(
     dialogSource,
-    /api\.updateProjectGroup\(group\.id, trimmedName, folders, primaryPath\)/,
+    /api\.updateProjectGroup\(\s*group\.id,\s*trimmedName,\s*folders,\s*primaryPath,\s*\{ workspaceIndex, \.\.\.appearance \},/,
   );
   assert.match(dialogSource, /api\.pickProjectFolders\(\)/);
   assert.match(dialogSource, /setFolders\(\(current\) =>[\s\S]*?current\.filter/);
@@ -84,6 +84,33 @@ test("project group update is available through the host RPC and preload API", (
   assert.match(ipcSource, /\.\.\.\(safePrimary \? \{ primary: safePrimary \} : \{\}\)/);
 });
 
+test("project group update carries the icon and colour pair", () => {
+  // Both keys are optional on the wire: an omitted pair must not clear what
+  // the host already stored, so the preload only forwards what the dialog set.
+  for (const handler of ["projectGroupCreate", "projectGroupUpdate"]) {
+    const start = ipcSource.indexOf(`IPC.invoke.${handler},`);
+    const body = ipcSource.slice(start, start + 2600);
+    assert.match(body, /icon\?: unknown;/);
+    assert.match(body, /color\?: unknown;/);
+    assert.match(body, /appearanceParams\(input\)/);
+    assert.match(body, /\.\.\.\(appearance \? appearance : \{\}\)/);
+  }
+  assert.match(
+    ipcSource,
+    /if \(!\("icon" in input\) && !\("color" in input\)\) return undefined;/,
+  );
+  assert.match(hostSource, /"project\.group\.update"/);
+  assert.match(hostSource, /appearance_param\(&params\)\?/);
+  assert.match(hostSource, /apply_appearance\(&st\.db, group, appearance\)/);
+  // A remote binding has no local glyph, so its rename path stays untouched.
+  const remoteBranch = dialogSource.slice(
+    dialogSource.indexOf("const result = group.remote"),
+    dialogSource.indexOf("api.updateProjectGroup"),
+  );
+  assert.match(remoteBranch, /api\.renameProjectGroup\(group\.id, trimmedName\)/);
+  assert.doesNotMatch(remoteBranch, /appearance|choices/);
+});
+
 test("only project group creation pre-checks folder existence here", () => {
   // #1869: an update must reach the host even when a stored root is missing
   // on disk (externally renamed/unmounted); the host validates new roots and
@@ -101,6 +128,19 @@ test("only project group creation pre-checks folder existence here", () => {
   assert.match(createHandler, /project group folders must be directories/);
 });
 
+test("the edit dialog survives a language switch while it is open", () => {
+  // `t` in the loader's deps re-ran the fetch on every language change and
+  // overwrote name, folders, primary path, index toggle and appearance with
+  // what the host had — silently discarding unsaved edits.
+  assert.match(dialogSource, /const loadFailed = useEffectEvent\(/);
+  assert.match(dialogSource, /throw loadFailed\(\);/);
+  assert.doesNotMatch(
+    dialogSource,
+    /\[project\.groupId, project\.path, t\]/,
+    "the loader must not restart when the language changes",
+  );
+});
+
 for (const [locale, source] of [["en", enSource], ["zh-CN", zhSource], ["tr", trSource]]) {
   test(`project edit labels are present in ${locale}`, () => {
     for (const key of [
@@ -112,6 +152,11 @@ for (const [locale, source] of [["en", enSource], ["zh-CN", zhSource], ["tr", tr
       "editCancel",
       "editPrimaryLocked",
       "editSetPrimary",
+      // The edit dialog reuses the create dialog's indexing copy.
+      "createWorkspaceIndexLabel",
+      "createWorkspaceIndexHint",
+      // Icon and colour rows share one nested copy block per locale.
+      "appearance",
     ]) {
       assert.match(source, new RegExp(`(?:\\b${key}|"${key}"):`));
     }

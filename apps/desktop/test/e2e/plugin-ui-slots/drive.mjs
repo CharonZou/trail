@@ -110,9 +110,9 @@ export async function drive({ control, renderer, check, project }) {
   // The lab's tool is low risk; Auto keeps the run free of approval prompts.
   await control.tool("pi_session_configure", { id: sessionId, mode: "agent", permissionMode: "auto", confirm: true });
 
-  await until(() => typeof window.__PI_DESKTOP__?.selectSession === "function", null, "renderer automation surface", 30_000);
+  await until(() => typeof window.__TRAIL__?.selectSession === "function", null, "renderer automation surface", 30_000);
   await page(installPageHelpers);
-  await page((id) => window.__PI_DESKTOP__.selectSession(id), sessionId);
+  await page((id) => window.__TRAIL__.selectSession(id), sessionId);
   await until(() => Boolean(document.querySelector('[data-lab="composerControl:left"]')), null, "lab composer controls", 30_000);
   check("the lab's renderer entry loaded into the open window", true);
 

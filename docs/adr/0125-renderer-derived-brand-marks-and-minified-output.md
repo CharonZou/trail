@@ -37,8 +37,9 @@ about 277 MB, so the renderer is the only part worth tuning.
    values as assets. Stripping them later leaves the assets emitted. Only
    comma-prefixed fallback entries are removed, so a face whose single source
    is `woff` or `truetype` keeps it.
-3. `build/icon_1024.png` and `build/logo_dark.png` remain the canonical brand
-   masters and the source of truth for installer icons. This amends D079 and
+3. `build/icon_1024.png` remains the canonical brand raster, and
+   `build/logo_dark.png` is the documentation lockup derived from it. This
+   amends D079 and
    D094 on one point: the renderer imports **derived** marks at
    `apps/desktop/src/assets/brand/logo-light.png` and `logo-dark.png` instead
    of the masters. The derived files are 192x192, covering a 64 px render at 3x

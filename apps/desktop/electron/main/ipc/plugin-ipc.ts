@@ -1,6 +1,6 @@
 import { dialog } from "electron";
-import { IPC, type ActivationScope } from "@pi-desktop/shared";
-import { isTemplateName, scaffold } from "@pi-desktop/plugin-devkit";
+import { IPC, type ActivationScope } from "@trail/shared";
+import { isTemplateName, scaffold } from "@trail/plugin-devkit";
 import type { AgentExtensionBridge } from "../agent-extensions";
 import type { BrowserHost } from "../browser-host";
 import type { HostProcess } from "../host-process";

@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 function fixture(options: { newline?: boolean } = {}) {
-  const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-"));
+  const root = mkdtempSync(join(tmpdir(), "trail-native-"));
   roots.push(root);
   const agentDir = join(root, "agent");
   const sessionRoot = join(agentDir, "sessions");
@@ -545,7 +545,7 @@ describe("native continuation review regressions", () => {
 
   it("settles retries once, rejects overlap without disposal, acknowledges distinct durable users, and keeps own idle lease usable", async () => {
     const f = await configuredFixture();
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@trail/shared").AgentEventEnvelope[] = [];
     let calls = 0;
     const requestTools: unknown[] = [];
     let release!: () => void;
@@ -689,7 +689,7 @@ describe("native continuation review regressions", () => {
 
 describe("native fork children", () => {
   function forkFixture() {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-fork-"));
+    const root = mkdtempSync(join(tmpdir(), "trail-native-fork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -885,7 +885,7 @@ describe("native fork children", () => {
       return stream;
     });
     const service = new NativePiSessionService(f);
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@trail/shared").AgentEventEnvelope[] = [];
     try {
       const [summary] = await service.list();
       await service.prompt(summary.id, "stream me", (envelope) => events.push(envelope), "optimistic-stream");
@@ -905,7 +905,7 @@ describe("native fork children", () => {
   });
 
   it("returns the whole child transcript and leaves general detail paging alone", async () => {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-longfork-"));
+    const root = mkdtempSync(join(tmpdir(), "trail-native-longfork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -947,7 +947,7 @@ describe("native fork children", () => {
   });
 
   it("normalizes the child cwd from the SDK header instead of the raw parent string", async () => {
-    const root = mkdtempSync(join(tmpdir(), "pi-desktop-native-cwdfork-"));
+    const root = mkdtempSync(join(tmpdir(), "trail-native-cwdfork-"));
     roots.push(root);
     const agentDir = join(root, "agent");
     const sessionRoot = join(agentDir, "sessions");
@@ -1300,7 +1300,7 @@ describe("independent native ownership, identity and tool regressions", () => {
     const f = await configuredFixture();
     vi.spyOn(ModelRuntime.prototype, "streamSimple").mockImplementation(() => fauxStream());
     const service = new NativePiSessionService(f);
-    const events: import("@pi-desktop/shared").AgentEventEnvelope[] = [];
+    const events: import("@trail/shared").AgentEventEnvelope[] = [];
     try {
       const [summary] = await service.list();
       for (const optimisticId of ["caller-1", "caller-2"]) {

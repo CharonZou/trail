@@ -669,7 +669,7 @@ Run the minimum sufficient validation:
 
 ```bash
 pnpm build:js
-pnpm --filter @pi-desktop/desktop typecheck
+pnpm --filter @trail/desktop typecheck
 pnpm lint
 pnpm -r --if-present test
 

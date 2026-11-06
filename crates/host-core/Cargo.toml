@@ -6,7 +6,7 @@ license.workspace = true
 description = "Trail Rust host core"
 
 [[bin]]
-name = "pi-desktop-host-core"
+name = "trail-host-core"
 path = "src/main.rs"
 
 [dependencies]

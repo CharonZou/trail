@@ -1,7 +1,7 @@
 {
-  "name": "pi-desktop",
+  "name": "trail",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Local-first AI coding agent desktop client",
   "packageManager": "pnpm@12.8.1+sha512.f64ba907507f5ceafe06c8d38e6052d0179444580ec1279ddd5bfc11cb48aa8a2644b66598e07e761da84872a9fc57d5f902b87fa49d024198d558612aabbe45",
   "engines": {
@@ -9,11 +9,11 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "pnpm --filter @pi-desktop/desktop dev",
+    "dev": "pnpm --filter @trail/desktop dev",
     "dev:web": "node scripts/dev-web.mjs",
-    "preview": "pnpm --filter @pi-desktop/desktop run preview",
-    "pack": "pnpm --filter @pi-desktop/desktop run pack",
-    "dist": "pnpm --filter @pi-desktop/desktop run dist",
+    "preview": "pnpm --filter @trail/desktop run preview",
+    "pack": "pnpm --filter @trail/desktop run pack",
+    "dist": "pnpm --filter @trail/desktop run dist",
     "pi-plugin": "pi-plugin",
     "build": "pnpm -r --if-present build && cargo build --release -p host-core",
     "build:js": "pnpm -r --if-present build",
@@ -67,6 +67,7 @@
     "test:e2e:config-sync": "node scripts/e2e-config-sync-multidevice.mjs",
     "test:e2e:layout": "node scripts/e2e-three-column-layout.mjs",
     "test:e2e:sidebar-menu": "node scripts/e2e-three-column-layout.mjs --sidebar-only",
+    "test:e2e:sidebar-token-meter": "node scripts/e2e-sidebar-token-meter.mjs",
     "test:e2e:window-controls": "node scripts/e2e-window-controls.mjs",
     "test:e2e:window-resize-native": "node scripts/e2e-window-controls.mjs --native-edge-drag",
     "test:e2e:window-surface": "node scripts/e2e-window-surface.mjs",
@@ -86,10 +87,10 @@
     "check:release-docs": "node scripts/check-release-docs.mjs",
     "check:agent-policy": "node scripts/check-agent-policy-sync.mjs",
     "check:pr-base": "node scripts/check-pr-base-main.mjs",
-    "docs:dev": "pnpm --filter @pi-desktop/docs dev",
-    "docs:build": "pnpm --filter @pi-desktop/docs build",
-    "docs:preview": "pnpm --filter @pi-desktop/docs preview",
-    "docs:check": "pnpm --filter @pi-desktop/docs check:locales && pnpm --filter @pi-desktop/docs check:docs",
+    "docs:dev": "pnpm --filter @trail/docs dev",
+    "docs:build": "pnpm --filter @trail/docs build",
+    "docs:preview": "pnpm --filter @trail/docs preview",
+    "docs:check": "pnpm --filter @trail/docs check:locales && pnpm --filter @trail/docs check:docs",
     "lint": "pnpm lint:biome && pnpm -r --if-present lint",
     "host:dev": "cargo run -p host-core",
     "clean": "pnpm -r --if-present clean && cargo clean",
@@ -116,6 +117,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
-    "@pi-desktop/plugin-devkit": "workspace:*"
+    "@trail/plugin-devkit": "workspace:*"
   }
 }

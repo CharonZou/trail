@@ -2,7 +2,7 @@ import type {
   MarketPluginSummary,
   PluginCapability,
   PluginSummary,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 export type TabId = "installed" | "market";
 
@@ -22,7 +22,7 @@ export const GROUP_LABEL_KEYS: Record<GroupId, string> = {
   disabled: "plugins.groupDisabled",
 };
 
-/** Mirrors TEMPLATE_NAMES in @pi-desktop/plugin-devkit; main rejects anything else. */
+/** Mirrors TEMPLATE_NAMES in @trail/plugin-devkit; main rejects anything else. */
 export const TEMPLATE_IDS = [
   "panel-basic",
   "agent-tool-basic",

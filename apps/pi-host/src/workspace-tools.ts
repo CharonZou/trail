@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import { realpath, stat } from "node:fs/promises";
 import { isAbsolute } from "node:path";
-import { RacpError } from "@pi-desktop/agent-host";
-import { isCommandShellCatalog, type CommandShellCatalog, type WorkspaceToolExecute, type WorkspaceToolResult } from "@pi-desktop/shared";
-import type { HostRpc } from "@pi-desktop/host-runtime";
-import type { RacpHostOperations } from "@pi-desktop/racp";
+import { RacpError } from "@trail/agent-host";
+import { isCommandShellCatalog, type CommandShellCatalog, type WorkspaceToolExecute, type WorkspaceToolResult } from "@trail/shared";
+import type { HostRpc } from "@trail/host-runtime";
+import type { RacpHostOperations } from "@trail/racp";
 
 type Owner = { deviceId: string; connectionId: string };
 type Active = { owner: Owner; host: HostRpc; sessionId: string; toolCallId: string; cancelled: boolean };

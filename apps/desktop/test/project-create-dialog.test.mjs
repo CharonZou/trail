@@ -6,7 +6,7 @@ import { readStoreSource } from "./helpers/store-source.mjs";
 
 const read = (relativePath) => readFile(new URL(relativePath, import.meta.url), "utf8");
 
-const [dialogSource, editDialog, store, api, protocol, main, styles] = await Promise.all([
+const [dialogSource, editDialog, store, api, protocol, main, styles, appearanceSource] = await Promise.all([
   read("../src/components/ProjectCreateDialog.tsx"),
   read("../src/components/ProjectEditDialog.tsx"),
   readStoreSource(),
@@ -14,6 +14,7 @@ const [dialogSource, editDialog, store, api, protocol, main, styles] = await Pro
   read("../../../packages/shared/src/protocol.ts"),
   readMainSource(),
   read("../src/styles/project-create-dialog.css"),
+  read("../src/components/ProjectAppearance.tsx"),
 ]);
 
 const dialog = dialogSource + await read("../src/components/ProjectFolderPicker.tsx");
@@ -57,9 +58,12 @@ test("create project dialog can create the project from a git checkout", () => {
   assert.match(dialog, /parentPath: cloneParent/);
   assert.match(dialog, /!projectName \|\| !cloneTarget \|\| !cloneParent \|\| busy/);
   assert.match(dialog, /project\.cloning/);
-  assert.match(store, /createProjectFromGit: async \(\{ name, url, parentPath \}\)/);
+  assert.match(
+    store,
+    /createProjectFromGit: async \(\{ name, url, parentPath, choices \}\)/,
+  );
   assert.match(store, /api\.cloneProjectInto\(url, parentPath\)/);
-  assert.match(store, /folders: \[checkout\.path\], primaryPath: checkout\.path/);
+  assert.match(store, /folders: \[checkout\.path\],\s*primaryPath: checkout\.path,\s*choices,/);
   assert.match(api, /cloneProjectInto: \(url: string, parentPath: string\)/);
   assert.match(protocol, /projectCloneCheckout:\s*"pi-desktop\/project\/cloneCheckout"/);
 });
@@ -70,9 +74,12 @@ test("project creation creates one logical group with a primary workspace", () =
     store,
     /openProject: async \(options\) => \{\s*set\(\{\s*createProjectDialogOpen: true,\s*createProjectDialogRemoteHostKey: options\?\.remoteHostKey\s*\}\)/,
   );
-  assert.match(store, /createProjectFromFolders: async \(\{ name, folders, primaryPath \}\)/);
+  assert.match(
+    store,
+    /createProjectFromFolders: async \(\{ name, folders, primaryPath, choices \}\)/,
+  );
   assert.match(store, /const orderedFolders = \[/);
-  assert.match(store, /api\.createProjectGroup\(normalizedName, orderedFolders\)/);
+  assert.match(store, /api\.createProjectGroup\(normalizedName, orderedFolders, choices\)/);
   assert.match(store, /const \{ groups \} = await api\.listProjectGroups\(\)/);
   assert.match(store, /group\.roots\.some\(\(root\) => normalizeProjectPath\(root\.path\) === selectedPath\)/);
   assert.match(store, /const existingPrimary = existing\.primaryPath \|\| orderedFolders\[0\]/);
@@ -86,13 +93,19 @@ test("project creation creates one logical group with a primary workspace", () =
   );
   // Folder picks and git checkouts share one project creation semantic.
   assert.match(store, /async function createNamedProjectGroup\(/);
-  assert.match(store, /createProjectFromFolders: async \(\{ name, folders, primaryPath \}\) =>\s*createNamedProjectGroup\(/);
+  assert.match(
+    store,
+    /createProjectFromFolders: async \(\{ name, folders, primaryPath, choices \}\) =>\s*createNamedProjectGroup\(/,
+  );
 });
 
 test("folder picker is a renderer-only multi-directory selection", () => {
   assert.match(protocol, /projectPickFolders:\s*"pi-desktop\/project\/pickFolders"/);
   assert.match(protocol, /projectGroupCreate:\s*"pi-desktop\/project-group\/create"/);
-  assert.match(api, /createProjectGroup: \(name: string, folders: string\[\]\)/);
+  assert.match(
+    api,
+    /createProjectGroup: \(\s*name: string,\s*folders: string\[\],\s*choices: ProjectGroupChoices = \{\},?\s*\)/,
+  );
   assert.match(main, /project\.group\.create/);
   assert.match(api, /pickProjectFolders: \(\) =>[\s\S]*?projectPickFolders/);
   const start = main.indexOf("IPC.invoke.projectPickFolders");
@@ -126,6 +139,66 @@ test("project folder pickers ignore repeated requests while a dialog is open", (
   assert.match(main, /const openProjectPicker = async/);
   assert.match(main, /if \(!result \|\| result\.canceled/);
   assert.match(main, /const owner = getMainWindow\(\)/);
+});
+
+test("both project dialogs offer the workspace index switch", () => {
+  for (const source of [dialog, editDialog]) {
+    // The shared boolean primitive rather than a hand-rolled switch, and on by
+    // default because indexing is the behaviour every existing project already
+    // had.
+    assert.match(source, /const \[workspaceIndex, setWorkspaceIndex\] = useState\(true\);/);
+    assert.match(source, /<SettingsToggle/);
+    assert.match(source, /checked=\{workspaceIndex\}/);
+    assert.match(source, /className="project-create-dialog-index-toggle"/);
+    assert.match(source, /project\.createWorkspaceIndexLabel/);
+    assert.match(source, /project\.createWorkspaceIndexHint/);
+  }
+  // A remote workspace has no local tree to index, so neither dialog offers it.
+  assert.match(dialog, /\{source === "remote" \? null : \(/);
+  assert.match(editDialog, /\{group\?\.remote \? null : \(/);
+  // The choice travels with creation and with the edit that saves it.
+  assert.match(dialog, /primaryPath: folders\[0\],\s*choices: \{ workspaceIndex, \.\.\.appearance \},/);
+  assert.match(dialog, /parentPath: cloneParent,\s*choices: \{ workspaceIndex, \.\.\.appearance \},/);
+  assert.match(dialog, /setWorkspaceIndex\(true\);/);
+  assert.match(editDialog, /setWorkspaceIndex\(resolved\.workspaceIndex !== false\);/);
+  assert.match(styles, /\.project-create-dialog-index-hint \{[^}]*color: var\(--ds-text-muted\);/);
+});
+
+test("both project dialogs offer the workspace icon and colour pickers", () => {
+  // One shared component draws both rows, so the tile order and the stored
+  // pair cannot drift apart between create and edit.
+  for (const source of [dialog, editDialog]) {
+    assert.match(source, /const \[appearance, setAppearance\] = useState<ProjectGroupAppearance>\(\{\}\);/);
+    assert.match(source, /<ProjectAppearancePicker/);
+    assert.match(source, /onChange=\{setAppearance\}/);
+    assert.match(source, /\{ workspaceIndex, \.\.\.appearance \}/);
+  }
+  assert.match(dialog, /setAppearance\(\{\}\);/);
+  assert.match(editDialog, /setAppearance\(resolved\.appearance \?\? \{\}\);/);
+  // A remote workspace has no local glyph to decorate.
+  assert.match(dialog, /\{source === "remote" \? null : \(\s*<>/);
+  assert.match(editDialog, /\{group\?\.remote \? null : \(\s*<>/);
+
+  assert.match(appearanceSource, /export function ProjectAppearancePicker/);
+  assert.match(appearanceSource, /export function ProjectAppearanceGlyph/);
+  assert.match(appearanceSource, /PROJECT_ICON_CHOICES\.map/);
+  assert.match(appearanceSource, /PROJECT_COLOR_CHOICES\.map/);
+  assert.match(appearanceSource, /t\("project\.appearance\.iconLabel"\)/);
+  assert.match(appearanceSource, /t\("project\.appearance\.colorLabel"\)/);
+  // Decoration reads workspace → icon → colour, then the index switch below the
+  // colour row; the same order in both dialogs keeps the two entry points from
+  // drifting apart.
+  for (const source of [dialog, editDialog]) {
+    const picker = source.indexOf("<ProjectAppearancePicker");
+    const indexSection = source.indexOf('project-create-dialog-index"');
+    assert.ok(picker >= 0 && indexSection > picker, "index switch below the colour row");
+  }
+  assert.match(
+    styles,
+    /\.project-appearance-row \{[^}]*grid-template-columns: repeat\(auto-fill, minmax\(var\(--appearance-tile\), 1fr\)\);/,
+  );
+  assert.match(styles, /\.project-appearance-row \{[^}]*grid-auto-rows: var\(--appearance-tile\);/);
+  assert.match(styles, /\.project-appearance-swatch-dot \{[^}]*background: currentColor;/);
 });
 
 test("clone checkout handler clones without touching the active workspace", () => {

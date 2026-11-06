@@ -28,7 +28,7 @@ import {
   type SessionThinkingLevel,
   type ThinkingLevel,
   type ThinkingProtocol,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   CONTEXT_WINDOW_PRESETS,
   MAX_OUTPUT_PRESETS,

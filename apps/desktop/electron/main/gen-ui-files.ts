@@ -4,7 +4,7 @@ import {
   isGenUiFragmentReadResult,
   isGenUiSessionId,
   type GenUiLocation,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 export type GenUiFragmentResult =
   | { ok: true; fragment: string }

@@ -10,7 +10,7 @@ import {
 } from "../../../scripts/export-linux-asar.mjs";
 
 async function createFixture({ unpackedDir = "linux-unpacked" } = {}) {
-  const rootDir = await mkdtemp(join(tmpdir(), "pi-desktop-release-asar-"));
+  const rootDir = await mkdtemp(join(tmpdir(), "trail-release-asar-"));
   const releaseDir = join(rootDir, "apps/desktop/release");
   await mkdir(join(releaseDir, `${unpackedDir}/resources`), { recursive: true });
   await writeFile(

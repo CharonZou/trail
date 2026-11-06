@@ -12,6 +12,7 @@ const {
   projectFolderPaths,
   refreshProjectGroups,
   rememberProjectGroups,
+  workspaceIndexEnabledFor,
   workspaceRootsFor,
 } = await import("../electron/main/workspace-roots.ts");
 
@@ -136,6 +137,25 @@ test("containment family is the group, or the workspace alone", () => {
   resetTo(null);
   assert.deepEqual(projectFolderPaths("C:\\work\\beta"), ["C:\\work\\beta"]);
   assert.deepEqual(projectFolderPaths(null), []);
+});
+
+test("the workspace-index switch gates every folder of its group", () => {
+  // Indexing is the historical behaviour, so only an explicit off disables it —
+  // and it disables the whole project, not just the folder the dialog edited.
+  resetTo([{ ...group, workspaceIndex: false }]);
+  assert.equal(workspaceIndexEnabledFor("C:\\work\\alpha"), false);
+  assert.equal(workspaceIndexEnabledFor("C:\\work\\gamma"), false);
+  assert.equal(workspaceIndexEnabledFor("c:/WORK\\Beta\\"), false);
+  // A workspace outside that group keeps its own answer.
+  assert.equal(workspaceIndexEnabledFor("D:\\elsewhere"), true);
+  // No group behind the path, and a cold snapshot, both mean indexed.
+  assert.equal(workspaceIndexEnabledFor(null), true);
+  resetTo([{ ...group, workspaceIndex: true }]);
+  assert.equal(workspaceIndexEnabledFor("C:\\work\\alpha"), true);
+  resetTo([group]);
+  assert.equal(workspaceIndexEnabledFor("C:\\work\\alpha"), true);
+  resetTo(null);
+  assert.equal(workspaceIndexEnabledFor("C:\\work\\alpha"), true);
 });
 
 test("refresh replaces the snapshot and reports whether it changed", async () => {

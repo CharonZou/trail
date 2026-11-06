@@ -1,4 +1,4 @@
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@trail/shared";
 
 export type SessionTimingMessage = Pick<
   UiMessage,

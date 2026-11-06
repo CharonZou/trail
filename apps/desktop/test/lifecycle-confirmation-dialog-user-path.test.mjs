@@ -15,7 +15,7 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
+import { catalogs, flattenCatalog } from "@trail/i18n";
 import { LifecycleConfirmationDialog } from "../../apps/desktop/src/components/LifecycleConfirmationDialog";
 
 await i18n.use(initReactI18next).init({ lng: "en", keySeparator: false,
@@ -155,8 +155,8 @@ test("lifecycle dialogs support accessible keyboard, backdrop, and decision path
       jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@trail/i18n": join(root, "packages/i18n/src"),
+        "@trail/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

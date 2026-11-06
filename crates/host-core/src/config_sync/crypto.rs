@@ -17,6 +17,12 @@ const MAX_ITERATIONS: u32 = 12;
 const MIN_PARALLELISM: u32 = 1;
 const MAX_PARALLELISM: u32 = 8;
 
+// The vault format tag and the `pi-desktop/config-sync/...` derivation and AAD
+// prefixes are frozen protocol constants. They are authenticated-data inputs of
+// blobs already written to a user's vault and remote bucket, so renaming them
+// with the product brand makes existing secrets unreadable. Brand surfaces stay
+// outside this module.
+
 /// Parameters are part of the authenticated vault header, but are bounded
 /// before Argon2 is invoked so an attacker-controlled remote header cannot
 /// turn unlocking into an unbounded memory or CPU allocation.

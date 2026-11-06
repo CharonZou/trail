@@ -268,19 +268,32 @@ type ToolBudgetHealth = {
   callers and returns a memory record without structured entries.
 - `project.groups.list` — returns one host-owned logical group per named
   project. Existing path-only records are compatibility `legacy` groups.
-- `project.group.create({ name, folders })` — validates the display name and
-  local directories, stores the ordered roots, and returns the new group
-  without changing the active workspace. A non-legacy root cannot belong to a
-  second group.
+- `project.group.create({ name, folders, workspaceIndex?, icon?, color? })` —
+  validates the display name and local directories, stores the ordered roots,
+  and returns the new group without changing the active workspace. A non-legacy
+  root cannot belong to a second group. Omitting `workspaceIndex` keeps the
+  default `true`; a non-boolean value is rejected rather than coerced. `icon`
+  and `color` are the decoration the picker offered at creation; either one
+  arriving stores the whole pair.
 - `project.group.rename({ groupId, name })` — persists the group display name.
-- `project.group.update({ groupId, name, folders, primary? })` — edits the group
+- `project.group.update({ groupId, name, folders, primary?, workspaceIndex?,
+  icon?, color? })`
+  — edits the group
   name and ordered roots. The stored primary root must remain first; naming a
   `primary` promotes that selected root and reorders the roots around it, while
   omitting it keeps the stored primary and refuses dropping it. Duplicate roots
   are removed, a `primary` outside `folders` is rejected, roots owned by
   another non-legacy group are rejected, and a root with existing chats cannot
   be detached. Removed roots are retained as suppressed historical paths rather
-  than reappearing as standalone legacy groups.
+  than reappearing as standalone legacy groups. An omitted `workspaceIndex`
+  leaves the stored choice untouched, so a rename never flips it. An omitted
+  `icon` **and** `color` likewise leave the stored decoration untouched, and
+  sending one half replaces the whole pair, so clearing the colour cannot
+  silently restore the folder icon. `icon` must be a non-empty slug of at most
+  40 characters (`[A-Za-z0-9][A-Za-z0-9._-]*`) and `color` a lowercase
+  `#rrggbb`; `null` or an empty string clears that half and any other shape is
+  rejected rather than stored. A remote group refuses the pair — it has no local
+  workspace to decorate — and an unchanged pair does not bump `updatedAt`.
 - `project.group.memory.get/set({ groupId, entries })` — reads or normalizes
   shared group memory using the existing 32 KiB entry limit.
 - `project.group.instructions.get/set({ groupId, content })` — reads or stores
@@ -594,10 +607,16 @@ deletes per 60 seconds. P2/P3 methods are not present in protocol v11.
   `month` buckets. Additive RPC; no protocol version bump. Default range is
   bounded (53 weeks / 52 weeks / 24 months). `week` uses ISO week year.
   Empty buckets in range are returned as zero rows so a calendar consumer sees a
-  complete window. `session.endTurn.usage` is the durable turn total: parent
+  complete window. Alongside `items` the result carries `models`: the same range
+  folded by the turn's `(provider_id, model_id)`, ranked by `total_tokens`
+  descending, summed from the same single pass so the model rows cannot drift
+  from `totals`. A turn with no stored model keeps a `null` key instead of
+  dropping out of the total. Additive; no schema version bump (D682).
+  `session.endTurn.usage` is the durable turn total: parent
   assistant messages plus settled subagent usage, not a rewrite of
-  `message.usage`. The user-facing dashboard is plugin `pi.token-insights`
-  (D335 / ADR 0173), not a Settings destination.
+  `message.usage`. The full dashboard is plugin `pi.token-insights`
+  (D335 / ADR 0173), not a Settings destination; the app's own compact surface
+  is the sidebar token meter (D682).
 
 ### Plan and Goal state and approvals
 

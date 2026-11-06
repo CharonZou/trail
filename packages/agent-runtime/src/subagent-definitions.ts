@@ -23,7 +23,7 @@ import {
   subagentPinnedProviders,
   OAUTH_AUTH_KIND,
   type SubagentDefinition,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   capabilitiesFromModelConfig,
   genericModelConfig,

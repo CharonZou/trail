@@ -12,7 +12,7 @@ describe("session links", () => {
   it("round-trips the link a session row copies", () => {
     const id = "6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506";
     const link = formatSessionLink(id);
-    expect(link).toBe(`pi-desktop://session/${id}`);
+    expect(link).toBe(`trail://session/${id}`);
     expect(parseSessionLinks(`please look at ${link} first`)).toEqual([id]);
   });
 
@@ -36,9 +36,25 @@ describe("session links", () => {
     expect(parseSessionLinks("")).toEqual([]);
     expect(parseSessionLinks("no links here")).toEqual([]);
     // A remote session id carries a colon, so it never parses as a local link.
-    expect(parseSessionLinks("pi-desktop://session/remote:abc")).toEqual([]);
+    expect(parseSessionLinks("trail://session/remote:abc")).toEqual([]);
     expect(parseSessionLinks("https://example.com/session/abc")).toEqual([]);
-    expect(parseSessionLinks("pi-desktop://session/")).toEqual([]);
+    expect(parseSessionLinks("trail://session/")).toEqual([]);
+  });
+
+  it("still reads links written before the Trail rename", () => {
+    const id = "6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506";
+    const legacy = `pi-desktop://session/${id}`;
+
+    expect(parseSessionLinks(`please look at ${legacy} first`)).toEqual([id]);
+    expect(parseSessionLinkToken(legacy)).toBe(id);
+    expect(isSessionLinkToken(legacy)).toBe(true);
+    expect(parseSessionLinks("pi-desktop://session/remote:abc")).toEqual([]);
+    expect(
+      sessionLinkSpans(`old ${legacy} and trail://session/zzz`).map((span) => span.id),
+    ).toEqual([id, "zzz"]);
+
+    // A copied row only ever emits the current scheme.
+    expect(formatSessionLink(id)).toBe(`trail://session/${id}`);
   });
 
   it("recognizes one token without scanning prose", () => {
@@ -49,7 +65,7 @@ describe("session links", () => {
     expect(parseSessionLinkToken(formatSessionLink("abc"))).toBe("abc");
     expect(parseSessionLinkToken(`  ${formatSessionLink("abc")}  `)).toBe("abc");
     expect(parseSessionLinkToken(`see ${formatSessionLink("abc")}`)).toBeNull();
-    expect(parseSessionLinkToken("pi-desktop://session/")).toBeNull();
+    expect(parseSessionLinkToken("trail://session/")).toBeNull();
     expect(parseSessionLinkToken("@src/index.ts")).toBeNull();
   });
 

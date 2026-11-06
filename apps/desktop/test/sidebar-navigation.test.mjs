@@ -151,9 +151,11 @@ test("sidebar project and session lists stay coordinated with the global type sc
 });
 
 test("pinned project rows replace the folder glyph with a filled star", () => {
+  // The unpinned branch draws the project's own appearance, whose default glyph
+  // is the folder (D680), so the pin still replaces the row's leading icon.
   assert.match(
     sidebarSource,
-    /entry\.meta\.pinned \? \([\s\S]*?<IconStar\s+size=\{13\}\s+fill="currentColor"[\s\S]*?className="sidebar-project-pin"[\s\S]*?\) : \([\s\S]*?<IconFolder size=\{13\} aria-hidden \/>/,
+    /entry\.meta\.pinned \? \([\s\S]*?<IconStar\s+size=\{13\}\s+fill="currentColor"[\s\S]*?className="sidebar-project-pin"[\s\S]*?\) : \([\s\S]*?<ProjectAppearanceGlyph\s+appearance=\{projectAppearance\[entry\.key\]\}\s+size=\{13\}\s*\/>/,
   );
   assert.match(
     globalStyles,

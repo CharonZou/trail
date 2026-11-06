@@ -77,6 +77,12 @@ and shared instructions. The first selected root is primary.
 
 ```ts
 type ProjectGroupRoot = { path: string; name: string; position: number };
+type ProjectGroupAppearance = {
+  /** Icon id from the renderer's catalog; an unknown id draws the folder. */
+  icon?: string | null;
+  /** Tint as `#rrggbb`; anything else is dropped before it reaches a style. */
+  color?: string | null;
+};
 type ProjectGroupRecord = {
   id: string;
   name: string;
@@ -87,8 +93,23 @@ type ProjectGroupRecord = {
   pinned: boolean;
   lastOpenedAt: number;
   legacy?: boolean;
+  /** When `false`, the workspace file index is never built for this group. */
+  workspaceIndex?: boolean;
+  /** Icon and tint chosen in the project dialogs; absent keeps the folder. */
+  appearance?: ProjectGroupAppearance;
 };
 ```
+
+`project-group/create` and `project-group/update` accept the same pair as
+optional top-level `icon` / `color` fields: omitting both leaves the stored
+choice untouched, and `project-group/rename` never carries them, so a rename
+cannot decorate a project by accident. The host validates shape only — the icon
+charset and length and a lowercase `#rrggbb` — while the icon catalog and its
+id → artwork maps (Lucide components and the supplied path-data glyphs, D681) and
+the swatch order stay in the renderer, so adding a tile needs no protocol change. A
+remote group has no local decoration: the dialogs hide both rows for it and the
+host refuses the pair. `project-group/list` returns the stored pair, and the
+sidebar draws the chosen glyph in the chosen tint instead of the fixed folder.
 
 `project-group/create` is additive and does not change the active workspace.
 `project-group/list` returns one row per logical group; old path projects are
@@ -1230,9 +1251,21 @@ plus `subagentUsage` into `session.endTurn.usage`.
 
 `bucket` is `day` | `week` | `month`. Omitted dates use the host default window
 (53 weeks / 52 weeks / 24 months) in the host's local calendar. `week` keys use
-ISO week year (`%G-W%V`). The result fills empty buckets in range. This channel
-is not a Settings page; the user-facing dashboard is plugin `pi.token-insights`
-(D335 / ADR 0173).
+ISO week year (`%G-W%V`). The result fills empty buckets in range.
+
+The result is `items` (one bucket each, with the bucket key), `models` and
+`totals`. `models` is the same range folded by the turn's `(providerId,
+modelId)` instead of by time: one row per model, ranked by `totalTokens`
+descending, with `inputTokens` / `outputTokens` / `cacheReadTokens` /
+`cacheWriteTokens` / `reasoningTokens` / `turnCount`. Both views are summed from
+one pass over the completed turns, so the model rows always add up to `totals`;
+a turn whose row stores no model is one `null`-keyed row rather than a dropped
+row. The field is additive (D682): an older renderer ignores it and reads only
+`items` and `totals`.
+
+This channel is not a Settings page. The compact first-party surface is the
+sidebar token meter (D682); the full dashboard stays plugin
+`pi.token-insights` (D335 / ADR 0173).
 
 ## 8. Settings / Secrets API
 
@@ -1675,7 +1708,7 @@ all-failed batches do not replace this preference.
 
 Desktop-only channels scan skill folders written by other agent tools on this
 machine — `~/.claude/skills/`, `<project>/.claude/skills/`, and the app's own
-`~/.agents/skills/` (or `PI_DESKTOP_AGENTS_DIR/skills/`) plus its project
+`~/.agents/skills/` (or `TRAIL_AGENTS_DIR/skills/`) plus its project
 equivalent — so the user can review candidates and batch-import them. Both the
 single-file (`<id>.md`) and Anthropic-style directory (`<name>/SKILL.md`)
 shapes are detected.
@@ -2253,6 +2286,16 @@ workspace. Fuzzy filtering happens renderer-side; a truncated index keeps
 only the shallowest entries, so a query against it is also sent to
 `fs/search`.
 
+A group whose `workspaceIndex` is `false` is never listed: `fs/index` and
+`fs/search` both return `{ entries: [], truncated: false }` before touching
+the filesystem (D679). The gate reads the group snapshot main already keeps,
+and fetches it once when the snapshot is cold, because guessing on a cold
+start would index a project whose owner turned it off. A workspace with no
+group behind it, and a record written before the field existed, stay
+indexed. `fs/resolveRef` is deliberately not gated: a `@path` reference
+already written into a transcript keeps resolving, so the switch hides the
+project from discovery, not the user's own files.
+
 ### fs/search
 
 ```ts
@@ -2387,7 +2430,7 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main builds a fixed GitHub bug-form URL
-(`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`)
+(`https://github.com/CharonZou/trail/issues/new?template=bug_report.yml`)
 and opens it with `shell.openExternal`. Query fields `app-version`, `os`, and
 `environment` are filled from Main-owned version info. The renderer cannot
 supply a URL. Construction that leaves that origin or template is rejected.
@@ -2401,8 +2444,8 @@ changing the renderer preload contract or host RPC protocol. The server is
 disabled by default and starts only when the Electron process receives:
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # optional; defaults to 37123
+TRAIL_MCP_CONTROL=1
+TRAIL_MCP_PORT=37123       # optional; defaults to 37123
 ```
 
 Electron Main binds `127.0.0.1` only and serves Streamable HTTP MCP at

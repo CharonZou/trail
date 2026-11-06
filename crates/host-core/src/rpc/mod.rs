@@ -739,6 +739,84 @@ fn fast_mode_param(params: &Value) -> Result<Option<bool>, JsonRpcError> {
     }
 }
 
+/// Parse the project-group indexing choice at the RPC boundary. A
+/// missing/null value keeps whatever the project already had, so callers that
+/// know nothing about the switch never flip it; present values must be
+/// booleans rather than being silently coerced.
+fn workspace_index_param(params: &Value) -> Result<Option<bool>, JsonRpcError> {
+    match params.get("workspaceIndex") {
+        None | Some(Value::Null) => Ok(None),
+        Some(Value::Bool(value)) => Ok(Some(*value)),
+        Some(_) => Err(rpc_err(
+            1002,
+            "workspaceIndex must be a boolean",
+            "INVALID_PARAMS",
+        )),
+    }
+}
+
+/// Write the indexing choice only when it actually differs, so a plain rename
+/// never rewrites the group record or bumps its timestamp.
+fn apply_workspace_index(
+    db: &crate::db::Database,
+    group: crate::db::ProjectGroupRecord,
+    workspace_index: Option<bool>,
+) -> Result<crate::db::ProjectGroupRecord> {
+    match workspace_index {
+        Some(enabled) if enabled != group.workspace_index => {
+            db.set_workspace_index(&group.id, enabled)
+        }
+        _ => Ok(group),
+    }
+}
+
+/// Parse the project-group icon and tint at the RPC boundary. When neither key
+/// is present the project keeps what it had, so callers that know nothing about
+/// the pickers never reset them; otherwise the pair replaces the stored one and
+/// a null or empty value clears that field. Values must look like what the
+/// picker can produce, because the renderer writes the color into a style.
+fn appearance_param(
+    params: &Value,
+) -> Result<Option<crate::db::ProjectGroupAppearance>, JsonRpcError> {
+    if params.get("icon").is_none() && params.get("color").is_none() {
+        return Ok(None);
+    }
+    let icon = optional_string_param(params, "icon")?;
+    let color = optional_string_param(params, "color")?;
+    crate::db::ProjectGroupAppearance::normalized(icon.as_deref(), color.as_deref())
+        .map(Some)
+        .map_err(|error| rpc_err(1002, error.to_string(), "INVALID_PARAMS"))
+}
+
+/// Read an absent/null value as `None` and refuse anything but a string, so a
+/// malformed field is reported instead of silently dropped.
+fn optional_string_param(params: &Value, key: &str) -> Result<Option<String>, JsonRpcError> {
+    match params.get(key) {
+        None | Some(Value::Null) => Ok(None),
+        Some(Value::String(value)) => Ok(Some(value.clone())),
+        Some(_) => Err(rpc_err(
+            1002,
+            format!("{key} must be a string or null"),
+            "INVALID_PARAMS",
+        )),
+    }
+}
+
+/// Write the appearance only when it actually differs, so a plain rename never
+/// rewrites the group record or bumps its timestamp.
+fn apply_appearance(
+    db: &crate::db::Database,
+    group: crate::db::ProjectGroupRecord,
+    appearance: Option<crate::db::ProjectGroupAppearance>,
+) -> Result<crate::db::ProjectGroupRecord> {
+    match appearance {
+        Some(appearance) if appearance != group.appearance => {
+            db.set_appearance(&group.id, appearance)
+        }
+        _ => Ok(group),
+    }
+}
+
 /// Parse the optional session thinking selector at the RPC boundary.  A
 /// missing/null value keeps the backwards-compatible default; present values
 /// must be strings from the host's allowlist rather than being silently
@@ -2017,7 +2095,7 @@ async fn handle_request(
             Ok(json!({ "enabled": enabled }))
         }
         "app.getVersion" => Ok(json!({
-            "name": "pi-desktop-host-core",
+            "name": "trail-host-core",
             "version": HOST_VERSION,
             "protocolVersion": PROTOCOL_VERSION
         })),
@@ -2070,10 +2148,18 @@ async fn handle_request(
                 .filter_map(Value::as_str)
                 .map(str::to_string)
                 .collect::<Vec<_>>();
+            // Both optional choices are parsed before anything is written, so a
+            // malformed value cannot leave a half-created project behind.
+            let workspace_index = workspace_index_param(&params)?;
+            let appearance = appearance_param(&params)?;
             let st = state.lock().await;
             let group = st
                 .db
                 .create_project_group(name, &folders)
+                .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
+            let group = apply_workspace_index(&st.db, group, workspace_index)
+                .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
+            let group = apply_appearance(&st.db, group, appearance)
                 .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
             Ok(json!({ "group": group }))
         }
@@ -2095,10 +2181,16 @@ async fn handle_request(
                 .map(str::to_string)
                 .collect::<Vec<_>>();
             let primary = params.get("primary").and_then(Value::as_str);
+            let workspace_index = workspace_index_param(&params)?;
+            let appearance = appearance_param(&params)?;
             let st = state.lock().await;
             let group = st
                 .db
                 .update_project_group(group_id, name, &folders, primary)
+                .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
+            let group = apply_workspace_index(&st.db, group, workspace_index)
+                .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
+            let group = apply_appearance(&st.db, group, appearance)
                 .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
             Ok(json!({ "group": group }))
         }
@@ -6245,6 +6337,164 @@ mod tests {
         .unwrap();
         assert_eq!(updated["group"]["name"], "Adjusted");
         assert_eq!(updated["group"]["roots"].as_array().unwrap().len(), 2);
+    }
+
+    #[tokio::test]
+    async fn project_group_workspace_index_rpc_is_optional_and_typed() {
+        let data_dir = tempfile::tempdir().unwrap();
+        let primary = data_dir.path().join("primary");
+        let extra = data_dir.path().join("extra");
+        fs::create_dir_all(&primary).unwrap();
+        fs::create_dir_all(&extra).unwrap();
+        let mut app_state = AppState::open(data_dir.path()).unwrap();
+        app_state.handshook = true;
+        let state = Arc::new(Mutex::new(app_state));
+        let created = handle_request(
+            state.clone(),
+            "project.group.create",
+            json!({ "name": "Quiet", "folders": [primary], "workspaceIndex": false }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(created["group"]["workspaceIndex"], false);
+        let group_id = created["group"]["id"].as_str().unwrap().to_string();
+        let primary_path = created["group"]["primaryPath"].clone();
+
+        // A caller that knows nothing about the switch must not flip it.
+        let renamed = handle_request(
+            state.clone(),
+            "project.group.update",
+            json!({ "groupId": group_id, "name": "Renamed", "folders": [primary_path] }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(renamed["group"]["workspaceIndex"], false);
+
+        let defaulted = handle_request(
+            state.clone(),
+            "project.group.create",
+            json!({ "name": "Defaulted", "folders": [extra] }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(defaulted["group"]["workspaceIndex"], true);
+
+        // A value that is not a boolean is refused rather than coerced, so a
+        // malformed client cannot silently re-enable indexing.
+        let invalid = handle_request(
+            state,
+            "project.group.update",
+            json!({
+                "groupId": group_id,
+                "name": "Renamed",
+                "folders": [primary_path],
+                "workspaceIndex": "off"
+            }),
+            mpsc::unbounded_channel().0,
+        )
+        .await;
+        assert!(invalid.is_err());
+    }
+
+    #[tokio::test]
+    async fn project_group_appearance_rpc_is_optional_and_typed() {
+        let data_dir = tempfile::tempdir().unwrap();
+        let primary = data_dir.path().join("primary");
+        fs::create_dir_all(&primary).unwrap();
+        let mut app_state = AppState::open(data_dir.path()).unwrap();
+        app_state.handshook = true;
+        let state = Arc::new(Mutex::new(app_state));
+        let created = handle_request(
+            state.clone(),
+            "project.group.create",
+            json!({
+                "name": "Decorated",
+                "folders": [primary],
+                "icon": "moon",
+                "color": "#3B81E9"
+            }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(created["group"]["appearance"]["icon"], "moon");
+        // The tint is stored lowercased so one spelling reaches the renderer.
+        assert_eq!(created["group"]["appearance"]["color"], "#3b81e9");
+        let group_id = created["group"]["id"].as_str().unwrap().to_string();
+        let primary_path = created["group"]["primaryPath"].clone();
+
+        // A caller that knows nothing about the pickers must not reset them.
+        let renamed = handle_request(
+            state.clone(),
+            "project.group.update",
+            json!({ "groupId": group_id, "name": "Renamed", "folders": [primary_path] }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(renamed["group"]["appearance"]["icon"], "moon");
+
+        // The pair replaces what was stored, so a null tint clears only itself.
+        let recolored = handle_request(
+            state.clone(),
+            "project.group.update",
+            json!({
+                "groupId": group_id,
+                "name": "Renamed",
+                "folders": [primary_path],
+                "icon": "rocket",
+                "color": null
+            }),
+            mpsc::unbounded_channel().0,
+        )
+        .await
+        .unwrap();
+        assert_eq!(recolored["group"]["appearance"]["icon"], "rocket");
+        assert_eq!(recolored["group"]["appearance"]["color"], Value::Null);
+
+        // A value the picker cannot produce is refused instead of being stored
+        // and later written straight into a style.
+        let spare = data_dir.path().join("spare");
+        fs::create_dir_all(&spare).unwrap();
+        for (value, message) in [
+            (
+                json!({ "name": "Bad", "folders": [spare], "color": "red" }),
+                "hex color",
+            ),
+            (
+                json!({ "name": "Bad", "folders": [spare], "color": "#12" }),
+                "hex color",
+            ),
+            (
+                json!({ "name": "Bad", "folders": [spare], "icon": 7 }),
+                "icon must be a string",
+            ),
+            (
+                json!({
+                    "name": "Bad",
+                    "folders": [spare],
+                    "icon": "url(javascript:1)"
+                }),
+                "icon is invalid",
+            ),
+        ] {
+            let invalid = handle_request(
+                state.clone(),
+                "project.group.create",
+                value,
+                mpsc::unbounded_channel().0,
+            )
+            .await
+            .unwrap_err();
+            assert!(
+                invalid.message.contains(message),
+                "expected {message:?} in {:?}",
+                invalid.message
+            );
+        }
     }
 
     #[tokio::test]

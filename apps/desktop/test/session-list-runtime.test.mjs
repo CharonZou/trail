@@ -14,7 +14,7 @@ const imports = {
   electron: { shell: {} },
   "node:fs": fs,
   "node:path": path,
-  "@pi-desktop/shared": { IPC },
+  "@trail/shared": { IPC },
   "../importers": {},
   "../services/session-collaboration": {},
   "../services/session-search": { localNativeProjectPaths },

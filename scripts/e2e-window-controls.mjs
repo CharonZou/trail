@@ -26,7 +26,7 @@ const { appDir } = assertDesktopBuild(root);
 const { electronBinary } = resolveElectronBinary(root);
 const binary = resolveHostBinary();
 const temp = await mkdtemp(join(tmpdir(), "pi-window-controls-"));
-const port = Number(process.env.PI_DESKTOP_CHROME_CDP_PORT || 9347);
+const port = Number(process.env.TRAIL_CHROME_CDP_PORT || 9347);
 const pending = new Map();
 let sequence = 0;
 let socket;
@@ -99,8 +99,8 @@ async function checkControls(label) {
     ? result.length === 0
     : result.length === 3 && result.every(r => r.visible && r.reachable);
   console.log(`${ok ? "PASS" : "FAIL"} ${label}: ${JSON.stringify(result)}`);
-  if ((!ok || label === "panel opened") && process.env.PI_DESKTOP_CHROME_ARTIFACT_DIR) {
-    const dir = resolve(process.env.PI_DESKTOP_CHROME_ARTIFACT_DIR);
+  if ((!ok || label === "panel opened") && process.env.TRAIL_CHROME_ARTIFACT_DIR) {
+    const dir = resolve(process.env.TRAIL_CHROME_ARTIFACT_DIR);
     await mkdir(dir, { recursive: true });
     const shot = await send("Page.captureScreenshot");
     await writeFile(join(dir, ok ? "window-controls-fixed.png" : "window-controls-failure.png"), Buffer.from(shot.data, "base64"));
@@ -240,9 +240,9 @@ try {
   } finally {
     await host.stop();
   }
-  const env = { ...process.env, PI_DESKTOP_DATA_DIR: join(temp, "data"),
-    PI_DESKTOP_HOST_BIN: binary, PI_DESKTOP_START_MAXIMIZED: "0",
-    PI_DESKTOP_MCP_CONTROL: "0", ELECTRON_RENDERER_URL: "" };
+  const env = { ...process.env, TRAIL_DATA_DIR: join(temp, "data"),
+    TRAIL_HOST_BIN: binary, TRAIL_START_MAXIMIZED: "0",
+    TRAIL_MCP_CONTROL: "0", ELECTRON_RENDERER_URL: "" };
   delete env.ELECTRON_RUN_AS_NODE;
   child = spawn(electronBinary, [`--remote-debugging-port=${port}`, `--user-data-dir=${join(temp, "profile")}`, "."],
     { cwd: appDir, env, stdio: ["ignore", "pipe", "pipe"] });
@@ -268,7 +268,7 @@ try {
     else entry.resolve(message.result);
   };
   await waitFor(() => evaluate(`!!document.querySelector('.main-pane') && !document.querySelector('.startup-splash')`), "ready shell");
-  await evaluate(`window.__PI_DESKTOP__.selectSession(${JSON.stringify(sessionId)})`);
+  await evaluate(`window.__TRAIL__.selectSession(${JSON.stringify(sessionId)})`);
   await waitFor(() => evaluate(`document.querySelector('.app-work-panel-toggle')?.disabled === false`), "active session");
   await settle();
   await checkControls("panel closed");
@@ -283,7 +283,7 @@ try {
     for (const platform of ["win32", "linux"]) {
       for (const theme of ["light", "dark"]) {
         await evaluate(`document.documentElement.dataset.platform = ${JSON.stringify(platform)};
-          window.__PI_DESKTOP__.setThemeAttr(${JSON.stringify(theme)})`);
+          window.__TRAIL__.setThemeAttr(${JSON.stringify(theme)})`);
         await settle();
         await checkControls(`${platform}/${theme} CSS with panel open (emulated)`);
       }
@@ -326,11 +326,11 @@ try {
   await click(".app-work-panel-toggle");
   await waitFor(() => evaluate(`!document.querySelector('.work-panel')`), "panel closed again");
   await checkControls("panel closed again");
-  await evaluate(`window.__PI_DESKTOP__.setPage('settings')`);
+  await evaluate(`window.__TRAIL__.setPage('settings')`);
   await waitFor(() => evaluate(`!!document.querySelector('.settings-mode')`), "settings opened");
   await settle();
   await checkControls("settings route");
-  await evaluate(`window.__PI_DESKTOP__.setPage('chat')`);
+  await evaluate(`window.__TRAIL__.setPage('chat')`);
   await settle();
   await click(".app-work-panel-toggle");
   await settle();

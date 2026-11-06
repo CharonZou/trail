@@ -1,6 +1,6 @@
 {
-  "name": "@pi-desktop/plugin-devkit",
-  "version": "1.0.1",
+  "name": "@trail/plugin-devkit",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -21,7 +21,7 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/plugin-sdk": "workspace:*"
+    "@trail/plugin-sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

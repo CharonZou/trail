@@ -36,7 +36,7 @@ import {
   type PublicNetworkRoute,
   type RegistryRecord,
   type SourcedCatalogEntry,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   allowInsecureUserEndpointsEnabled,
   noteInsecureUserEndpoint,

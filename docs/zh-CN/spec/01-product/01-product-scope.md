@@ -125,7 +125,7 @@ Plan 和 Goal 是合约模式，而不是严格的只读安全配置文件：Bas
 ## 8. 命名
 
 - 产品：`Trail`
-- 包装：`pi-desktop`
+- 包装：`trail`
 - 应用程序 ID：`net.aiuo.pi-desktop`
 - 窗口标题：`Trail`
 

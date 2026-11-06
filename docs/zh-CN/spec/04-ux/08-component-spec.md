@@ -79,7 +79,7 @@
   shell actions plus an 8px gap in both sidebar states on every platform.
   The left inset is 8px except collapsed-sidebar windowed macOS (88px through
   `--ds-window-lead-inset`: the shared 76px native cluster edge plus 12px).
-  Main uses the same native geometry from `@pi-desktop/shared`.
+  Main uses the same native geometry from `@trail/shared`.
   Right native-control exclusion is unchanged. Header-height paint fills the
   left lane without an opaque overlay hiding tabs or panel actions.
 - 工作面板调整大小：左边缘拖动手柄（§5.4）
@@ -1018,7 +1018,7 @@ SESSIONS                                      [msg+][↕]
   进入独立会话。子会话留在同一个项目或
   独立会话部分并变为活动状态；后来 transcript/configuration 发生了变化
 不影响来源。对于正在运行的源，该操作被禁用。
-- 「复制会话链接」把 `pi-desktop://session/<id>` 引用写入剪贴板，不需要开发者模式。
+- 「复制会话链接」把 `trail://session/<id>` 引用写入剪贴板，不需要开发者模式。
   把它粘贴进另一段对话的输入框草稿，该轮就会带上这段对话的有界摘录，用户消息随后
   以芯片显示它（§20B）。
 - 首先选择与不同项目的对话会激活该对话
@@ -2376,7 +2376,7 @@ Live Voice 受现有开发者模式和开发构建门控约束，包含四种展
   按原始参考顺序恢复该快照而不是复制
   序列化的消息路径返回到文本区域。回复开始后停止
   不得恢复或复制已提交的草稿。
-- 草稿里的 `pi-desktop://session/<id>` 链接本身就是引用：不在 `@` 文件和 `/` 命令
+- 草稿里的 `trail://session/<id>` 链接本身就是引用：不在 `@` 文件和 `/` 命令
   之外新增触发符号，草稿未发送时链接保持可见纯文本。派发之前，main 会把每个指向同一
   项目内其他对话的链接解析成有界摘录附件（§20B）。不存在的 id、自引用与其他项目中的
   对话保持纯文本。
@@ -2978,7 +2978,7 @@ Sidebar footer                                        Popover (360px max)
 
 ### 20B.1 目的
 
-把另一段对话带进本轮，而不必重新抄一遍。`pi-desktop://session/<id>` 链接本身就是
+把另一段对话带进本轮，而不必重新抄一遍。`trail://session/<id>` 链接本身就是
 整个交互：读者从对话溢出菜单复制它，再粘贴进输入框草稿（issue #1324 的 B 方案）。
 「复制对话 ID」仍是开发者模式下的身份标识。
 
@@ -3011,7 +3011,7 @@ Sidebar footer                                        Popover (360px max)
 
 ### 20B.4 交互
 
-- 「复制会话链接」从对话溢出菜单写入 `pi-desktop://session/<sessionId>`。持久 id
+- 「复制会话链接」从对话溢出菜单写入 `trail://session/<sessionId>`。持久 id
   就是引用本身；「复制对话 ID」在开发者模式下仍暴露裸 id。
 - 发送带有该链接的草稿时，会附带被引用对话的有界摘录：最近 40 条消息、每个字段
   8 KB、整段摘录 16 KB，最新在后，并说明被边界截掉的更早消息条数。每条消息最多
@@ -3033,7 +3033,7 @@ Sidebar footer                                        Popover (360px max)
   键盘行为放在可激活的 span 上。
 - 芯片带 button 角色，无障碍名称由语言目录生成，工具提示说明它会打开哪段对话；可键盘激活，
   并保持周围可选中的消息文本不变。
-- `pi-desktop://` 目前还不是操作系统协议处理器；从应用外打开链接是另一项改动
+- `trail://` 目前还不是操作系统协议处理器；从应用外打开链接是另一项改动
   （issue #1324 的 A 方案）。本节只覆盖应用内的引用。
 ## 21. 验收标准（所有组件）
 

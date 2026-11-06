@@ -32,12 +32,41 @@ test("the search channel runs main's listing search and leaves remote sessions o
   assert.match(handler, /return searchWorkspaceFiles\(root, String\(input\.query \?\? ""\)\)/);
 });
 
+test("a project that turned indexing off answers both file channels with nothing", async () => {
+  const workspaceIpc = await readFile(
+    join(root, "apps/desktop/electron/main/ipc/workspace-ipc.ts"),
+    "utf8",
+  );
+  // Both interactive channels are gated before they touch the filesystem, so a
+  // disabled project cannot be reached through a deep search either.
+  for (const channel of ["fsIndex", "fsSearch"]) {
+    const handler = workspaceIpc.match(
+      new RegExp(`handle\\(IPC\\.invoke\\.${channel},[\\s\\S]*?\\n {2}\\}\\);`),
+    )?.[0];
+    assert.ok(handler, `main must register the ${channel} channel`);
+    assert.match(
+      handler,
+      /if \(!\(await workspaceIndexAllowed\(root\)\)\) return \{ entries: \[\], truncated: false \};/,
+    );
+  }
+  assert.match(
+    workspaceIpc,
+    /const workspaceIndexAllowed = async \(root: string\): Promise<boolean> => \{[\s\S]*?return workspaceIndexEnabledFor\(root\);/,
+  );
+  // A reference already written into a transcript still resolves; the switch
+  // only stops the index from being built, it does not hide the user's own files.
+  const resolveHandler = workspaceIpc.slice(
+    workspaceIpc.indexOf("IPC.invoke.fsResolveRef"),
+  );
+  assert.doesNotMatch(resolveHandler, /workspaceIndexAllowed/);
+});
+
 const fixture = String.raw`
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
+import { catalogs, flattenCatalog } from "@trail/i18n";
 import { useComposerDraft } from "../../apps/desktop/src/features/chat/composer/hooks/useComposerDraft";
 import { useComposerCompletions } from "../../apps/desktop/src/features/chat/composer/hooks/useComposerCompletions";
 import { ComposerInput } from "../../apps/desktop/src/features/chat/composer/ComposerInput";
@@ -207,8 +236,8 @@ test("an @ query reaches deep files past a truncated file index", {
       jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@trail/i18n": join(root, "packages/i18n/src"),
+        "@trail/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

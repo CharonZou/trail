@@ -291,7 +291,7 @@ The local MCP control server is an explicit automation boundary, not a general
 remote-control listener:
 
 - It is disabled by default and only starts with
-  `PI_DESKTOP_MCP_CONTROL=1`.
+  `TRAIL_MCP_CONTROL=1`.
 - It binds `127.0.0.1` only and refuses to start if the listen address is not
   loopback. There is no configuration path for a LAN or public interface, and
   the feature does not revive the deferred remote Gateway / WebUI scope.

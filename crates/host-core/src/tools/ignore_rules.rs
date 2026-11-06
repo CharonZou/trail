@@ -8,16 +8,21 @@
 //! 2. App defaults: build output and dependency trees are hidden from an
 //!    unscoped `Glob`/`Grep` walk. An explicit `path` argument opts back in,
 //!    the same way it already bypasses parent `.gitignore` rules.
-//! 3. Workspace rules: a gitignore-style `.pi-desktopignore` at the workspace
-//!    root, honored by unscoped walks.
-//! 4. User global rules: `<data_dir>/ignore` (`~/.pi-desktop/ignore` by
+//! 3. Workspace rules: a gitignore-style `.trailignore` at the workspace
+//!    root, honored by unscoped walks, together with the `.pi-desktopignore`
+//!    name the pre-Trail releases wrote.
+//! 4. User global rules: `<data_dir>/ignore` (`~/.trail/ignore` by
 //!    default), honored by unscoped walks.
 
 use ignore::WalkBuilder;
 use std::path::{Path, PathBuf};
 
 /// Workspace-root ignore file name (spec 15 §5).
-pub const WORKSPACE_IGNORE_FILE: &str = ".pi-desktopignore";
+pub const WORKSPACE_IGNORE_FILE: &str = ".trailignore";
+
+/// The same file under the name the pre-Trail releases wrote. Both are honored,
+/// so a repository that already carries one keeps its rules after the rename.
+pub const LEGACY_WORKSPACE_IGNORE_FILE: &str = ".pi-desktopignore";
 
 /// Exact file names on the security denylist (spec 15 §3).
 const SENSITIVE_FILE_NAMES: &[&str] = &["id_rsa", "id_ed25519", "credentials.json", ".env"];
@@ -113,18 +118,19 @@ fn is_default_ignored_file_name(name: &str) -> bool {
             .any(|suffix| name.len() > suffix.len() && name.ends_with(suffix))
 }
 
-/// The workspace-root ignore file, when present.
-pub fn workspace_ignore_file(ignore_root: &Path) -> Option<PathBuf> {
-    let candidate = ignore_root.join(WORKSPACE_IGNORE_FILE);
-    candidate.is_file().then_some(candidate)
+/// The workspace-root ignore files, when present. `.trailignore` first, then
+/// the `.pi-desktopignore` a repository may still carry from earlier releases.
+pub fn workspace_ignore_files(ignore_root: &Path) -> Vec<PathBuf> {
+    [WORKSPACE_IGNORE_FILE, LEGACY_WORKSPACE_IGNORE_FILE]
+        .into_iter()
+        .map(|name| ignore_root.join(name))
+        .filter(|candidate| candidate.is_file())
+        .collect()
 }
 
 /// The user's global ignore file (`<data_dir>/ignore`), when present.
 pub fn user_global_ignore_file() -> Option<PathBuf> {
-    let data_dir = std::env::var_os("PI_DESKTOP_DATA_DIR")
-        .map(PathBuf::from)
-        .or_else(|| dirs::home_dir().map(|home| home.join(".pi-desktop")))?;
-    let candidate = data_dir.join("ignore");
+    let candidate = crate::state::default_data_dir().join("ignore");
     candidate.is_file().then_some(candidate)
 }
 
@@ -132,7 +138,7 @@ pub fn user_global_ignore_file() -> Option<PathBuf> {
 /// `path` argument) keep only the security denylist.
 pub fn configure_walker(walker: &mut WalkBuilder, ignore_root: &Path, scoped: bool) {
     if !scoped {
-        if let Some(file) = workspace_ignore_file(ignore_root) {
+        for file in workspace_ignore_files(ignore_root) {
             let _ = walker.add_ignore(file);
         }
         if let Some(file) = user_global_ignore_file() {
@@ -196,12 +202,10 @@ pub fn rg_args(ignore_root: &Path, scoped: bool) -> Vec<String> {
         args.push("--glob".into());
         args.push(format!("!*{suffix}"));
     }
-    for file in [
-        workspace_ignore_file(ignore_root),
-        user_global_ignore_file(),
-    ]
-    .into_iter()
-    .flatten()
+    let global = user_global_ignore_file();
+    for file in workspace_ignore_files(ignore_root)
+        .into_iter()
+        .chain(global)
     {
         args.push("--ignore-file".into());
         args.push(file.to_string_lossy().into_owned());
@@ -258,5 +262,42 @@ mod tests {
         let unscoped = rg_args(Path::new("/nonexistent"), false);
         assert!(unscoped.contains(&"!node_modules".to_string()));
         assert!(unscoped.contains(&"!*.log".to_string()));
+    }
+
+    #[test]
+    fn workspace_ignore_files_cover_the_trail_and_legacy_names() {
+        let root = tempfile::tempdir().unwrap();
+        assert!(workspace_ignore_files(root.path()).is_empty());
+
+        // A repository that still carries only the pre-Trail file keeps its
+        // rules after the rename.
+        std::fs::write(
+            root.path().join(LEGACY_WORKSPACE_IGNORE_FILE),
+            "secret.txt\n",
+        )
+        .unwrap();
+        assert_eq!(
+            workspace_ignore_files(root.path()),
+            vec![root.path().join(LEGACY_WORKSPACE_IGNORE_FILE)],
+        );
+
+        std::fs::write(root.path().join(WORKSPACE_IGNORE_FILE), "*.tmp\n").unwrap();
+        let both = workspace_ignore_files(root.path());
+        assert_eq!(
+            both,
+            vec![
+                root.path().join(WORKSPACE_IGNORE_FILE),
+                root.path().join(LEGACY_WORKSPACE_IGNORE_FILE),
+            ],
+        );
+
+        let args = rg_args(root.path(), false);
+        for file in &both {
+            assert!(
+                args.iter()
+                    .any(|arg| arg == &file.to_string_lossy().to_string()),
+                "{file:?} must reach rg",
+            );
+        }
     }
 }

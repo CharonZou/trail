@@ -1,4 +1,4 @@
-import type { Mode } from "@pi-desktop/shared";
+import type { Mode } from "@trail/shared";
 
 export const DEFAULT_RUNTIME_SYSTEM_PROMPT =
   "You are Trail, a coding agent. Answer in the user's language. Be concise, direct, and actionable.";

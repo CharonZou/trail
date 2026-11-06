@@ -1,6 +1,6 @@
 {
-  "name": "@pi-desktop/host-runtime",
-  "version": "1.0.1",
+  "name": "@trail/host-runtime",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -18,9 +18,9 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/shared": "workspace:*"
+    "@trail/agent-host": "workspace:*",
+    "@trail/agent-runtime": "workspace:*",
+    "@trail/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

@@ -115,7 +115,7 @@ pi 消费排队输入时保留渲染器提供的消息 id；即使补充输入�
    文件头显示最长边超过 8000 px 的图片（D675）同样走路径回退。
    草稿内联命名过位置的图片会把那段 `@path` 文本作为 `inlinePath` 随持久消息和
    sidecar 附件传递；运行时据此把图片块放在用户写下的位置，而不是统一追加在提示文本之后
-   草稿里的 `pi-desktop://session/<id>` 链接在同一步骤里解析成有界摘录附件：只限
+   草稿里的 `trail://session/<id>` 链接在同一步骤里解析成有界摘录附件：只限
    同一项目，当前对话在任何读取之前就被跳过；运行时随后把它作为一个
    `<session_reference name="…" session="…">` 块排在用户自己的话之前引用给模型
 7. 为本回合快照有效的 shell ID 与方言
@@ -400,7 +400,7 @@ pi 0.84.4+ 只在循环将要在同一次运行中开启另一个助手回合时
   正在总结中。
 
 压缩系列先由构造选项决定，其次才轮到
-`PI_DESKTOP_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
+`TRAIL_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
 都不存在；它之所以存在，是为了让"不做摘要"这条机制既被实现、又可被测试。
 
 **面向模型的表面。** `new_context` 不带任何参数并开始一个新的
@@ -937,8 +937,8 @@ OpenCode Go 的一次性调用复用会话 id 作为 `x-opencode-session`；否�
 `opencode.ai`——都会发送：
 
 - `x-opencode-session`：持久的对话 id；调用方没有会话时则为一个按次生成的 UUID
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: trail`
+- `User-Agent: trail/<APP_VERSION>`
 
 调用方自带的标头会覆盖 client 与 User-Agent 默认值。空的会话标头会由对话 id
 补回，使 OpenCode Go 不会返回 `MissingSessionID`。提供商行上的 `headers` 映射

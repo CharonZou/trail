@@ -1,5 +1,5 @@
 import type { Context } from "@earendil-works/pi-ai";
-import { completeOneShot, type RuntimeProviderConfig } from "@pi-desktop/agent-runtime";
+import { completeOneShot, type RuntimeProviderConfig } from "@trail/agent-runtime";
 import {
   createLiveWorkBackendPort,
   listLiveWorkSessions,
@@ -21,7 +21,7 @@ import {
   type ProviderReceipt,
   type LiveWorkPendingQuestion,
   type WorkSnapshot,
-} from "@pi-desktop/host-runtime";
+} from "@trail/host-runtime";
 import { buildSpokenAnswers, toPendingQuestion } from "./spoken-answer";
 import {
   ErrorCodes,
@@ -34,7 +34,7 @@ import {
   type LiveWorkStopOperationResult,
   type SessionSource,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type { AgentSidecar } from "../agent-sidecar";
 import type { BackendRouter } from "../remote/backend-router";
 import type { RemoteHostsBoot } from "../bootstrap/remote-hosts";

@@ -66,13 +66,15 @@ blob directory, new file cleanup lifecycle or lossy image transform is added.
 
 ## 2. 文件布局
 
-正式打包版把上述目录树放在 `~/.pi-desktop`；开发构建放在 `~/.pi-desktop-dev`，
+正式打包版把上述目录树放在 `~/.trail`；开发构建放在 `~/.trail-dev`，
 因为正式版与 `pnpm dev` 是两个需要同时运行的安装（D599、ADR 0094）。
-`PI_DESKTOP_DATA_DIR` 会整体替换任一默认根目录，并在作为子进程环境变量传给
-host-core 之前被解析为绝对路径。
+`TRAIL_DATA_DIR` 会整体替换任一默认根目录，并在作为子进程环境变量传给
+host-core 之前被解析为绝对路径。Trail 改名之前就建立的目录会被继续
+使用：只有旧配置文件存在、`~/.trail` 不存在时采用改名前的目录名，
+因此升级不会移动或复制任何用户数据。
 
 ```text
-~/.pi-desktop/
+~/.trail/
  ├── pi.sqlite            # index database (WAL: + -wal/-shm) — host-core only
  ├── pi.sqlite.v6.bak     # archived pre-v7 database (D119 breaking reset)
  ├── pi.sqlite.v8.bak     # exact readable backup before v8→v15 destructive work

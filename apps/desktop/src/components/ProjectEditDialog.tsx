@@ -2,10 +2,16 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useBlockingOverlay } from "../lib/blocking-overlay";
 import { portalToBody } from "../lib/portal-visibility";
 import { useTranslation } from "react-i18next";
-import type { ProjectGroupRecord, ProjectGroupRoot } from "@pi-desktop/shared";
+import type {
+  ProjectGroupAppearance,
+  ProjectGroupRecord,
+  ProjectGroupRoot,
+} from "@trail/shared";
 import { api } from "../lib/api";
 import { MAX_PROJECT_NAME_CHARS } from "../lib/sidebar-preferences";
-import { OverlayBackdrop, Button, Input, TooltipButton } from "./ui";
+import { useAppStore } from "../stores/app-store";
+import { OverlayBackdrop, Button, Input, SettingsToggle, TooltipButton } from "./ui";
+import { ProjectAppearancePicker } from "./ProjectAppearance";
 import {
   IconClose,
   IconFolder,
@@ -64,11 +70,20 @@ export function ProjectEditDialog({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [folderPickerBusy, setFolderPickerBusy] = useState(false);
+  // Until the record loads the dialog shows the historical default: indexed.
+  const [workspaceIndex, setWorkspaceIndex] = useState(true);
+  const [appearance, setAppearance] = useState<ProjectGroupAppearance>({});
+  const refreshProjectGroups = useAppStore((state) => state.refreshProjectGroups);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const busyRef = useRef(false);
   const folderPickerInFlightRef = useRef(false);
   const reportLoadError = useEffectEvent((error: unknown) => onError(error));
+  // Translating the failure inside the loader would put `t` in the deps and
+  // restart the fetch on a language switch, which discards unsaved edits.
+  const loadFailed = useEffectEvent(
+    () => new Error(t("project.notFound", { defaultValue: "Project not found" })),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -84,7 +99,7 @@ export function ProjectEditDialog({
             candidate.roots.some((root) => samePath(root.path, requestedPath)),
         );
         if (!resolved) {
-          throw new Error(t("project.notFound", { defaultValue: "Project not found" }));
+          throw loadFailed();
         }
         setGroup(resolved);
         setName(resolved.name);
@@ -95,6 +110,8 @@ export function ProjectEditDialog({
             .sort((a, b) => a.position - b.position)
             .map((root) => root.path),
         );
+        setWorkspaceIndex(resolved.workspaceIndex !== false);
+        setAppearance(resolved.appearance ?? {});
         setLoading(false);
       })
       .catch((error) => {
@@ -106,7 +123,7 @@ export function ProjectEditDialog({
     return () => {
       cancelled = true;
     };
-  }, [project.groupId, project.path, t]);
+  }, [project.groupId, project.path]);
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -182,8 +199,17 @@ export function ProjectEditDialog({
     try {
       const result = group.remote
         ? await api.renameProjectGroup(group.id, trimmedName)
-        : await api.updateProjectGroup(group.id, trimmedName, folders, primaryPath);
+        : await api.updateProjectGroup(
+            group.id,
+            trimmedName,
+            folders,
+            primaryPath,
+            { workspaceIndex, ...appearance },
+          );
       onSaved(result.group);
+      // The sidebar draws the glyph from the host record, so the saved
+      // decoration has to reach that lookup, not just this dialog.
+      void refreshProjectGroups();
       onClose();
     } catch (error) {
       onError(error);
@@ -370,6 +396,41 @@ export function ProjectEditDialog({
                 </span>
               </Button> : null}
             </section>
+
+            {group?.remote ? null : (
+              <>
+                <ProjectAppearancePicker
+                  appearance={appearance}
+                  idPrefix="project-edit"
+                  disabled={loading || busy}
+                  onChange={setAppearance}
+                />
+
+                <section
+                  className="project-create-dialog-section project-create-dialog-index"
+                  aria-labelledby="project-edit-index-heading"
+                >
+                  <div className="project-create-dialog-section-head">
+                    <h3
+                      id="project-edit-index-heading"
+                      className="project-create-dialog-section-title"
+                    >
+                      {t("project.createWorkspaceIndexLabel")}
+                    </h3>
+                    <SettingsToggle
+                      checked={workspaceIndex}
+                      label={t("project.createWorkspaceIndexLabel")}
+                      className="project-create-dialog-index-toggle"
+                      disabled={loading || busy}
+                      onChange={() => setWorkspaceIndex((current) => !current)}
+                    />
+                  </div>
+                  <p className="project-create-dialog-index-hint">
+                    {t("project.createWorkspaceIndexHint")}
+                  </p>
+                </section>
+              </>
+            )}
           </div>
 
           <div className="project-create-dialog-actions">

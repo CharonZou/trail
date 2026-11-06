@@ -1,4 +1,4 @@
-import type { ContextCompactionMark, UiMessage } from "@pi-desktop/shared";
+import type { ContextCompactionMark, UiMessage } from "@trail/shared";
 import {
   buildTranscriptEntries,
   messageThinking,

@@ -10,15 +10,15 @@ import {
   type CommandShellId,
   type ModelBinding,
   type SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   capabilitiesFromModelConfig,
   modelConfigWithBinding,
   type ModelConfig,
   visionFromModelConfig,
   type ThinkingCapabilities,
-} from "@pi-desktop/agent-runtime";
-import { resolveBindingLimits } from "@pi-desktop/shared";
+} from "@trail/agent-runtime";
+import { resolveBindingLimits } from "@trail/shared";
 import type { HostProcess } from "../host-process";
 import {
   catalogModelConfigFor,

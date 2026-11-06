@@ -2,12 +2,12 @@
 
 - Status: Accepted for implementation (amended by ADR 0117, ADR 0123, and ADR tray-session-shortcuts)
 - Date: 2026-08-12
-- Deciders: PI-Desktop core
+- Deciders: Trail core
 - Related: D216, D252, D256, E2E-124, ADR 0117, ADR 0123
 
 ## Context
 
-PI-Desktop already has custom window controls on Windows/Linux and native
+Trail already has custom window controls on Windows/Linux and native
 traffic-light controls on macOS. Their minimize actions currently use native
 window minimization, which makes the app disappear into different OS window
 surfaces and does not provide a consistent way to keep background work
@@ -19,8 +19,8 @@ so a tray integration belongs there rather than in the renderer bridge.
 1. Electron Main creates one tray icon on every supported desktop platform.
    Packaged builds carry the existing product PNG as an extra resource for
    Windows/Linux. macOS carries a separate transparent monochrome template
-   asset derived from the PI mark; the light application tile is not part of
-   the menu bar silhouette.
+   asset derived from the brand mark's bars; the application plate is not part
+   of the menu bar silhouette.
 2. Main intercepts the `minimize` event for the main window and hides it to the
    tray only for macOS traffic-light minimization. On Windows/Linux, native
    minimize transitions — including the renderer and native-menu actions —
@@ -29,7 +29,7 @@ so a tray integration belongs there rather than in the renderer bridge.
 3. Tray click and double-click, the Show menu item, and macOS app activation
    restore and focus the existing window. If the window was closed, they create
    a new one through the existing window factory.
-4. The tray menu contains localized Show PI-Desktop and Quit PI-Desktop items.
+4. The tray menu contains localized Show Trail and Quit Trail items.
    Quit calls `app.quit()` and therefore follows the existing `before-quit`
    shutdown sequence. Closing the main window remains an explicit quit action.
 

@@ -195,13 +195,7 @@ async fn reattach(
     .await?;
     git.run(
         Path::new(&row.path),
-        &[
-            "worktree",
-            "lock",
-            "--reason",
-            "Trail subagent",
-            &row.path,
-        ],
+        &["worktree", "lock", "--reason", "Trail subagent", &row.path],
     )
     .await?;
     let st = state.lock().await;

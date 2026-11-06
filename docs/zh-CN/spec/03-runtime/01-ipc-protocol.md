@@ -74,6 +74,12 @@ event: pi-desktop/<domain>/event/<name>
 
 ```ts
 type ProjectGroupRoot = { path: string; name: string; position: number };
+type ProjectGroupAppearance = {
+  /** Icon id from the renderer's catalog; an unknown id draws the folder. */
+  icon?: string | null;
+  /** Tint as `#rrggbb`; anything else is dropped before it reaches a style. */
+  color?: string | null;
+};
 type ProjectGroupRecord = {
   id: string;
   name: string;
@@ -84,8 +90,20 @@ type ProjectGroupRecord = {
   pinned: boolean;
   lastOpenedAt: number;
   legacy?: boolean;
+  /** When `false`, the workspace file index is never built for this group. */
+  workspaceIndex?: boolean;
+  /** Icon and tint chosen in the project dialogs; absent keeps the folder. */
+  appearance?: ProjectGroupAppearance;
 };
 ```
+
+`project-group/create` 与 `project-group/update` 接受同一对可选的顶层 `icon` /
+`color` 字段：两者都不传即保持已存的选择不变，`project-group/rename` 永远不带它们，
+因此重命名不会顺手给项目加上装饰。宿主只校验形状——图标的字符集与长度、以及小写
+`#rrggbb`——而图标目录、它的 id → 图形映射（Lucide 组件与用户自备的 path 数据图形，
+D681）和色板顺序留在渲染器，所以新增一格不需要改协议。
+远程项目组没有本地装饰：两个弹窗为它隐藏这两行，宿主也会拒绝这一对字段。
+`project-group/list` 会返回已存的这一对，侧栏用选中的图形和颜色替代固定的文件夹图标。
 
 `project-group/create` 是新增能力，不会改变当前工作区。`project-group/list` 每个逻辑
 项目组返回一行；旧的仅路径项目会作为 `legacy` 单根项目组返回。项目组记忆和指令
@@ -958,8 +976,18 @@ Electron拥有本地化并提供面向用户的分支名称；主机
 
 `bucket` 取 `day` | `week` | `month`。省略日期时使用主机默认窗口
 （53 周 / 52 周 / 24 个月），按主机本地日历计算。`week` 的键使用 ISO 周年
-（`%G-W%V`）。结果会填充范围内的空桶。此通道不是设置页面；面向用户的仪表板
-是插件 `pi.token-insights`（D335 / ADR 0173）。
+（`%G-W%V`）。结果会填充范围内的空桶。
+
+结果是 `items`（每个时间桶一条，带桶键）、`models` 与 `totals`。`models`
+是把同一范围按回合的 `(providerId, modelId)` 而不是按时间折叠：每个模型
+一行，按 `totalTokens` 降序，并带 `inputTokens` / `outputTokens` /
+`cacheReadTokens` / `cacheWriteTokens` / `reasoningTokens` / `turnCount`。
+两个视图由同一次已完成回合扫描累加得出，所以模型行必然等于 `totals`；
+未存储模型的回合保留为一条 `null` 键的行，而不是被丢弃。此字段是增量扩展
+（D682）：旧渲染层忽略它，只读 `items` 与 `totals`。
+
+此通道不是设置页面。内置的紧凑视图是侧栏 token 计量卡（D682）；完整仪表板
+仍是插件 `pi.token-insights`（D335 / ADR 0173）。
 
 ## 8. 设置/秘密 API
 
@@ -1694,6 +1722,13 @@ type FsIndexEntry = { path: string; kind: "file" | "dir" };
 工作区。模糊过滤发生在渲染器端；被截断的索引只保留最浅的条目，因此针对它的
 查询还会发给 `fs/search`。
 
+`workspaceIndex` 为 `false` 的项目组不会被列出：`fs/index` 和 `fs/search` 都在触碰
+文件系统之前返回 `{ entries: [], truncated: false }`（D679）。该闸门读取主进程已有的
+项目组快照，快照为空时先拉取一次，因为冷启动时凭猜测索引会绕过用户已经关掉的开关。
+没有对应项目组的目录、以及写入时还没有该字段的记录，都保持被索引。`fs/resolveRef`
+刻意不加闸门：已经写进对话的 `@path` 引用仍可解析，这个开关关闭的是发现能力，不是
+用户自己的文件。
+
 ### fs/search
 
 ```ts
@@ -1811,7 +1846,7 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main 构造固定的 GitHub bug 表单 URL
-（`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`），
+（`https://github.com/CharonZou/trail/issues/new?template=bug_report.yml`），
 并用 `shell.openExternal` 打开。查询字段 `app-version`、`os` 和 `environment`
 由主进程版本信息填充。渲染器不能提供 URL。离开该 origin 或模板的构造会被拒绝。
 此通道不进入 host-core，也不改变 host RPC 协议版本。
@@ -1822,8 +1857,8 @@ Trail 可以为外部 Agent 暴露本地自动化接口，而不改变渲染器 
 契约或 host RPC 协议。服务默认关闭，只有 Electron 进程收到以下配置时才启动：
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # 可选；默认 37123
+TRAIL_MCP_CONTROL=1
+TRAIL_MCP_PORT=37123       # 可选；默认 37123
 ```
 
 Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP。

@@ -1,4 +1,4 @@
-import type { OAuthPromptRequest } from "@pi-desktop/shared";
+import type { OAuthPromptRequest } from "@trail/shared";
 
 /**
  * Plain text prompts may use an empty value as a vendor-defined default. Keep

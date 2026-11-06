@@ -1058,7 +1058,7 @@ mod tests {
     }
 
     pub(super) fn run_in_isolated_process(test_name: &str) -> Result<bool> {
-        const ISOLATED_PROCESS: &str = "PI_DESKTOP_CONFIG_SYNC_TEST_CHILD";
+        const ISOLATED_PROCESS: &str = "TRAIL_CONFIG_SYNC_TEST_CHILD";
         if std::env::var(ISOLATED_PROCESS).as_deref() == Ok(test_name) {
             return Ok(false);
         }

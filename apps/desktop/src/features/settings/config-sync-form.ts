@@ -1,4 +1,4 @@
-import type { ConfigSyncCategorySelection, ConfigSyncConfigureInput, ConfigSyncConnection, ConfigSyncMode, ConfigSyncState, ConfigSyncTestInput } from "@pi-desktop/shared";
+import type { ConfigSyncCategorySelection, ConfigSyncConfigureInput, ConfigSyncConnection, ConfigSyncMode, ConfigSyncState, ConfigSyncTestInput } from "@trail/shared";
 import type { ConfigSyncDraft } from "./config-sync-preferences";
 
 /** Transient form memory only. Never serialize this object directly. */

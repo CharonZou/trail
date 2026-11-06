@@ -104,7 +104,7 @@ function workspace({
   storeHash = HASH,
   lockHash = HASH,
 } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), "pi-desktop-patches-"));
+  const dir = mkdtempSync(join(tmpdir(), "trail-patches-"));
 
   write(
     dir,

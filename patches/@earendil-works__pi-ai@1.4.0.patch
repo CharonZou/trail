@@ -428,7 +428,7 @@ index 793ed0a6060e5d2e61b09e2d93514610527873df..78c6a829151d8bb57357d9a379997da4
 +    // real echo set requiresNonEmptyReasoningReplay and receive a documented
 +    // placeholder instead of a silent empty string (#296).
 +    // Placeholder text must match DEEPSEEK_REASONING_REPLAY_PLACEHOLDER in
-+    // @pi-desktop/shared provider-presets.
++    // @trail/shared provider-presets.
 +    const reasoningFields = ["reasoning_content", "reasoning_text", "reasoning"];
 +    // The history can mix field names: a rebuilt row is stamped
 +    // reasoning_content while a live row keeps the field the relay streamed.

@@ -75,7 +75,7 @@
   sidebar states, including expanded-sidebar New Task, on every platform.
   The left inset is 8px except collapsed-sidebar windowed macOS (88px), using
   `--ds-window-lead-inset`: the shared native cluster's 76px edge plus 12px.
-  The main process uses the same geometry from `@pi-desktop/shared`.
+  The main process uses the same geometry from `@trail/shared`.
   Right native-control exclusion is unchanged; header-height background paint
   fills the left lane without an opaque overlay covering panel controls.
   窗口级控件条始终挂在各面板堆叠上下文之外，覆盖面板打开、预览、还原和设置页切换。
@@ -216,6 +216,17 @@
   取消背景回合。后台事件仅更新其原始事件
   会话并且永远不会更改活动会话、页面、项目或键盘
   焦点。
+- **Token 计量卡**：位于项目列表与底部之间、不参与滚动的一张卡。它用 `day`
+  桶且不传日期调用 `stats.getTokenUsageHistory`，所以总数就是宿主自己的默认
+  窗口，并标注它实际覆盖的范围。两个选项的开关只切换同一组数字的画法：按日方格
+  （每周一列、每天一格，阈值按有使用记录的日子取四分位，四级墨色高于无记录日的
+  淡底，首尾补齐格是不可见而不是零）或按模型排行（最大的几个模型一条条形，加一行
+  诚实的「其他 N 个模型」，各带紧凑总量与占比）。两个视图不会互相矛盾，因为宿主
+  由同一次扫描折叠两者（D682）。列宽随侧栏增长但有可读下限，方格保持正方形，窄侧栏下
+  更早的周横向滚出视野，用的是壳层统一的那套安静滚动条（静止时透明、悬停或滚动才现形），
+  因为把 53 列塞进 240 px 只会让每列比旁边的间隔还窄。方格区打开时停在包含今天的
+  那一周，且可以聚焦，所以更早的周也能用键盘到达；读取失败时说明用量不可用，而不是画
+  一整年的空格。
 
 ### 3. 3 定时任务
 任务列与所选任务的页面并排展示，支持创建、编辑、暂停、启用和确认删除。表单可为每个任务单独选择项目、权限、模型与会话模式（每次新开会话或复用同一会话）。周期保留下拉选择，并与时分统一为自定义主题菜单。每小时按一小时间隔执行，不显示时间选择；保存、启用、启动或上次自动准入后重新计时。

@@ -1,5 +1,5 @@
-import { parseProxyUrl } from "@pi-desktop/shared";
-import { socks5Connect } from "@pi-desktop/agent-runtime/proxy-tunnel";
+import { parseProxyUrl } from "@trail/shared";
+import { socks5Connect } from "@trail/agent-runtime/proxy-tunnel";
 import { ensureSystemProxyRelay } from "./network-proxy";
 import { fetchHttpsMetadata } from "./provider-https-metadata";
 import type { ProviderMetadataFetch } from "./provider-metadata-fetch";

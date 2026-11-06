@@ -40,7 +40,7 @@ async function scenario(mode) {
   const baseHost = fixtureHost();
   const host = (method, params) => method === "plans.abort" ? { ok: true } : baseHost(method, params);
   const env = await isolatedEnv(dir);
-  env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "30000";
+  env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "30000";
   const child = spawn(process.execPath, [bundle], { cwd: dir, env, stdio: ["pipe", "pipe", "pipe"] });
   const sidecar = new OfflineSidecar(child, dir, host, 45_000);
   sidecar.allowProviderRetries = true;

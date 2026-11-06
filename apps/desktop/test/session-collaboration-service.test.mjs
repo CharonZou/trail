@@ -24,8 +24,8 @@ function load(relative, imports) {
 // way from `providers.list` through the plugin model list into the spawn
 // decision, and a hand-written stub would prove only the last step.
 const pluginAgentComplete = load("../electron/main/plugin-agent-complete.ts", {
-  "@pi-desktop/agent-runtime": await import("@pi-desktop/agent-runtime"),
-  "@pi-desktop/shared": await import("@pi-desktop/shared"),
+  "@trail/agent-runtime": await import("@trail/agent-runtime"),
+  "@trail/shared": await import("@trail/shared"),
 });
 
 const { createSessionCollaborationService } = load("../electron/main/services/session-collaboration.ts", {

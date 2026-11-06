@@ -5,7 +5,7 @@ import type {
   GlobalPermissionMode,
   PluginScenicThemesDestinationMeta,
   ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
 import {
@@ -61,6 +61,7 @@ import {
 } from "./primitives";
 import { AgentInstructionsSection, UpdatesRow } from "./agent-sections";
 import { CloseBehaviorSection, DeveloperSection } from "./developer-sections";
+import { WindowActionSection } from "./window-actions";
 import { PluginScenicThemesDestination } from "../../components/settings/PluginScenicThemesDestination";
 import { ConfigSyncPage } from "../../components/settings/ConfigSyncPage";
 import { StorageSettingsSection } from "./StorageSettingsSection";
@@ -503,6 +504,8 @@ export function SettingsPage() {
                   />
                 </SettingsRow>
               </SettingsCard>
+
+              <WindowActionSection />
 
               {platform !== "darwin" && <CloseBehaviorSection />}
             </div>

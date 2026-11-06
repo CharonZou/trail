@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen, type Rectangle } from "electron";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { IPC, type LiveCallView, type LiveVoiceWidgetAction } from "@pi-desktop/shared";
+import { IPC, type LiveCallView, type LiveVoiceWidgetAction } from "@trail/shared";
 import { getModuleDirectory } from "../module-path";
 import { suppressLinuxFramelessSystemMenu } from "../frameless-system-menu";
 
@@ -161,7 +161,7 @@ export function createLiveVoiceWidget(input: {
           contextIsolation: true,
           nodeIntegration: false,
           sandbox: true,
-          additionalArguments: [`--pi-desktop-locale=${app.getLocale()}`],
+          additionalArguments: [`--trail-locale=${app.getLocale()}`],
         },
       });
       window = created;

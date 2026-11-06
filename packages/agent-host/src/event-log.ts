@@ -1,5 +1,5 @@
-import type { RacpCursor, RacpEventEnvelope, RacpEventKind, RacpLimits } from "@pi-desktop/shared";
-import { RACP_DEFAULT_LIMITS, isDurableEventKind } from "@pi-desktop/shared";
+import type { RacpCursor, RacpEventEnvelope, RacpEventKind, RacpLimits } from "@trail/shared";
+import { RACP_DEFAULT_LIMITS, isDurableEventKind } from "@trail/shared";
 
 import { racpError, type RacpError } from "./errors.js";
 import type { Clock, IdSource } from "./ports.js";

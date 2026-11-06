@@ -224,7 +224,7 @@ test("the no-summary rollover family stays an internal switch", () => {
   // Codex's second path: a fresh context window with no summary request. It is
   // selectable for development only, so it reaches neither settings nor i18n.
   assert.match(runtime, /type CompactionStrategy = "summary" \| "fresh_window"/);
-  assert.match(runtime, /PI_DESKTOP_COMPACTION_STRATEGY === "fresh_window"/);
+  assert.match(runtime, /TRAIL_COMPACTION_STRATEGY === "fresh_window"/);
   assert.match(runtime, /private buildRolloverCheckpoint\(/);
   assert.match(runtime, /CONTEXT_ROLLOVER_SUMMARY/);
   assert.match(runtime, /strategy: "fresh_window" satisfies CompactionStrategy/);

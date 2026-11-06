@@ -8,8 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { UiMessage } from "@pi-desktop/shared";
-import { splitInlineContent } from "@pi-desktop/shared";
+import type { UiMessage } from "@trail/shared";
+import { splitInlineContent } from "@trail/shared";
 import { useOpenChatFileRef } from "../../../hooks/use-preview-target";
 import { sessionAllows } from "../../../lib/remote-session-safety";
 import { useSlotSessionId } from "../../../plugins/renderer-slots/use-slots";

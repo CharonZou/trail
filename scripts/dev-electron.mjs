@@ -16,9 +16,9 @@ import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Display brand for the macOS development bundle. The bundle identifier and
-// all on-disk machine tokens keep the legacy pi-desktop identity (see
-// packages/shared/src/protocol.ts).
+// Display brand for the macOS development bundle. The bundle identifier stays
+// on the pre-Trail value, so keychain items and LaunchServices entries keep
+// pointing at the identity the packaged app was installed under.
 const APP_NAME = "Trail";
 const DEV_BUNDLE_ID = "net.aiuo.pi-desktop.dev";
 const BRANDING_SCHEMA = "v4";
@@ -154,7 +154,7 @@ export function prepareMacDevelopmentBundle({
 }
 
 function run() {
-  const env = { ...process.env, PI_DESKTOP_DEV: "1" };
+  const env = { ...process.env, TRAIL_DEV: "1" };
   // Electron 43+ downloads its platform binary when its package is resolved.
   // electron-vite requires the resulting path.txt marker on every platform.
   const electron = resolveElectronInstallation();

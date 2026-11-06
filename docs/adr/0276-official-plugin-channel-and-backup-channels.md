@@ -8,7 +8,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-09-17
-- Deciders: PI-Desktop plugin and distribution maintainers
+- Deciders: Trail plugin and distribution maintainers
 - Related: ADR 0102, D238, E2E-024P, E2E-PLUGIN-official-channel-resolves-through-the-platform
 
 ## Context
@@ -66,7 +66,7 @@ The product always reads `https://plugins.aiuo.net/catalog.json`; the Plugins
 page has no source selector. `pluginMarketSource` and `pluginMarketCustomUrl`
 remain in persisted settings so older settings can be read without migration,
 but host-core ignores them. The development-only
-`PI_DESKTOP_PLUGIN_MARKET_URL` override remains available to tests and local
+`TRAIL_PLUGIN_MARKET_URL` override remains available to tests and local
 development.
 
 | Channel | Value | Catalog URL | Install path |

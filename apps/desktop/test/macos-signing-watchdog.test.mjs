@@ -73,7 +73,7 @@ function runWatchdog(args, { env = {}, cwd = repoRoot } = {}) {
 }
 
 async function makeTempDir(t) {
-  const root = await mkdtemp(join(tmpdir(), "pi-desktop-signing-watchdog-"));
+  const root = await mkdtemp(join(tmpdir(), "trail-signing-watchdog-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }

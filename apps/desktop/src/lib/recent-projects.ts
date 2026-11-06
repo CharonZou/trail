@@ -1,4 +1,4 @@
-import type { RemoteWorkspace } from "@pi-desktop/shared";
+import type { RemoteWorkspace } from "@trail/shared";
 
 export type RecentProject = {
   remote?: RemoteWorkspace;

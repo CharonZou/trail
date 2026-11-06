@@ -942,7 +942,7 @@ test("resolvePreviewTarget carries line/col on file chips (#681)", () => {
 });
 
 test("session links segment as their own target", () => {
-  const link = "pi-desktop://session/6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506";
+  const link = "trail://session/6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506";
   const segments = splitChatText(`analyze ${link} please`, ROOT);
   assert.deepEqual(
     segments.map((segment) => segment.text),
@@ -954,6 +954,19 @@ test("session links segment as their own target", () => {
     sessionId: "6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506",
   });
   // A remote id and a bare scheme are not local conversations.
-  assert.equal(resolvePreviewTarget("pi-desktop://session/remote:abc", ROOT), null);
-  assert.equal(resolvePreviewTarget("pi-desktop://session/", ROOT), null);
+  assert.equal(resolvePreviewTarget("trail://session/remote:abc", ROOT), null);
+  assert.equal(resolvePreviewTarget("trail://session/", ROOT), null);
+
+  // A link copied out of a session row before the Trail rename still names the
+  // same conversation.
+  const legacy = link.replace("trail://", "pi-desktop://");
+  const legacySegments = splitChatText(`analyze ${legacy} please`, ROOT);
+  assert.deepEqual(
+    legacySegments.map((segment) => segment.text),
+    ["analyze ", legacy, " please"],
+  );
+  assert.deepEqual(
+    legacySegments.find((segment) => segment.kind === "target").target,
+    { kind: "session", sessionId: "6f1d2c3b-4a59-4e7f-8a90-b1c2d3e4f506" },
+  );
 });

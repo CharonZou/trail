@@ -65,7 +65,7 @@ import {
   type TrustedExtensionDiagnostic,
   type TrustedExtensionSpec,
   type TrustedExtensionUiResponse,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type {
   TrustedExtensionRunner,
   RegisteredTrustedExtensionAgent,
@@ -102,7 +102,7 @@ import type {
   ThinkingLevel,
   ToolTokenUsage,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   addUsage,
   checkpointGeneration,
@@ -129,7 +129,7 @@ import {
   type SubagentPermission,
   GEN_UI_SKILL_ID,
   withoutReasoningReplayPlaceholder,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { createStreamCoalescer, type StreamCoalescer } from "./stream-coalescer.js";
 import { checkGenUiFragment, genUiFragmentCheckNote, isGenUiFragmentPath } from "./gen-ui-fragment-check.js";
 import type { RuntimeHost } from "./host-client.js";
@@ -318,7 +318,7 @@ export type { RuntimeProviderConfig } from "./provider-binding.js";
 export type RuntimePromptAttachment = Omit<AgentPromptAttachment, "kind"> & {
   /**
    * `session` is written by Electron main for a resolved
-   * `pi-desktop://session/<id>` reference; the renderer never sends it.
+   * `trail://session/<id>` reference; the renderer never sends it.
    */
   kind: AgentPromptAttachment["kind"] | "session";
   /** Base64 payload is transient and only crosses the sidecar for this turn. */
@@ -904,7 +904,7 @@ function resolveCompactionStrategy(
   option?: CompactionStrategy,
 ): CompactionStrategy {
   if (option) return option;
-  return process.env.PI_DESKTOP_COMPACTION_STRATEGY === "fresh_window"
+  return process.env.TRAIL_COMPACTION_STRATEGY === "fresh_window"
     ? "fresh_window"
     : "summary";
 }
@@ -1034,7 +1034,7 @@ export type AgentRuntimeOptions = {
   compactionSettings?: ContextCompactionSettings;
   /**
    * Which compaction family to use. Tests set it explicitly; production reads
-   * `PI_DESKTOP_COMPACTION_STRATEGY` and otherwise summarizes.
+   * `TRAIL_COMPACTION_STRATEGY` and otherwise summarizes.
    */
   compactionStrategy?: CompactionStrategy;
   /** Plugin agent tools to expose to the model this session. */
@@ -2310,7 +2310,7 @@ Do not invent objections or turn speculative risks into blockers. Stop when the 
         const requestContext = requestTranscript(m, context);
         const attemptOptions: SimpleStreamOptions = {
           ...hookedOptions,
-          // Cap the output budget at the pi-desktop layer so the estimate
+          // Cap the output budget at the trail layer so the estimate
           // holds for both adapter branches: `streamSimple` re-derives
           // max_tokens, but the low-level `stream` path used by
           // `thinkingLevel: "omit"` would otherwise send it untouched, and

@@ -3,7 +3,7 @@ import type {
   AgentActivity,
   SessionSummary,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { api } from "../../../lib/api";
 import {
   calculateSessionTimingBreakdown,

@@ -1,7 +1,7 @@
 import { forgetTranscriptReadingState } from "../../lib/transcript-reading-position";
 import i18n from "i18next";
-import type { ProjectWorkspace } from "@pi-desktop/shared";
-import { api } from "../../lib/api";
+import type { ProjectWorkspace } from "@trail/shared";
+import { api, type ProjectGroupChoices } from "../../lib/api";
 import {
   rememberProject,
   removeRecentProject,
@@ -34,6 +34,7 @@ import {
   normalizeProjectPath,
   sessionMatchesProject,
 } from "../../lib/sidebar-session-groups";
+import { projectAppearanceByPath } from "../../lib/project-appearance";
 import type { AppState } from "../app-state";
 import type { SessionRuntime } from "../runtime/session-runtime";
 import type { StoreAccess } from "./types";
@@ -70,7 +71,13 @@ async function createNamedProjectGroup(
     name,
     folders,
     primaryPath,
-  }: { name: string; folders: string[]; primaryPath?: string },
+    choices,
+  }: {
+    name: string;
+    folders: string[];
+    primaryPath?: string;
+    choices?: ProjectGroupChoices;
+  },
 ): Promise<void> {
   const normalizedName = name.trim();
   if (!normalizedName) {
@@ -99,7 +106,8 @@ async function createNamedProjectGroup(
   const intent = runtime.beginNavigationIntent();
   // Closing a project only removes it from the sidebar. Its host-owned group
   // remains durable, so choosing that one folder again means reopen the group
-  // instead of trying to create a duplicate owner for the same path.
+  // instead of trying to create a duplicate owner for the same path. Reopening
+  // configures nothing, so the dialog's choices are not sent here.
   if (orderedFolders.length === 1) {
     const { groups } = await api.listProjectGroups();
     if (!runtime.navigationIntentIsCurrent(intent)) return;
@@ -119,8 +127,16 @@ async function createNamedProjectGroup(
       return;
     }
   }
-  const created = await api.createProjectGroup(normalizedName, orderedFolders);
+  const created = await api.createProjectGroup(normalizedName, orderedFolders, choices);
   if (!runtime.navigationIntentIsCurrent(intent)) return;
+  // The record the host just wrote owns the decoration, so merge it into the
+  // sidebar lookup instead of waiting for the next group listing.
+  set((state) => ({
+    projectAppearance: {
+      ...state.projectAppearance,
+      ...projectAppearanceByPath([created.group]),
+    },
+  }));
   const groupPrimary = created.group.primaryPath || primary;
   const workspace = await get().activateProject(groupPrimary, {
     navigationIntent: intent,
@@ -231,6 +247,7 @@ export function createProjectSlice({
   AppState,
   | "activateProject"
   | "refreshProject"
+  | "refreshProjectGroups"
   | "openProjectPath"
   | "switchProjectPath"
   | "closeProjectPath"
@@ -355,6 +372,15 @@ export function createProjectSlice({
       return applied ? workspace : null;
     },
 
+    refreshProjectGroups: async () => {
+      try {
+        const { groups } = await api.listProjectGroups();
+        set({ projectAppearance: projectAppearanceByPath(groups) });
+      } catch {
+        // The host owns these choices; a failed read keeps the last known ones.
+      }
+    },
+
     openProjectPath: async (path) => get().activateProject(path),
     switchProjectPath: async (path) => get().activateProject(path),
 
@@ -400,10 +426,10 @@ export function createProjectSlice({
     closeProjectDialog: () => {
       set({ createProjectDialogOpen: false, createProjectDialogRemoteHostKey: undefined });
     },
-    createProjectFromFolders: async ({ name, folders, primaryPath }) =>
+    createProjectFromFolders: async ({ name, folders, primaryPath, choices }) =>
       createNamedProjectGroup(
         { get, set, runtime },
-        { name, folders, primaryPath },
+        { name, folders, primaryPath, choices },
       ),
     createProjectFromRemote: async ({ name, hostKey, path }) => {
       const normalizedName = normalizeProjectName(name);
@@ -418,13 +444,18 @@ export function createProjectSlice({
       if (!runtime.navigationIntentIsCurrent(intent)) return;
       set({ createProjectDialogOpen: false, createProjectDialogRemoteHostKey: undefined, onboarding, page: "chat" });
     },
-    createProjectFromGit: async ({ name, url, parentPath }) => {
+    createProjectFromGit: async ({ name, url, parentPath, choices }) => {
       // Clone first, then create the project through the same group path, so a
       // checkout and a folder pick produce identical project semantics.
       const checkout = await api.cloneProjectInto(url, parentPath);
       await createNamedProjectGroup(
         { get, set, runtime },
-        { name, folders: [checkout.path], primaryPath: checkout.path },
+        {
+          name,
+          folders: [checkout.path],
+          primaryPath: checkout.path,
+          choices,
+        },
       );
     },
 
@@ -488,6 +519,7 @@ export function createProjectSlice({
       if (isOpen) await get().closeProjectPath(path);
       persistCurrentSidebar(get);
       await get().refreshSessions();
+      await get().refreshProjectGroups();
     },
 
     toggleSessionPinned: (id) => {

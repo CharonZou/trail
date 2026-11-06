@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 register(new URL("./helpers/ts-import-hooks.mjs", import.meta.url));
-const { parseSkillFrontmatter } = await import("@pi-desktop/plugin-sdk");
+const { parseSkillFrontmatter } = await import("@trail/plugin-sdk");
 const {
   assertBuiltinSkillEnabled,
   builtinSkillCatalog,
@@ -49,7 +49,7 @@ test("the skill only names tokens, classes, and libraries the bundled kit provid
   assert.ok(classes.size > 20);
   for (const name of classes) assert.match(css, new RegExp(`\\.${name}\\b`), `.${name}`);
   // Tabs and tooltips are wired by the kit runtime.
-  assert.match(kit, /pi-desktop-visualization-tabs/);
+  assert.match(kit, /trail-visualization-tabs/);
   assert.match(kit, /closest\("\[data-tooltip\]"\)/);
   // Every library URL the skill still names is a bundled, pinned one; D3 is
   // preloaded by the kit, so the skill must not ask for a script tag.

@@ -46,7 +46,7 @@ case "$*" in
     app="${repoRoot}/apps/desktop/release/mac-arm64/Trail.app"
     mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources/bin"
     : > "$app/Contents/MacOS/Trail"
-    : > "$app/Contents/Resources/bin/pi-desktop-host-core"
+    : > "$app/Contents/Resources/bin/trail-host-core"
     : > "${repoRoot}/apps/desktop/release/Trail-0.0.0-arm64.dmg"
     ;;
 esac
@@ -86,7 +86,7 @@ test(
   "the signed local macOS lane runs electron-builder with every documented flag",
   { skip: process.platform !== "darwin" ? "macOS-only lane" : false },
   async (t) => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-macos-lane-"));
+    const root = await mkdtemp(join(tmpdir(), "trail-macos-lane-"));
     t.after(() => rm(root, { recursive: true, force: true }));
 
     const repoRoot = join(root, "repo");

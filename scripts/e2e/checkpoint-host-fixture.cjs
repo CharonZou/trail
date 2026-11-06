@@ -3,7 +3,7 @@ const { createInterface } = require("node:readline");
 const { readFile, rename, writeFile } = require("node:fs/promises");
 const { join } = require("node:path");
 
-const root = process.env.PI_DESKTOP_DATA_DIR;
+const root = process.env.TRAIL_DATA_DIR;
 const started = [];
 const startWaiters = new Map();
 const saveWaiters = new Map();

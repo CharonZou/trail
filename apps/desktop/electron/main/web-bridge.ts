@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket, type RawData } from "ws";
-import { IPC_WHITELIST } from "@pi-desktop/shared/protocol";
+import { IPC_WHITELIST } from "@trail/shared/protocol";
 
 /**
  * Dev-mode Web bridge (Browser Dev Mode).
@@ -14,7 +14,7 @@ import { IPC_WHITELIST } from "@pi-desktop/shared/protocol";
  *
  * Security posture: dev tooling only. The server binds 127.0.0.1, accepts no
  * message larger than 1 MiB, and only serves channels on `IPC_WHITELIST`. It is
- * never started outside `PI_DESKTOP_WEB=1` (see `dev:web`).
+ * never started outside `TRAIL_WEB=1` (see `dev:web`).
  *
  * Wire protocol (JSON):
  *   client → server:  { id, channel, args }          invoke

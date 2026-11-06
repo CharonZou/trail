@@ -60,7 +60,7 @@
 仓库 CLI 路径使用根目录 `package.json` 中 `engines` 和 `packageManager`
 声明的 Node.js、pnpm 版本，并需要本仓库的检出副本。 devkit 和 SDK 目前已
 私有工作空间包，所以不要假设`npm install
-@pi-desktop/plugin-devkit` 在此存储库之外工作。
+@trail/plugin-devkit` 在此存储库之外工作。
 
 ## 3. 创建第一个插件
 
@@ -92,7 +92,7 @@ Trail 编写起始文件，加载文件夹作为开发插件，
 
 ```bash
 pnpm install
-pnpm --filter @pi-desktop/plugin-devkit... build
+pnpm --filter @trail/plugin-devkit... build
 pnpm pi-plugin init panel-basic ../my-first-plugin \
   --id local.my-first-plugin \
   --name "My First Plugin"
@@ -1200,7 +1200,7 @@ SHA-256 并发布该版本，再把目录与安装包同步到
 
 ## 12. 参考索引
 
-- [示例插件](https://github.com/vastsa/PI-Desktop/tree/main/examples/plugins)
+- [示例插件](https://github.com/CharonZou/trail/tree/main/examples/plugins)
 - [插件系统概述](/zh-CN/spec/07-plugins/01-plugin-system)
 - [Manifest Schema](/zh-CN/spec/07-plugins/02-plugin-manifest-schema)
 - [主机 API](/zh-CN/spec/07-plugins/03-plugin-api)
@@ -1208,7 +1208,7 @@ SHA-256 并发布该版本，再把目录与安装包同步到
 - [包装](/zh-CN/spec/07-plugins/06-plugin-packaging)
 - [开发者体验](/zh-CN/spec/07-plugins/10-plugin-devex)
 - [权限](/zh-CN/spec/07-plugins/13-plugin-permissions-matrix)
-- [Hello 参考插件](https://github.com/vastsa/PI-Desktop/tree/main/examples/plugins/hello)
+- [Hello 参考插件](https://github.com/CharonZou/trail/tree/main/examples/plugins/hello)
 
 ## 13. 完整 SDK 接口与源码索引
 

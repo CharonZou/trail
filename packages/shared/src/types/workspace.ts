@@ -44,6 +44,16 @@ export type ProjectGroupRoot = {
   position: number;
 };
 
+/**
+ * Icon id and tint the user picked for one project. `icon` is an id from the
+ * renderer's catalog (an unknown id falls back to the folder glyph) and
+ * `color` is a `#rrggbb` string; both are absent for an untouched project.
+ */
+export type ProjectGroupAppearance = {
+  icon?: string | null;
+  color?: string | null;
+};
+
 export type ProjectGroupRecord = {
   remote?: RemoteWorkspace;
   id: string;
@@ -58,6 +68,10 @@ export type ProjectGroupRecord = {
   legacy?: boolean;
   /** Previously removed roots remain suppressed from legacy projections. */
   detachedPaths?: string[];
+  /** When false, the workspace file index is never built for this project. */
+  workspaceIndex?: boolean;
+  /** Icon and tint the user picked; absent keeps the historical folder glyph. */
+  appearance?: ProjectGroupAppearance;
 };
 
 export type ProjectGroupContext = {

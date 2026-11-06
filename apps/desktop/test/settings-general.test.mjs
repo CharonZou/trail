@@ -276,8 +276,8 @@ test("date copy follows the active application locale", () => {
 });
 
 test("sandboxed preload receives the OS locale without importing main-only APIs", () => {
-  assert.match(electronMainSource, /additionalArguments:\s*\[`--pi-desktop-locale=\$\{app\.getLocale\(\)\}`\]/);
-  assert.match(preloadSource, /const LOCALE_ARGUMENT_PREFIX = "--pi-desktop-locale="/);
+  assert.match(electronMainSource, /additionalArguments:\s*\[`--trail-locale=\$\{app\.getLocale\(\)\}`\]/);
+  assert.match(preloadSource, /const LOCALE_ARGUMENT_PREFIX = "--trail-locale="/);
   assert.match(preloadSource, /process\.argv[\s\S]*startsWith\(LOCALE_ARGUMENT_PREFIX\)/);
   assert.doesNotMatch(preloadSource, /import\s*\{[^}]*\bapp\b[^}]*\}\s*from "electron"/);
   assert.doesNotMatch(preloadSource, /locale:\s*app\.getLocale\(\)/);

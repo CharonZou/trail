@@ -1,0 +1,203 @@
+/*
+ * Sidebar token meter (near a year of usage, daily strip and per-model bars).
+ *
+ * A year is ~53 week columns, and the 240px sidebar floor leaves each of them
+ * under 2px if they are allowed to shrink — narrower than the gutter between
+ * them, which turns the grid into unreadable noise. So a column keeps a
+ * readable floor and the strip scrolls the older weeks sideways instead; the
+ * scrollbar stays hidden, matching the rest of the shell. `aspect-ratio` keeps
+ * every cell square, so the grid's height no longer depends on sidebar width.
+ */
+
+.token-usage-card {
+  flex: 0 0 auto;
+  margin: 6px 8px 8px;
+  padding: 9px 10px 10px;
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--ds-tile);
+  color: var(--ds-text-secondary);
+  font-size: var(--text-xs);
+}
+
+.token-usage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.token-usage-title {
+  font-size: var(--text-xs-plus);
+  font-weight: var(--font-weight-strong);
+  color: var(--ds-text-primary);
+}
+
+.token-usage-switch {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-2xs);
+  background: var(--ds-tile-deep);
+}
+
+.token-usage-switch-option {
+  padding: 2px 7px;
+  border: 0;
+  border-radius: var(--radius-3xs);
+  background: transparent;
+  color: var(--ds-text-muted);
+  font: inherit;
+  font-size: var(--text-2xs);
+  cursor: pointer;
+}
+
+.token-usage-switch-option:hover {
+  color: var(--ds-text-primary);
+}
+
+.token-usage-switch-option.active {
+  background: var(--ds-bg-active);
+  color: var(--ds-text-primary);
+}
+
+.token-usage-switch-option:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 1px;
+}
+
+.token-usage-total {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 8px 0 7px;
+}
+
+.token-usage-total-value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ds-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.token-usage-total-unit,
+.token-usage-total-range,
+.token-usage-note {
+  color: var(--ds-text-faint);
+}
+
+.token-usage-total-range {
+  margin-left: auto;
+}
+
+.token-usage-heat {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* The narrow bounds scroll, so the strip is a focus target: keyboard users
+   reach the older weeks with the arrow keys instead of only by wheel. The
+   strip keeps the global scrollbar contract — quiet 6px at rest, revealed on
+   hover, focus or scroll — because `scrollbar-width` would disable those
+   pseudo-elements for the whole renderer. */
+.token-usage-heat:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 2px;
+}
+
+.token-usage-heat-week {
+  /* Grows to fill a wide sidebar, never below the legibility floor. */
+  flex: 1 0 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.token-usage-heat-cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+.token-usage-heat-cell.absent {
+  visibility: hidden;
+}
+
+/* Monochrome ramp on the foreground ink, so both themes get the same tiers. */
+.token-usage-heat-cell.level-0 {
+  background: color-mix(in oklab, var(--ds-text-primary) 7%, transparent);
+}
+
+.token-usage-heat-cell.level-1 {
+  background: color-mix(in oklab, var(--ds-text-primary) 26%, transparent);
+}
+
+.token-usage-heat-cell.level-2 {
+  background: color-mix(in oklab, var(--ds-text-primary) 46%, transparent);
+}
+
+.token-usage-heat-cell.level-3 {
+  background: color-mix(in oklab, var(--ds-text-primary) 68%, transparent);
+}
+
+.token-usage-heat-cell.level-4 {
+  background: color-mix(in oklab, var(--ds-text-primary) 92%, transparent);
+}
+
+.token-usage-models {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token-usage-model {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 2.6em;
+  align-items: baseline;
+  gap: 3px 6px;
+}
+
+.token-usage-model-name {
+  grid-column: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ds-text-primary);
+}
+
+.token-usage-model-total {
+  grid-column: 2;
+  color: var(--ds-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.token-usage-model-share {
+  grid-column: 3;
+  text-align: right;
+  color: var(--ds-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.token-usage-model-bar {
+  grid-column: 1 / -1;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--ds-text-primary) 9%, transparent);
+  overflow: hidden;
+}
+
+.token-usage-model-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--ds-text-primary) 62%, transparent);
+}
+
+.token-usage-model.is-other .token-usage-model-name {
+  color: var(--ds-text-muted);
+}

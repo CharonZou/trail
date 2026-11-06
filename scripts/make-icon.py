@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Derive Trail platform icon resources from the canonical logo.
 
-The tracked ``apps/desktop/build/icon_1024.png`` file is the brand source of
-truth. This script preserves that file and emits:
+The tracked ``apps/desktop/build/icon_1024.png`` file is the brand raster: a
+flat render of the ``docs/public/brand-mark.svg`` vector master. This script
+preserves that file and emits:
 
   apps/desktop/build/icon.iconset/  - all macOS iconset sizes
   apps/desktop/build/icon.icns      - via `iconutil` (macOS only)
   apps/desktop/build/icon.ico       - multi-size Windows application icon
   apps/desktop/build/icon.png       - 512px Windows/Linux package icon
+  apps/desktop/build/logo_dark.png  - 1254px documentation brand lockup
   apps/desktop/build/tray-icon-mac.png - transparent macOS template icon
 
 Run: python3 scripts/make-icon.py
@@ -19,7 +21,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "apps" / "desktop" / "build"
@@ -46,6 +48,7 @@ def main() -> None:
         format="ICO",
         sizes=[
             (16, 16),
+            (24, 24),
             (32, 32),
             (48, 48),
             (64, 64),
@@ -55,34 +58,36 @@ def main() -> None:
     )
     package_icon = BUILD / "icon.png"
     master.resize((512, 512), Image.LANCZOS).save(package_icon)
+    logo_dark = BUILD / "logo_dark.png"
+    master.resize((1254, 1254), Image.LANCZOS).save(logo_dark)
 
-    # macOS menu bar icons are template images: the opaque pixels are tinted
-    # by the system. The application icon has an opaque light tile, so using
-    # it directly would turn that tile into the tray silhouette. Derive the
-    # dark PI mark as a transparent, monochrome image instead.
-    tray_icon = master.convert("L")
-    tray_alpha = ImageChops.multiply(
-        tray_icon.point(
-            lambda luminance: max(0, min(255, (160 - luminance) * 255 // 80))
+    # macOS menu bar icons are template images: the system tints every opaque
+    # pixel, so the silhouette has to be the bar glyph alone. Reusing the app
+    # icon would fill the menu bar with the black plate. The plate is pure
+    # black, which makes the bars exactly the pixels that carry light.
+    bar_alpha = master.convert("L").point(lambda value: min(255, value * 6))
+    tray_alpha = ImageChops.multiply(bar_alpha, master.getchannel("A"))
+    glyph_bounds = tray_alpha.getbbox()
+    if glyph_bounds is None:
+        raise ValueError("canonical logo does not contain the bar glyph")
+    glyph = tray_alpha.crop(glyph_bounds)
+    # Normalise the ink box to three quarters of the tile so the glyph keeps the
+    # same menu bar weight the app icon has, then centre it.
+    glyph_scale = (BASE * 3 / 4) / max(glyph.size)
+    glyph = glyph.resize(
+        (
+            round(glyph.width * glyph_scale),
+            round(glyph.height * glyph_scale),
         ),
-        master.getchannel("A"),
+        Image.LANCZOS,
     )
-    # The source artwork also contains a soft outline around its light app
-    # tile. Keep the known PI mark area so that outline cannot leak into the
-    # menu bar template silhouette.
-    mark_clip = Image.new("L", master.size, 0)
-    mark_draw = ImageDraw.Draw(mark_clip)
-    mark_draw.rectangle((120, 115, 850, 800), fill=255)
-    mark_draw.rectangle((120, 115, 250, 250), fill=0)
-    tray_alpha = ImageChops.multiply(tray_alpha, mark_clip)
+    tray_canvas = Image.new("L", master.size, 0)
+    tray_canvas.paste(
+        glyph,
+        ((BASE - glyph.width) // 2, (BASE - glyph.height) // 2),
+    )
     tray_icon_mac = Image.new("RGBA", master.size, (0, 0, 0, 0))
-    tray_icon_mac.putalpha(tray_alpha)
-    mark_bounds = tray_alpha.getbbox()
-    if mark_bounds is None:
-        raise ValueError("canonical logo does not contain a dark PI mark")
-    mark = tray_icon_mac.crop(mark_bounds).resize((768, 768), Image.LANCZOS)
-    tray_icon_mac = Image.new("RGBA", master.size, (0, 0, 0, 0))
-    tray_icon_mac.paste(mark, (128, 128), mark)
+    tray_icon_mac.putalpha(tray_canvas)
     tray_icon_mac_path = BUILD / "tray-icon-mac.png"
     tray_icon_mac.save(tray_icon_mac_path)
 
@@ -102,6 +107,7 @@ def main() -> None:
         print(f"used {SOURCE}")
         print(f"wrote {windows_icon}")
         print(f"wrote {package_icon}")
+        print(f"wrote {logo_dark}")
         print(f"wrote {tray_icon_mac_path}")
         print("skipped icon.icns (iconutil is unavailable)")
         return
@@ -113,6 +119,7 @@ def main() -> None:
     print(f"used {SOURCE}")
     print(f"wrote {windows_icon}")
     print(f"wrote {package_icon}")
+    print(f"wrote {logo_dark}")
     print(f"wrote {tray_icon_mac_path}")
     print(f"wrote {icns}")
 

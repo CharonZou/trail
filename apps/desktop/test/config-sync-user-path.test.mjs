@@ -16,8 +16,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@trail/i18n";
+import { IPC } from "@trail/shared";
 import { ConfigSyncPage } from "../../apps/desktop/src/components/settings/ConfigSyncPage";
 import { Checkbox } from "../../apps/desktop/src/components/ui";
 import { selectionFromDraft } from "../../apps/desktop/src/features/settings/config-sync-form";
@@ -198,6 +198,9 @@ window.configSyncProbe = async () => {
   releaseSync();
   await until(() => button("backupNow") && !button("backupNow").disabled, "background sync did not complete after navigation");
   await ready();
+  // The default key prefix stays pi-desktop/config — it is an input to buckets
+  // users already uploaded to — so the fixture revision ids, which are built
+  // from the form untouched default, carry that name too.
   await until(() => document.body.textContent.includes("older-pi-desktop/config"), "history missing");
   flushSync(() => view.unmount()); mount(); await ready();
   check(input("bucket").value === "private-config", "saved connection not hydrated");
@@ -296,8 +299,8 @@ test("S3 settings user path preserves credentials, modes, history and legacy dat
       outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm", jsx: "automatic",
       define: { "process.env.NODE_ENV": '"production"' },
       alias: {
-        "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-        "@pi-desktop/shared": join(root, "packages/shared/src"),
+        "@trail/i18n": join(root, "packages/i18n/src"),
+        "@trail/shared": join(root, "packages/shared/src"),
         react: join(root, "apps/desktop/node_modules/react"),
         "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
         i18next: join(root, "apps/desktop/node_modules/i18next"),

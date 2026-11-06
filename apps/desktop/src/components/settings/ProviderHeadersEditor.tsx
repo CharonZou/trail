@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { APP_VERSION, inspectHeaderValue } from "@pi-desktop/shared";
+import { APP_VERSION, inspectHeaderValue } from "@trail/shared";
 import {
   KeyValueRows,
   pairsToRecord,
@@ -17,7 +17,7 @@ type HeaderPreset = {
 };
 
 const HEADER_PRESETS: HeaderPreset[] = [
-  { key: "User-Agent", value: `pi-desktop/${APP_VERSION}` },
+  { key: "User-Agent", value: `trail/${APP_VERSION}` },
   { key: "X-Client-Name", value: "Trail" },
   { key: "X-Title", value: "Trail" },
 ];

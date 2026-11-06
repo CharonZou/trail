@@ -8,12 +8,12 @@ import { flushSync } from "react-dom";
 import { useState } from "react";
 import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { en } from "@pi-desktop/i18n";
+import { en } from "@trail/i18n";
 import type {
   AgentActivity,
   AgentEventEnvelope,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   ContextMenu,
   useContextMenu,

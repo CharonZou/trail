@@ -16,8 +16,8 @@ import {
   type CloseBehavior,
   type KeybindingOverrides,
   type NativeMenuAction,
-} from "@pi-desktop/shared";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
+} from "@trail/shared";
+import { catalogs, resolveLocale } from "@trail/i18n";
 import { installApplicationMenu } from "../application-menu";
 import { isWindowFullScreen, setWindowFullScreen } from "../window-fullscreen";
 import { createTraySessions } from "../tray-sessions";
@@ -367,7 +367,7 @@ export function createApplicationLifecycle({
       // Browser Dev Mode: the window is the backend anchor (mainWindow must
       // exist for IPC guards and event fan-out), not the user-visible surface.
       // Keep it hidden so only the browser shows the app.
-      if (process.env.PI_DESKTOP_WEB === "1" && state.mainWindow && !state.mainWindow.isDestroyed()) {
+      if (process.env.TRAIL_WEB === "1" && state.mainWindow && !state.mainWindow.isDestroyed()) {
         state.mainWindow.hide();
       }
       return true;

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Type } from "typebox";
-import type { AgentEventEnvelope } from "@pi-desktop/shared";
+import type { AgentEventEnvelope } from "@trail/shared";
 import { DesktopAgentRuntime } from "./runtime.js";
 import { SubagentRun } from "./subagent.js";
 import type { RuntimeProviderConfig } from "./provider-binding.js";
@@ -170,7 +170,7 @@ describe("provider recovery through real agent loops (#699)", () => {
   for (const [idleTimeout, failures] of [[180_000, 10], [30_000, 1]] as const) {
     it(`keeps ${failures} rate-limit waits outside the ${idleTimeout}ms stream idle budget`, async () => {
       vi.useFakeTimers();
-      vi.stubEnv("PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS", String(idleTimeout));
+      vi.stubEnv("TRAIL_STREAM_IDLE_TIMEOUT_MS", String(idleTimeout));
       const f = fixture([...Array<Step>(failures).fill("rate-limit"), "success"], 30_000);
       try {
         await settle(f.runtime.prompt("Report after the provider becomes available."), 400);
@@ -190,7 +190,7 @@ describe("provider recovery through real agent loops (#699)", () => {
 
   it("aborts a silent attempt and retries with a fresh request signal", async () => {
     vi.useFakeTimers();
-    vi.stubEnv("PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS", "30000");
+    vi.stubEnv("TRAIL_STREAM_IDLE_TIMEOUT_MS", "30000");
     const f = fixture(["stall", "success"]);
     try {
       await settle(f.runtime.prompt("Recover from a silent provider."));
@@ -207,7 +207,7 @@ describe("provider recovery through real agent loops (#699)", () => {
 
   it("keeps repeated idle timeouts inside the shared retry budget", async () => {
     vi.useFakeTimers();
-    vi.stubEnv("PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS", "30000");
+    vi.stubEnv("TRAIL_STREAM_IDLE_TIMEOUT_MS", "30000");
     const f = fixture(Array<Step>(11).fill("stall"));
     try {
       await settle(f.runtime.prompt("Report."), 450);

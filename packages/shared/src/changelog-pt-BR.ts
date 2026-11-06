@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const ptBREntries: ChangelogEntry[] = [
   {
+    version: "1.0.2",
+    date: "2026-11-06",
+    highlights: [
+      "Cada projeto escolhe seu próprio ícone e cor de espaço de trabalho, e a barra lateral os mostra em vez de um único ícone de pasta para tudo.",
+      "O índice do espaço de trabalho pode ser desativado por projeto nos diálogos de criar e editar; desativado, as sugestões @ não listam arquivos, mas um caminho já citado em uma conversa continua resolvendo.",
+      "Uso de tokens na barra lateral: um total dos últimos 12 meses, uma faixa diária por intensidade e o mesmo total dividido por modelo.",
+      "Minimize a janela ou abra em tela cheia no novo cartão Janela em Configurações, sem depender da barra de menus.",
+      "Mais provedores exibem sua marca oficial nas listas, incluindo Mistral, Kimi e Moonshot.",
+      "O ícone do aplicativo agora é uma marca limpa em todas as superfícies, inclusive na barra de tarefas do Windows e no Alt+Tab.",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-11-04",
     highlights: [
@@ -132,7 +144,7 @@ export const ptBREntries: ChangelogEntry[] = [
       "As tarefas agendadas podem rodar em cadência de intervalo: de 5 minutos a 24 horas, contadas a partir do momento em que a tarefa foi armada.",
       "A página Agendados combina a lista de tarefas com a tarefa selecionada: último resultado, próxima execução, instrução e histórico de execuções.",
       "A conversa de uma execução tem uma linha de retorno para sua tarefa e execução, e cada tarefa escolhe se uma execução abre uma nova conversa ou continua uma existente.",
-      "Cole um link pi-desktop://session/<id> no Composer para entregar uma conversa a outro turno.",
+      "Cole um link trail://session/<id> no Composer para entregar uma conversa a outro turno.",
       "Abra referências de arquivo path:line no chat, no painel de trabalho e no gerenciador de arquivos incluído, e vá direto para essa linha.",
       "Código embutido que resolve para um caminho de arquivo real agora é um link clicável; os demais códigos embutidos e blocos de código continuam simples.",
       "Cada servidor MCP pode definir seu próprio tempo limite de conexão (1-600 segundos), e limpá-lo restaura o padrão.",
@@ -706,7 +718,7 @@ export const ptBREntries: ChangelogEntry[] = [
       "Permite entrar em várias contas de provedores e escolher qual conta usar para cada provedor.",
       "Usa os recursos de cada modelo para decidir quando há suporte a anexos de imagem.",
       "Permite escolher no Composer o nível de esforço de raciocínio para modelos que oferecem esse recurso.",
-      "Mantém uma única instância do PI-Desktop por diretório de dados para evitar conflitos entre sessões.",
+      "Mantém uma única instância do Trail por diretório de dados para evitar conflitos entre sessões.",
       "Organiza Settings em grupos mais claros e simplifica o gerenciamento de contas de provedores.",
       "Mantém os subagentes integrados alinhados ao modo de permissão da conversa principal.",
     ]
@@ -750,7 +762,7 @@ export const ptBREntries: ChangelogEntry[] = [
       "Lembra os plugins usados recentemente no lançador para agilizar o acesso.",
       "Adiciona ao menu de contexto a opção de copiar o caminho da sessão para o modo de desenvolvedor.",
       "Corrige problemas de corte no seletor de fontes e na restauração da fonte padrão do sistema.",
-      "Mantém o PI-Desktop no Dock do macOS e no Cmd+Tab após fechar a janela.",
+      "Mantém o Trail no Dock do macOS e no Cmd+Tab após fechar a janela.",
       "Mantém a transcrição do chat na posição mais recente quando o Composer é recolhido após o envio.",
       "Adiciona ao painel de trabalho um estado vazio real, com orientações mais claras.",
     ]
@@ -790,7 +802,7 @@ export const ptBREntries: ChangelogEntry[] = [
     "date": "2026-08-12",
     "highlights": [
       "Restaura o lançador global de plugins do Windows com Alt+Space, mesmo quando outra aplicação está em foco.",
-      "Mantém o PI-Desktop disponível na bandeja do sistema quando minimizado no macOS, Windows e Linux.",
+      "Mantém o Trail disponível na bandeja do sistema quando minimizado no macOS, Windows e Linux.",
       "Melhora a legibilidade dos menus de seleção nativos nos temas claro e escuro.",
     ]
   },
@@ -866,8 +878,8 @@ export const ptBREntries: ChangelogEntry[] = [
     "version": "0.4.1",
     "date": "2026-08-02",
     "highlights": [
-      "Atualiza os links do GitHub Releases e do atualizador automático para apontarem ao repositório canônico do PI-Desktop.",
-      "Atualiza a documentação do projeto, dos plugins e das versões para usar o nome do repositório PI-Desktop.",
+      "Atualiza os links do GitHub Releases e do atualizador automático para apontarem ao repositório canônico do Trail.",
+      "Atualiza a documentação do projeto, dos plugins e das versões para usar o nome do repositório Trail.",
     ]
   },
   {

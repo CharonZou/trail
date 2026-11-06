@@ -4,8 +4,8 @@ import {
   isAppLocale,
   resolveLocale,
   type AppLocale,
-} from "@pi-desktop/i18n/locale-info";
-import type { AppSettings } from "@pi-desktop/shared";
+} from "@trail/i18n/locale-info";
+import type { AppSettings } from "@trail/shared";
 import { loadRendererCatalog } from "./renderer-catalogs.ts";
 
 export type AppLanguageSetting = NonNullable<AppSettings["language"]>;

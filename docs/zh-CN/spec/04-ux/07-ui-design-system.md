@@ -479,7 +479,7 @@ WebKit 与 Chromium 会忽略伪元素，该表面退回为常显的原生滚动
 在同一行。 macOS 行省略侧边栏 logo/title，保留 `88px`
 在窗口模式下的本机 chrome 左侧，并回收该填充
 全屏。 该预留量是共享 token `--ds-window-lead-inset` —— 灯簇 `76px` 右缘
-（与主进程放置按钮所用的是同一份 `@pi-desktop/shared` 几何）加 `12px` 留白。
+（与主进程放置按钮所用的是同一份 `@trail/shared` 几何）加 `12px` 留白。
 Windows/Linux 将身份和侧边栏操作保留在第一位置
 行并为三个无框窗口控件保留最右边的 112px。每个
 control 拥有 46px 高保留带的全部份额。展开的工作面板标题使用可横向滚动的
@@ -967,7 +967,7 @@ Linux 保留淡入淡出和滑动退出。
   border box excludes shell actions plus an 8px gap in both sidebar states on
   every platform. The left inset is 8px except collapsed-sidebar windowed macOS
   (88px through `--ds-window-lead-inset`: the shared 76px native cluster edge
-  plus 12px, from the same `@pi-desktop/shared` geometry used by main).
+  plus 12px, from the same `@trail/shared` geometry used by main).
   The expanded action lane uses the shared 28px control size plus 8px; the
   collapsed lane uses two controls, 4px spacing and an 8px gap.
   Right native-control exclusion is unchanged. Header-height background
@@ -1163,6 +1163,46 @@ must remain outside optional disclosures.
 
 设置中的下拉选项列表必须使用 `SettingsMenuSelect`，不使用浏览器原生
 `Select`（`<select>`）。
+
+### 11.13 ProjectAppearancePicker
+
+实现：`components/ProjectAppearance.tsx` —— `ProjectAppearancePicker`（创建项目与
+编辑项目弹窗里的两行）和 `ProjectAppearanceGlyph`（侧栏项目行的前置图标）。
+
+| 属性 | 值 |
+|---|---|
+| 格子 | `--radius-md`、`--appearance-tile`（23px）网格轨道、6px 间距 |
+| CSS 类 | `.project-appearance-row` / `.project-appearance-tile` / `.project-appearance-swatch` / `.project-appearance-swatch-dot` |
+| 目录 | 二十二个图标选项（不写值的默认格、十四个 Lucide 图形、七个用户自备图形）与十五个颜色选项 |
+| 内容 | 每个图标格一个 15px 图形；每个颜色格一个 12px 的 `currentColor` 圆点 |
+| 选中 | `--ds-tile-deep` 底色加 `--ds-focus` 边框与 1px 描边 —— 绝不只靠颜色表意 |
+| 角色 | 整行是带 `aria-label` 的 `role="group"`；每格是一个带 `aria-pressed` 与组合 `aria-label` 的 `TooltipButton` |
+| 禁用 | 沿用弹窗的忙碌态 —— 不另设禁用样式 |
+| 运动 | 快速的底色/边框过渡，在 `prefers-reduced-motion` 下移除 |
+| 文案 | 每一格的名称都来自九份目录里的 `project.appearance.*` |
+
+两个项目弹窗**必须**共用 `ProjectAppearancePicker`，这样格子顺序、选中语义和存储的
+这一对值不会在两个入口之间各走各的；远程项目没有本地装饰可存，两行都不显示
+（D680）。弹窗的顺序是工作区 → 图标 → 颜色 → 工作区索引：两行装饰在前，开关收尾。
+
+每行第一格什么都不存，并且在项目没有存对应那一半时呈选中态，所以没人装饰过的项目
+继续用历史文件夹图形和主题自身的文字色，而不是它们的副本。`ProjectGlyph` 负责把一个
+存储 id 解析成图形：Lucide 一族用本组件里的 id → 组件映射，其余落在
+`lib/project-icon-shapes.ts` 的 id → path 数据映射里。两者都是纯数据模块 ——
+`lib/project-appearance.ts` 与 `lib/project-icon-shapes.ts` 都不能导入组件，store 才
+能引用它们 —— 两张映射合起来必须覆盖整个目录，这条约束由
+`test/project-appearance.test.mjs` 钉住。已存颜色要经过 `resolveProjectColor` 证明它是
+`#rrggbb` 之后才进入样式。
+
+自备图形是拍平后的 path 数据而不是 Lucide 组件：每个 `<path>` 都画 `currentColor`，
+原稿颜色只保留成透明度，于是项目色调对它们的作用方式与描边图标完全一致。硬编码的
+填充会让颜色行恰好在这七格上失效。每形的 `viewBox` 是按实测墨迹外接框裁出的正方形，
+所以很宽的导出结果也能在方格正中显示，而不是继承原稿的宽高比。
+
+整行是 `repeat(auto-fill, minmax(23px, 1fr))` 网格配 `grid-auto-rows: 23px`，而不是固定
+宽度的 flex 行：弹窗那一列宽 444px，一排固定 26px 的格子会溢出它，最后的选项会单独
+掉到第二行。流体轨道让弹窗在自己的宽度上每行放下十五列——颜色行因此是一整行，图标行
+再接上同样十五列的第二行——只有当那一列连 23px 的最小格都放不下时，才退回更少的列。
 
 ## 12. 状态模式
 

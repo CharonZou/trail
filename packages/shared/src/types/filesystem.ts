@@ -67,11 +67,34 @@ export type TokenUsageHistoryItem = {
   turnCount: number;
 };
 
+/**
+ * Completed-turn totals for one wire model over the same range as `items`,
+ * ranked by `totalTokens` descending. Turns whose row carries no model stay a
+ * `null` key so their usage cannot disappear from the total.
+ */
+export type TokenUsageModelTotal = {
+  providerId: string | null;
+  modelId: string | null;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  reasoningTokens: number;
+  turnCount: number;
+};
+
 export type TokenUsageHistoryResult = {
   bucket: TokenUsageBucket;
   rangeStart: number;
   rangeEnd: number;
   items: TokenUsageHistoryItem[];
+  /**
+   * Absent from a host built before D682, which answers with `items` and
+   * `totals` only. A consumer must treat "no dimension" as "nothing to rank",
+   * never as an array.
+   */
+  models?: TokenUsageModelTotal[];
   totals: {
     inputTokens: number;
     outputTokens: number;

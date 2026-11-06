@@ -56,7 +56,7 @@ test("CI does not typecheck workspace dependencies twice", () => {
 
   assert.match(
     ciWorkflowSource,
-    /run: pnpm --filter @pi-desktop\/desktop typecheck/,
+    /run: pnpm --filter @trail\/desktop typecheck/,
   );
   assert.doesNotMatch(ciWorkflowSource, /run: pnpm typecheck/);
 });
@@ -82,7 +82,7 @@ test("release preparation overlaps independent work and avoids duplicate builds"
   assert.match(releaseWorkflowSource, /wait "\$host_build_pid"/);
   assert.match(
     releaseWorkflowSource,
-    /pnpm --filter '@pi-desktop\/desktop\^\.\.\.' --fail-if-no-match build/,
+    /pnpm --filter '@trail\/desktop\^\.\.\.' --fail-if-no-match build/,
   );
   // The full JS build belongs to the verify gate; the build matrix only
   // builds the desktop app's workspace dependencies.
@@ -99,7 +99,7 @@ test("release builds are gated on the CI checks and least-privilege permissions"
   assert.ok(verifyJob, "release verify job is missing");
   for (const step of [
     /run: pnpm build:js/,
-    /run: pnpm --filter @pi-desktop\/desktop typecheck/,
+    /run: pnpm --filter @trail\/desktop typecheck/,
     /run: pnpm lint/,
     /run: pnpm -r --if-present test/,
     /run: cargo test -p host-core --locked/,
@@ -123,7 +123,7 @@ test("manual Linux package validation covers the RPM desktop identity", () => {
   assert.match(linuxPackageWorkflowSource, /runs-on: ubuntu-22\.04/);
   assert.match(
     linuxPackageWorkflowSource,
-    /run: pnpm --filter @pi-desktop\/desktop run dist:linux -- --x64/,
+    /run: pnpm --filter @trail\/desktop run dist:linux -- --x64/,
   );
   assert.match(
     linuxPackageWorkflowSource,
@@ -137,10 +137,10 @@ test("manual Linux package validation covers the RPM desktop identity", () => {
   assert.match(linuxPackageWorkflowSource, /build-id/);
   assert.match(
     linuxPackageWorkflowSource,
-    /usr\/share\/applications\/pi-desktop\.desktop/,
+    /usr\/share\/applications\/trail\.desktop/,
   );
-  assert.match(linuxPackageWorkflowSource, /Icon=pi-desktop/);
-  assert.match(linuxPackageWorkflowSource, /StartupWMClass=pi-desktop/);
+  assert.match(linuxPackageWorkflowSource, /Icon=trail/);
+  assert.match(linuxPackageWorkflowSource, /StartupWMClass=trail/);
   assert.match(
     linuxPackageWorkflowSource,
     /uses: actions\/upload-artifact@v7[\s\S]*path: apps\/desktop\/release\/\*\.rpm/,
@@ -211,8 +211,8 @@ test("the Linux package config lets the workflow choose the architecture", () =>
     /-linux-\$\{arch\}\.\$\{ext\}$/,
     "the AppImage name carries its architecture",
   );
-  assert.equal(build.deb.artifactName, "pi-desktop_${version}_${arch}.${ext}");
-  assert.equal(build.rpm.artifactName, "pi-desktop-${version}-${arch}.${ext}");
+  assert.equal(build.deb.artifactName, "trail_${version}_${arch}.${ext}");
+  assert.equal(build.rpm.artifactName, "trail-${version}-${arch}.${ext}");
 });
 
 test("release matrix packages both native macOS architectures", () => {
@@ -226,7 +226,7 @@ test("release matrix packages both native macOS architectures", () => {
   );
   assert.match(
     releaseWorkflowSource,
-    /name: Package installers \(\$\{\{ matrix\.dist \}\}\)[\s\S]*?if: matrix\.platform != 'macos'[\s\S]*?run: pnpm --filter @pi-desktop\/desktop run \$\{\{ matrix\.dist \}\} -- --\$\{\{ matrix\.arch \}\}/,
+    /name: Package installers \(\$\{\{ matrix\.dist \}\}\)[\s\S]*?if: matrix\.platform != 'macos'[\s\S]*?run: pnpm --filter @trail\/desktop run \$\{\{ matrix\.dist \}\} -- --\$\{\{ matrix\.arch \}\}/,
   );
   assert.equal(
     JSON.parse(desktopPackageSource).build.mac.artifactName,
@@ -240,7 +240,7 @@ test("release matrix packages both native macOS architectures", () => {
   );
   assert.match(
     releaseWorkflowSource,
-    /Package unsigned macOS installer[\s\S]*?pnpm --filter @pi-desktop\/desktop run dist:mac -- --\$\{\{ matrix\.arch \}\}/,
+    /Package unsigned macOS installer[\s\S]*?pnpm --filter @trail\/desktop run dist:mac -- --\$\{\{ matrix\.arch \}\}/,
     "unsigned macOS builds use the shared artifact naming config",
   );
   assert.doesNotMatch(
@@ -324,7 +324,7 @@ test("macOS release signing is required on tag pushes", () => {
   assert.match(signedBlock, /PI_STAPLER_RETRY_DELAY_SECONDS: "10"/);
   assert.match(
     signedBlock,
-    /node scripts\/macos-signing-watchdog\.mjs \\\n\s+--label "dist:mac-\$\{\{ matrix\.arch \}\}" \\\n\s+-- pnpm --filter @pi-desktop\/desktop run dist:mac/,
+    /node scripts\/macos-signing-watchdog\.mjs \\\n\s+--label "dist:mac-\$\{\{ matrix\.arch \}\}" \\\n\s+-- pnpm --filter @trail\/desktop run dist:mac/,
     "the signed macOS packaging phase runs under the signing watchdog",
   );
   // electron-builder notarizes only the .app; the DMG needs its own

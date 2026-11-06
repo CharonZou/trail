@@ -56,8 +56,8 @@ async function launch() {
   mkdirSync(userDataDir);
   const env = {
     ...process.env,
-    PI_DESKTOP_DATA_DIR: dataDir,
-    PI_DESKTOP_START_MAXIMIZED: "0",
+    TRAIL_DATA_DIR: dataDir,
+    TRAIL_START_MAXIMIZED: "0",
     ELECTRON_RENDERER_URL: "",
   };
   delete env.ELECTRON_RUN_AS_NODE;

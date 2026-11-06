@@ -2,7 +2,7 @@ import type {
   PluginWorkspaceInfo,
   PluginWorkspaceRoot,
   ProjectGroupRecord,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 /**
  * The project-group roots behind the one visible workspace (ADR 0249, ADR 0263).
@@ -68,6 +68,20 @@ export function workspaceRootsFor(
   const roots = rootsOf(group);
   if (roots.length === 0) return {};
   return { projectId: group.id, roots };
+}
+
+/**
+ * Whether the workspace file index may be built for `path`. Only an explicit
+ * `false` disables it: a standalone folder, a cold snapshot and a project
+ * created before the switch all keep the historical behaviour of indexing.
+ */
+export function workspaceIndexEnabledFor(path: string | null): boolean {
+  if (!path || !groups) return true;
+  const wanted = comparable(path);
+  const group = groups.find((candidate) =>
+    candidate.roots.some((root) => comparable(root.path) === wanted),
+  );
+  return group?.workspaceIndex !== false;
 }
 
 /**

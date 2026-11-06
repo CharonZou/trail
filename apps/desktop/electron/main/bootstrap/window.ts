@@ -9,7 +9,7 @@ import {
   IPC,
   MAC_TRAFFIC_LIGHT_POSITION,
   type CloseBehavior,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type { BrowserHost } from "../browser-host";
 import type { HostProcess } from "../host-process";
 import type { Logger } from "../logger";
@@ -201,7 +201,7 @@ export async function createWindow({
     // One frameless look everywhere: macOS keeps inset traffic lights;
     // Windows/Linux hide native chrome entirely — the renderer draws its
     // own Codex-style window controls (see WindowControls.tsx).
-    // The traffic-light position comes from @pi-desktop/shared so the space
+    // The traffic-light position comes from @trail/shared so the space
     // the renderer reserves for the buttons (styles/tokens.css) is derived
     // from the same numbers that place them.
     ...(process.platform === "darwin"
@@ -241,7 +241,7 @@ export async function createWindow({
       // Preload runs in a sandbox and cannot import Electron's main-only `app`
       // module. Pass the display locale at process creation so it remains
       // available synchronously before the renderer's first paint.
-      additionalArguments: [`--pi-desktop-locale=${app.getLocale()}`],
+      additionalArguments: [`--trail-locale=${app.getLocale()}`],
     },
   });
   const window = windowState.mainWindow;
@@ -674,7 +674,7 @@ export async function createWindow({
     window.on("maximize", sendMaximized);
     // Native-runner E2E fixture: establish the initial native state before
     // the renderer mounts, then let WindowControls query it through IPC.
-    if (process.env.PI_DESKTOP_START_MAXIMIZED === "1") window.maximize();
+    if (process.env.TRAIL_START_MAXIMIZED === "1") window.maximize();
   }
   window.on("unmaximize", () => {
     if (process.platform !== "darwin") sendMaximized();
@@ -1159,14 +1159,14 @@ export async function createWindow({
     if (!isLiveWindow()) return;
     // Capture runs need the deterministic Codex footprint; normal launches
     // must respect restored user bounds and only fix real shelf states.
-    ensureStableBounds(process.env.PI_DESKTOP_CAPTURE === "1");
+    ensureStableBounds(process.env.TRAIL_CAPTURE === "1");
     window.show();
     window.focus();
     // Burst re-assert only while Stage Manager initially settles / shelves us.
     for (const ms of [100, 250, 500, 1000, 2000, 3500, 5000, 8000, 12000]) {
       setTimeout(() => ensureStableBounds(false), ms);
     }
-    if (process.env.PI_DESKTOP_CAPTURE === "1") {
+    if (process.env.TRAIL_CAPTURE === "1") {
       setTimeout(() => {
         void (async () => {
           try {
@@ -1184,17 +1184,17 @@ export async function createWindow({
             };
             const setPage = async (page: string) => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setPage?.(${JSON.stringify(page)})`,
+                `window.__TRAIL__?.setPage?.(${JSON.stringify(page)})`,
               );
             };
             const setSettingsTab = async (tab: string) => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setSettingsTab?.(${JSON.stringify(tab)})`,
+                `window.__TRAIL__?.setSettingsTab?.(${JSON.stringify(tab)})`,
               );
             };
             const setTheme = async (theme: "light" | "dark") => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setThemeAttr?.(${JSON.stringify(theme)})`,
+                `window.__TRAIL__?.setThemeAttr?.(${JSON.stringify(theme)})`,
               );
             };
             // Wait until React leaves the starting gate.
@@ -1212,8 +1212,8 @@ export async function createWindow({
               await new Promise((r) => setTimeout(r, 250));
             }
             await windowState.mainWindow!.webContents.executeJavaScript(`
-              window.__PI_DESKTOP__?.setThemeAttr?.("light");
-              window.__PI_DESKTOP__?.setPage?.("chat");
+              window.__TRAIL__?.setThemeAttr?.("light");
+              window.__TRAIL__?.setPage?.("chat");
               // ensure expanded sidebar if rail-only
               if (document.querySelector(".sidebar-rail") && !document.querySelector(".sidebar")) {
                 document.dispatchEvent(new KeyboardEvent("keydown", { key: "b", metaKey: true, bubbles: true }));
@@ -1222,7 +1222,7 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 400));
             try {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_CAPTURE__ = 1; void window.__PI_DESKTOP__?.ensureVisualFixtures?.()`,
+                `window.__PI_CAPTURE__ = 1; void window.__TRAIL__?.ensureVisualFixtures?.()`,
               );
             } catch {
               // fixtures optional
@@ -1230,8 +1230,8 @@ export async function createWindow({
             // Focused sidebar-status capture: one row per D135 state, in both
             // themes. The status-only mode exits before the broader visual
             // suite and is intended for narrow UI verification.
-            if (process.env.PI_DESKTOP_CAPTURE_STATUS_ONLY === "1") {
-              if (process.env.PI_DESKTOP_CAPTURE_REDUCED_MOTION === "1") {
+            if (process.env.TRAIL_CAPTURE_STATUS_ONLY === "1") {
+              if (process.env.TRAIL_CAPTURE_REDUCED_MOTION === "1") {
                 windowState.mainWindow!.webContents.debugger.attach("1.3");
                 await windowState.mainWindow!.webContents.debugger.sendCommand(
                   "Emulation.setEmulatedMedia",
@@ -1243,11 +1243,11 @@ export async function createWindow({
                 );
               }
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.ensureVisualFixtures?.()`,
+                `window.__TRAIL__?.ensureVisualFixtures?.()`,
               );
               await new Promise((r) => setTimeout(r, 300));
               const statusFixture = await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.seedSidebarStatuses?.()`,
+                `window.__TRAIL__?.seedSidebarStatuses?.()`,
               );
               const probeStatuses = async (theme: "light" | "dark") => {
                 await setTheme(theme);
@@ -1300,7 +1300,7 @@ export async function createWindow({
                   apiStyle: "chat_completions",
                 });
                 await windowState.mainWindow!.webContents.executeJavaScript(
-                  `void window.__PI_DESKTOP__?.refreshProviders?.()`,
+                  `void window.__TRAIL__?.refreshProviders?.()`,
                 );
                 await new Promise((r) => setTimeout(r, 300));
               }
@@ -1355,7 +1355,7 @@ export async function createWindow({
             // and its tool list are on screen (D224). Photograph it in both
             // themes before the artifact scenes create tabs.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.openWorkPanel()`,
+              `window.__TRAIL__?.openWorkPanel()`,
             );
             await new Promise((r) => setTimeout(r, 500));
             await shot("pi-panel-empty");
@@ -1366,13 +1366,13 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 300));
             const openPanelArtifact = (kind: string, resource?: string) =>
               windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.openWorkPanelArtifact(${JSON.stringify(kind)}, ${JSON.stringify(resource)})`,
+                `window.__TRAIL__?.openWorkPanelArtifact(${JSON.stringify(kind)}, ${JSON.stringify(resource)})`,
               );
             await openPanelArtifact("review");
             // The Review tab reads the session transcript, so without a change
             // fixture every review scene would shoot the empty state.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedReviewChanges?.(4)`,
+              `void window.__TRAIL__?.seedReviewChanges?.(4)`,
             );
             await new Promise((r) => setTimeout(r, 500));
             await shot("pi-panel-review");
@@ -1401,23 +1401,23 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-review-rows");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__TRAIL__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-review-rows-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__TRAIL__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedReviewChanges?.(0)`,
+              `void window.__TRAIL__?.seedReviewChanges?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // Per-turn changed-files card (D674): relaxed rows for a few
             // files, dense rows plus `+N more` for many.
             const shootTurnChanges = async (files: number, name: string) => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `void window.__PI_DESKTOP__?.seedTurnChanges?.(${files})`,
+                `void window.__TRAIL__?.seedTurnChanges?.(${files})`,
               );
               await new Promise((r) => setTimeout(r, 450));
               await windowState.mainWindow!.webContents.executeJavaScript(
@@ -1429,12 +1429,12 @@ export async function createWindow({
             await shootTurnChanges(3, "pi-turn-changes");
             await shootTurnChanges(15, "pi-turn-changes-dense");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__TRAIL__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-turn-changes-dense-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__TRAIL__?.setThemeAttr("light")`,
             );
             // A row click opens Review on that file with its change expanded.
             await windowState.mainWindow!.webContents.executeJavaScript(
@@ -1443,14 +1443,14 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 600));
             await shot("pi-turn-changes-open-review");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedTurnChanges?.(0)`,
+              `void window.__TRAIL__?.seedTurnChanges?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // A run row keeps its command in the head and only its output in the
             // body (D226). Seed one row per state, open the activity groups, and
             // hover the open row so its copy control and caret are on screen.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedRunRows?.(3)`,
+              `void window.__TRAIL__?.seedRunRows?.(3)`,
             );
             await new Promise((r) => setTimeout(r, 400));
             await windowState.mainWindow!.webContents.executeJavaScript(`
@@ -1479,22 +1479,22 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-run-rows");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__TRAIL__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-run-rows-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__TRAIL__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedRunRows?.(0)`,
+              `void window.__TRAIL__?.seedRunRows?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // Every delegation is a card, a lone one included: seed one `Task`
             // and a two-`Task` fan-out so the scene shows the two read alike.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedDelegationRows?.(3)`,
+              `void window.__TRAIL__?.seedDelegationRows?.(3)`,
             );
             await new Promise((r) => setTimeout(r, 400));
             await windowState.mainWindow!.webContents.executeJavaScript(`
@@ -1512,16 +1512,16 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-delegation-cards");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__TRAIL__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-delegation-cards-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__TRAIL__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedDelegationRows?.(0)`,
+              `void window.__TRAIL__?.seedDelegationRows?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await openPanelArtifact("browser");
@@ -1546,7 +1546,7 @@ export async function createWindow({
               }
             };
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.openNewWorkPanelTab?.()`,
+              `window.__TRAIL__?.openNewWorkPanelTab?.()`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-panel-new");
@@ -1615,7 +1615,7 @@ export async function createWindow({
             // tests a clipped surface, so it is not suitable for this header
             // geometry check.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setWorkPanelWidth?.(244)`,
+              `window.__TRAIL__?.setWorkPanelWidth?.(244)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             captureViewportOverride = true;
@@ -1639,7 +1639,7 @@ export async function createWindow({
             }
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.collapseWorkPanel()`,
+              `window.__TRAIL__?.collapseWorkPanel()`,
             );
             await new Promise((r) => setTimeout(r, 300));
             // Open composer + menu for chrome parity proof.
@@ -1691,7 +1691,7 @@ export async function createWindow({
             // Conversation minimap: seed a capture-only transcript, magnify
             // mid-rail (Dock effect + preview popover), then restore.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedTranscript?.()`,
+              `void window.__TRAIL__?.seedTranscript?.()`,
             );
             await new Promise((r) => setTimeout(r, 600));
             await shot("pi-minimap");
@@ -1712,15 +1712,15 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-minimap-hover");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedTranscript?.(0)`,
+              `void window.__TRAIL__?.seedTranscript?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // Radial menu scenes (D678): the opt-in ring on the transcript
             // background, sector labels at rest, one sector hovered; light
             // then dark.
             await windowState.mainWindow!.webContents.executeJavaScript(`
-              void window.__PI_DESKTOP__?.seedTranscript?.(6);
-              window.__PI_DESKTOP__?.seedRadialMenu?.(true);
+              void window.__TRAIL__?.seedTranscript?.(6);
+              window.__TRAIL__?.seedRadialMenu?.(true);
             `);
             await new Promise((r) => setTimeout(r, 500));
             await setTheme("light");
@@ -1765,8 +1765,8 @@ export async function createWindow({
             await shot("pi-radial-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(`
               window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-              window.__PI_DESKTOP__?.seedRadialMenu?.(false);
-              void window.__PI_DESKTOP__?.seedTranscript?.(0);
+              window.__TRAIL__?.seedRadialMenu?.(false);
+              void window.__TRAIL__?.seedTranscript?.(0);
             `);
             await setTheme("light");
             await new Promise((r) => setTimeout(r, 250));
@@ -1774,7 +1774,7 @@ export async function createWindow({
             // both themes, then the responsive fixed-position popover.
             const openNotificationFixture = async () => {
               await windowState.mainWindow!.webContents.executeJavaScript(`
-                window.__PI_DESKTOP__?.seedNotifications?.(105);
+                window.__TRAIL__?.seedNotifications?.(105);
                 document.querySelector('.notification-trigger')?.dispatchEvent(
                   new MouseEvent('click', { bubbles: true })
                 );
@@ -1783,7 +1783,7 @@ export async function createWindow({
               // fixture after that request settles.
               await new Promise((r) => setTimeout(r, 350));
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.seedNotifications?.(105)`,
+                `window.__TRAIL__?.seedNotifications?.(105)`,
               );
               await new Promise((r) => setTimeout(r, 150));
             };
@@ -1845,7 +1845,7 @@ export async function createWindow({
               await shot("pi-notifications-narrow");
               await windowState.mainWindow!.webContents.executeJavaScript(`
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-                window.__PI_DESKTOP__?.seedNotifications?.(0);
+                window.__TRAIL__?.seedNotifications?.(0);
               `);
             } finally {
               windowState.mainWindow!.setSize(CODEX_BOUNDS.width, CODEX_BOUNDS.height, false);
@@ -1860,7 +1860,7 @@ export async function createWindow({
               captureViewportOverride = false;
             }
             await new Promise((r) => setTimeout(r, 300));
-            // Destination + theme captures (robust via __PI_DESKTOP__ hooks).
+            // Destination + theme captures (robust via __TRAIL__ hooks).
             await setTheme("dark");
             await setPage("chat");
             await new Promise((r) => setTimeout(r, 250));
@@ -1883,8 +1883,8 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 700));
             await shot("pi-scheduled-live");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(4);
-               window.__PI_DESKTOP__?.seedExtensions?.(3)`,
+              `window.__TRAIL__?.seedPlugins?.(4);
+               window.__TRAIL__?.seedExtensions?.(3)`,
             );
             await setPage("plugins");
             await new Promise((r) => setTimeout(r, 350));
@@ -1892,7 +1892,7 @@ export async function createWindow({
             // replaces the fixture with the real (near-empty) index; seed again
             // once the mount effect has settled.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(4)`,
+              `window.__TRAIL__?.seedPlugins?.(4)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await shot("pi-plugins-live");
@@ -2067,9 +2067,9 @@ export async function createWindow({
             `);
             await new Promise((r) => setTimeout(r, 200));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(0);
-               window.__PI_DESKTOP__?.seedExtensions?.(0);
-               window.__PI_DESKTOP__?.seedPluginThemes?.(2)`,
+              `window.__TRAIL__?.seedPlugins?.(0);
+               window.__TRAIL__?.seedExtensions?.(0);
+               window.__TRAIL__?.seedPluginThemes?.(2)`,
             );
             await setPage("settings");
             // The general tab carries the theme picker, including plugin themes
@@ -2081,7 +2081,7 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-settings-live");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPluginThemes?.(0)`,
+              `window.__TRAIL__?.seedPluginThemes?.(0)`,
             );
             // Dropping the seeded plugin themes re-applies the stored theme,
             // which is still dark from the destination pass; the remaining
@@ -2203,9 +2203,9 @@ export async function createWindow({
             // Toast stack proof (ToastHost variants) in both themes.
             const raiseToasts = () =>
               windowState.mainWindow!.webContents.executeJavaScript(`
-                window.__PI_DESKTOP__?.showToast?.("Provider saved", { variant: "success" });
-                window.__PI_DESKTOP__?.showToast?.("Reconnecting to local backend…", { variant: "warning" });
-                window.__PI_DESKTOP__?.showToast?.("Model request failed: 401 Unauthorized", { variant: "error" });
+                window.__TRAIL__?.showToast?.("Provider saved", { variant: "success" });
+                window.__TRAIL__?.showToast?.("Reconnecting to local backend…", { variant: "warning" });
+                window.__TRAIL__?.showToast?.("Model request failed: 401 Unauthorized", { variant: "error" });
               `);
             await raiseToasts();
             await new Promise((r) => setTimeout(r, 400));
@@ -2229,7 +2229,7 @@ export async function createWindow({
 
   if (process.env.ELECTRON_RENDERER_URL) {
     await window.loadURL(process.env.ELECTRON_RENDERER_URL);
-    if (process.env.PI_DESKTOP_DEVTOOLS === "1") {
+    if (process.env.TRAIL_DEVTOOLS === "1") {
       window.webContents.openDevTools({ mode: "detach" });
     }
   } else {

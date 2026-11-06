@@ -1,4 +1,4 @@
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@trail/shared";
 import type { SpeechService } from "../services/speech-service";
 import type { IpcRegistrar } from "./types";
 

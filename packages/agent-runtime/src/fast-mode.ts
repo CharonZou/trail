@@ -5,7 +5,7 @@
  */
 
 import type { SimpleStreamOptions } from "@earendil-works/pi-ai";
-import { FAST_MODE_SERVICE_TIER, fastModeSupportedOn } from "@pi-desktop/shared";
+import { FAST_MODE_SERVICE_TIER, fastModeSupportedOn } from "@trail/shared";
 
 /** Ask for the priority tier on a wire that carries it; other wires keep their options. */
 export function withFastModeOptions(

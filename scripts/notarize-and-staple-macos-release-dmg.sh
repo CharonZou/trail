@@ -56,7 +56,7 @@ DMG="${DMGS[0]}"
 
 # Explicit template: GNU `mktemp -t` rejects a name without X's, and BSD
 # `mktemp -t` would append its own suffix. `TMPDIR` is set on macOS runners.
-SUBMIT_LOG="$(mktemp "${TMPDIR:-/tmp}/pi-desktop-notarytool-submit.XXXXXX")"
+SUBMIT_LOG="$(mktemp "${TMPDIR:-/tmp}/trail-notarytool-submit.XXXXXX")"
 trap 'rm -f "$SUBMIT_LOG"' EXIT
 
 # `notarytool log` needs the same credentials as `submit`; both are passed on

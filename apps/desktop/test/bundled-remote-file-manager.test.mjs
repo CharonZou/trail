@@ -17,8 +17,8 @@ test("the actual bundled File Manager lists and reads remote files through the H
   await mkdir(data);
   await writeFile(join(root, "docs/guide.md"), "ACTUAL BUNDLED REMOTE BYTES\n");
   await writeFile(join(root, ".env"), "private fixture");
-  const previousData = process.env.PI_DESKTOP_DATA_DIR;
-  process.env.PI_DESKTOP_DATA_DIR = data;
+  const previousData = process.env.TRAIL_DATA_DIR;
+  process.env.TRAIL_DATA_DIR = data;
   const { PluginRuntime } = await import("../electron/main/plugin-runtime.ts");
   const { createWorkspacePluginFiles } = await import("../../pi-host/src/plugin-workspace-files.ts");
   const identity = "remote-project:bundled-regression";
@@ -53,8 +53,8 @@ test("the actual bundled File Manager lists and reads remote files through the H
       await runtime.unload("pi.file-manager");
     } finally {
       await rm(directory, { recursive: true, force: true });
-      if (previousData === undefined) delete process.env.PI_DESKTOP_DATA_DIR;
-      else process.env.PI_DESKTOP_DATA_DIR = previousData;
+      if (previousData === undefined) delete process.env.TRAIL_DATA_DIR;
+      else process.env.TRAIL_DATA_DIR = previousData;
     }
   });
   await runtime.loadFromPath(fileURLToPath(new URL("../resources/plugins/pi.file-manager", import.meta.url)));

@@ -3,7 +3,7 @@ import { nativeTheme } from "electron";
 import type {
   AppMenuCommand,
   CloseBehavior,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   emptyWorkPanelReservationState,
   type WindowBounds,

@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { SessionWorktreeSummary, WorktreePendingWork } from "@pi-desktop/shared";
+import type { SessionWorktreeSummary, WorktreePendingWork } from "@trail/shared";
 import {
   IconBranch,
   IconFileText,
@@ -159,107 +159,6 @@ export function useWorktreeSessionMenuItems({
   const [behind, setBehind] = useState<number | null>(null);
   useEffect(() => {
     if (!sessionId || !syncable) return;
-    let current = true;
-    setBehind(null);
-    api
-      .getWorktreeBehind(sessionId)
-      .then((count) => {
-        if (!current) return;
-        setBehind(count);
-        useWorktreeUi.getState().setBehindFor(sessionId, count);
-      })
-      .catch(() => current && setBehind(-1));
-    return () => {
-      current = false;
-    };
-  }, [sessionId, syncable]);
-  if (!worktree) return [];
-  const missing = worktree.status === "missing";
-  return [
-    sidebarMenuAction({
-      id: "worktree-merge",
-      label: t("worktree.merge.menu"),
-      icon: <IconPullRequest size={14} />,
-      disabled: running || missing,
-      onSelect: () => {
-        onDone();
-        open({ kind: "merge", sessionId, title });
-      },
-    }),
-    sidebarMenuAction({
-      id: "worktree-sync",
-      label:
-        syncable && behind !== null && behind > 0
-          ? t("worktree.sync.menuBehind", { count: behind })
-          : t("worktree.sync.menu"),
-      icon: <IconRefresh size={14} />,
-      disabled: running || !syncable || behind === null || behind === 0,
-      busy: behind === null && syncable,
-      title: conflicted
-        ? t("worktree.sync.resolveFirst")
-        : behind === 0
-          ? t("worktree.sync.upToDate")
-          : undefined,
-      onSelect: () => {
-        onDone();
-        void syncIsolatedSession(sessionId, t);
-      },
-    }),
-    sidebarMenuAction({
-      id: "worktree-reveal",
-      label: t("worktree.reveal"),
-      icon: <IconFolderOpen size={14} />,
-      disabled: missing,
-      onSelect: () => {
-        onDone();
-        void api.revealWorktree(sessionId).catch((error: unknown) =>
-          useAppStore
-            .getState()
-            .showToast(worktreeErrorMessage(error, t), { variant: "error" }),
-        );
-      },
-    }),
-    ...(worktree.setupStatus && worktree.setupStatus !== "none"
-      ? [
-          sidebarMenuAction({
-            id: "worktree-setup-log",
-            label: t("worktree.setupLog.menu"),
-            icon: <IconFileText size={14} />,
-            onSelect: () => {
-              onDone();
-              open({ kind: "setupLog", sessionId, title });
-            },
-          }),
-        ]
-      : []),
-  ];
-}
-
-/** Session-menu items of an isolated session; nothing for other sessions. */
-export function WorktreeSessionMenuItems({
-  sessionId,
-  title,
-  worktree,
-  running,
-  onDone,
-}: {
-  sessionId: string;
-  title: string;
-  worktree?: SessionWorktreeSummary;
-  running: boolean;
-  onDone: () => void;
-}) {
-  const { t } = useTranslation();
-  const open = useWorktreeUi((s) => s.open);
-  // A conflicted session resolves first; syncing again would only report
-  // the same conflict.
-  const conflicted = worktree?.status === "conflict";
-  const syncable = Boolean(worktree) && worktree?.status !== "missing" && !conflicted;
-  // Project commits the session lacks, counted when the menu opens; `-1`
-  // when the count failed (syncing still reports the reason).
-  const [behind, setBehind] = useState<number | null>(null);
-  useEffect(() => {
-    if (!syncable) return;
     let current = true;
     setBehind(null);
     api

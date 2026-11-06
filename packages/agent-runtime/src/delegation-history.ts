@@ -37,7 +37,7 @@ import {
   normalizeSubagentName,
   withoutReasoningReplayPlaceholder,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { isRecord, timestampMs, toJsonObject, toJsonValue, usageToPi } from "./agent-messages.js";
 import type { ContextBudgetLimits } from "./context-budget.js";
 import {

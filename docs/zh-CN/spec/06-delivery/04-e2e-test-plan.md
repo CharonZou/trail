@@ -133,7 +133,7 @@
 
 ### E2E-TRANSCRIPT-lossless-tool-images
 
-- Entry: `PI_DESKTOP_HOST_BIN=<candidate-host> pnpm test:e2e:tool-result-persistence`
+- Entry: `TRAIL_HOST_BIN=<candidate-host> pnpm test:e2e:tool-result-persistence`
   after building Host, shared, agent-runtime and host-runtime.
 - Environment: Real isolated Host, SQLite and JSONL, production Desktop IPC and
   outbox; only Electron shell and unused importer/search services are stubs.
@@ -258,7 +258,7 @@ unit/integration 测试；代码 pull request 使用有选择且高价值的 E2E
 | 要求 | 详情 |
 |---|---|
 | 平台 | macOS arm64、Intel x64、Windows x64 和 Linux x64 及 arm64 发行目标 (D126/D285、D638 / ADR 0318) |
-| 公司简介 | 干净的 `~/.pi-desktop` 配置文件（无需事先配置） |
+| 公司简介 | 干净的 `~/.trail` 配置文件（无需事先配置） |
 | 固定装置 | 示例项目目录 (`examples/fixtures/sample-project/`) |
 | 示例插件 | 从本地路径加载 `examples/plugins/hello` |
 | 提供商 | 至少一个拥有有效密钥的提供商（测试帐户） |
@@ -355,7 +355,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
 
 #### E2E-001：应用程序启动并显示主窗口
 
-- **先决条件**：macOS arm64 或 Intel x64；没有先前的 `~/.pi-desktop` 配置文件。对于
+- **先决条件**：macOS arm64 或 Intel x64；没有先前的 `~/.trail` 配置文件。对于
   开发通道、工作区包构建输出不存在或早于
   他们的 TypeScript 来源。
 - **步骤**：1) 启动 Trail。在开发通道中，使用 `pnpm dev`。
@@ -400,7 +400,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
 
 #### E2E-004：出现首次运行内联检查表
 
-- **先决条件**：新鲜的配置文件（无 `~/.pi-desktop`）。
+- **先决条件**：新鲜的配置文件（无 `~/.trail`）。
 - **步骤**：1) 在新的配置文件上启动应用程序。 2) 遵守新手引导清单。
 - **预期**：显示内嵌清单； provider/key 项目打开设置
   → Agent，可选插件项打开app-shell Plugins
@@ -624,7 +624,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
 - **链接规格**：`03-runtime/02-agent-runtime.md`、`03-runtime/10-session-state-machine.md`
 - **接受**：C（新会话，发送消息）
 - **里程碑**：M2
-- **状态**：自动化（协议烟雾、实时模型通道；需要 PI_DESKTOP_TEST_API_KEY）
+- **状态**：自动化（协议烟雾、实时模型通道；需要 TRAIL_TEST_API_KEY）
 
 #### E2E-008d：Composer 回车发送与修饰键发送
 
@@ -902,7 +902,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
   2) 打开 B，把链接粘贴进输入框草稿并发送，检查用户消息。
   3) 在 B 里追问一次，不再重复链接。 4) 把 C 的链接粘贴进 B 并发送。
   5) 在 A 里发送 A 自己的链接。 6) 从 A 的对话溢出菜单给它改名，然后回到 B。
-- **预期**：剪贴板内容是 `pi-desktop://session/<A 的 id>`。B 的用户消息保留可见的链接
+- **预期**：剪贴板内容是 `trail://session/<A 的 id>`。B 的用户消息保留可见的链接
   文本，并显示聊天图标芯片，标签为语言目录里的引用标签加 A 的标题；激活芯片会打开 A。
   回答使用 A 的内容，追问仍然读到同一份引用，而无需再次写入链接。C 的链接与 A 自己的
   链接什么都不附带：消息保持纯文本，模型收不到它们的任何摘录——解析器在任何读取之前
@@ -1905,7 +1905,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
 #### E2E-034：NDJSON 日志文件已写入并经过编辑
 
 - **先决条件**：新鲜的个人资料；提供商已配置；一轮聊天结束。
-- **步骤**：1) 通过工具调用运行提示。 2) 打开 `~/.pi-desktop/logs/`。 3) 检查 `app/`、`host/` 和 `agent/` 下的分类文件。
+- **步骤**：1) 通过工具调用运行提示。 2) 打开 `~/.trail/logs/`。 3) 检查 `app/`、`host/` 和 `agent/` 下的分类文件。
 - **预期**：NDJSON 记录与 `ts/level/channel/category/event/message` 一起存在；正常工具调用只产生一条携带 `sessionId`/`toolCallId`、安全工具元数据和有界结果/时长信息的完成或失败记录；中断工具仍可由同一 ID 追踪；没有出现 API key、Authorization 值、原始命令输出或本机绝对路径；每个类别文件在 5 MB 轮换。生命周期、权限、工具、provider、plugin、持久化、更新器和错误记录仍可用，且正常运行不会创建独立的 timing 类别文件。
 - **链接规格**：`03-runtime/09-logging-and-observability.md`
 - **接受**：H（诊断）
@@ -1935,7 +1935,7 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
   `TypeError: Cannot convert argument to a ByteString`。
 - **步骤**：1) 启动，使自动更新检查或模型发现发出主进程 `net.fetch` /
   electron-updater 请求。2) 确认没有原生异常对话框。3) 无需关闭任何框；等待
-  下一次更新或发现请求。4) 打开 `~/.pi-desktop/logs/app/runtime.log`。
+  下一次更新或发现请求。4) 打开 `~/.trail/logs/app/runtime.log`。
 - **预期**：不会出现 Electron “A JavaScript error occurred in the main process”
   对话框。应用保持运行、不会退出。`runtime.log` 中有
   `code: "NON_ASCII_HTTP_HEADER"` 且 `recoverable: true` 的错误记录。后续
@@ -2026,9 +2026,9 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
   的 arm64 `ubuntu-22.04-arm` 运行器。
 - **步骤**：1) 运行标签发布工作流程。2) 确认 arm64 通道运行在
   `aarch64` 运行器上，且打包出的
-  `target/release/pi-desktop-host-core` 是 AArch64 二进制。3) 检查
+  `target/release/trail-host-core` 是 AArch64 二进制。3) 检查
   已发布的 Release 资产中是否有 `Trail-X.Y.Z-linux-arm64.AppImage`、
-  `pi-desktop_X.Y.Z_arm64.deb`、`pi-desktop-X.Y.Z-aarch64.rpm`、
+  `trail_X.Y.Z_arm64.deb`、`trail-X.Y.Z-aarch64.rpm`、
   `Trail-X.Y.Z-linux-arm64.asar`，以及带 `.sha256` 的
   `pi-host-X.Y.Z-linux-arm64.tar.gz`。4) 确认
   `latest-linux.yml` 仍列出 x64 AppImage，而
@@ -2050,12 +2050,12 @@ task-candidate E2E 从请求工作树运行，但使用主工作区已经准备�
 - **先决条件**：Linux x64 软件包验证运行或标签发布可以在 Ubuntu 22.04
   上完成；有一台干净的 Fedora 44 KDE/Wayland 机器用于安装和启动。
 - **步骤**：1) 构建 Linux 目标，并使用 `rpm -qip` 和 `rpm -qpl` 检查 RPM。
-  2) 确认软件包包含应用归档、host-core、`pi-desktop.desktop` 和 512px
-  的 `pi-desktop` 图标。3) 确认 RPM 没有全局 `/usr/lib/.build-id` 链接。
+  2) 确认软件包包含应用归档、host-core、`trail.desktop` 和 512px
+  的 `trail` 图标。3) 确认 RPM 没有全局 `/usr/lib/.build-id` 链接。
   4) 在 Fedora KDE/Wayland 机器上安装 RPM，并从桌面项启动 Trail。
   5) 检查任务栏分组和已安装的桌面项。
 - **预期**：生成具有文档所述名称的 x64 RPM，并与发布工件一起上传。桌面项
-  包含 `Icon=pi-desktop` 和 `StartupWMClass=pi-desktop`；运行中的 Wayland
+  包含 `Icon=trail` 和 `StartupWMClass=trail`；运行中的 Wayland
   窗口与 Trail 启动器正确分组并显示其图标，而不是通用 Electron 图标。
   软件包更新仍采用通知并打开链接的模式，捆绑的 Electron 二进制文件不会生成
   全局 build-id 链接。
@@ -3159,7 +3159,7 @@ Markdown 源码，不是 `text/html` 负载；对禁用行内 HTML 的外部编�
 
 - **先决条件**：原生 macOS、Windows 和 Linux 运行程序；内置桌面
   应用程序；提供英语和中文语言环境。 Windows/Linux线束可设置
-  `PI_DESKTOP_START_MAXIMIZED=1` 在启动之前，以便 Main 最大化隐藏
+  `TRAIL_START_MAXIMIZED=1` 在启动之前，以便 Main 最大化隐藏
   渲染器安装之前的本机窗口。
 - **步骤**：1) 在 macOS 上，启动 `pnpm dev` 和打包版本。确认
   应用程序菜单标题为 Trail，打开“关于 Trail”，然后检查
@@ -3399,7 +3399,7 @@ Trail 图标；两个表面都不会暴露库存 Electron 名称或图标。
 - **验收**：C（会话）、质量
 - **里程碑**：M6+
 - **状态**：已自动化（通过 `pnpm test:e2e:boot` 运行 `scripts/e2e-electron-boot.mjs`，
-  使用现有的 `PI_DESKTOP_BOOT_PROBE` 入口）。
+  使用现有的 `TRAIL_BOOT_PROBE` 入口）。
 
 #### E2E-071g：保留的会话面板有上限并逐出最旧的
 
@@ -4172,7 +4172,7 @@ IPC 请求无法关闭。
 #### E2E-196c：macOS 标签工件通过 Gatekeeper 且无需移除隔离属性
 
 - **先决条件**：推送与 `apps/desktop/package.json` 匹配的 `vX.Y.Z` 标签，或手动运行 Release 工作流并保持 `sign_macos: true`（默认）；GitHub Actions 已配置 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD` 和 `APPLE_TEAM_ID` 密钥；两个本机 macOS 运行器均可用。
-- **步骤**：1) 运行标签工作流。2) 对每个 macOS 架构检查解压后的应用，使用 `codesign -dv --verbose=4` 确认权限为 `Developer ID Application: XingYu Liu (DUV63RKYTW)`。3) 对应用运行 `codesign --verify --deep --strict --verbose=2`、`spctl --assess --type execute --verbose=4` 和 `xcrun stapler validate`，并检查 `Contents/Resources/bin/pi-desktop-host-core`。4) 确认 app stapler shim 只在 app 公证提交被接受后重试 `xcrun stapler staple`，最多六次；再确认工作流的 DMG 步骤报告 Apple 公证状态为 `Accepted`，并对对应的 DMG 运行 `xcrun stapler validate`。5) 在干净的 macOS 配置文件中下载 DMG，将应用移到 `/Applications` 后不清除 `com.apple.quarantine` 直接打开。
+- **步骤**：1) 运行标签工作流。2) 对每个 macOS 架构检查解压后的应用，使用 `codesign -dv --verbose=4` 确认权限为 `Developer ID Application: XingYu Liu (DUV63RKYTW)`。3) 对应用运行 `codesign --verify --deep --strict --verbose=2`、`spctl --assess --type execute --verbose=4` 和 `xcrun stapler validate`，并检查 `Contents/Resources/bin/trail-host-core`。4) 确认 app stapler shim 只在 app 公证提交被接受后重试 `xcrun stapler staple`，最多六次；再确认工作流的 DMG 步骤报告 Apple 公证状态为 `Accepted`，并对对应的 DMG 运行 `xcrun stapler validate`。5) 在干净的 macOS 配置文件中下载 DMG，将应用移到 `/Applications` 后不清除 `com.apple.quarantine` 直接打开。
 - **预期**：每个 macOS 应用通过签名完整性检查，Gatekeeper 报告 `source=Notarized Developer ID`，应用和 DMG 都包含有效的装订票据。DMG 有自己的提交：从未提交过的 DMG 没有票据，装订会以 error 65 失败，因此标签构建绝不能走到该状态。应用可正常打开，无需 `xattr` 命令或“安全性与隐私”覆盖。缺少密钥、提交被拒或装订重试耗尽都会让作业失败。
 - **关联规格**：`06-delivery/06-release-runbook.md`、`05-security/01-security.md`、ADR 0289
 - **验收**：质量、安全
@@ -4212,7 +4212,7 @@ IPC 请求无法关闭。
      模块、源映射、tests/examples/declarations、Chromium 语言环境以及
      本机预构建目标。
   3. 对每个 macOS 软件包使用 `file`（或 `lipo -info`）检查应用程序
-     可执行文件和 `Resources/bin/pi-desktop-host-core`；确认 arm64 和
+     可执行文件和 `Resources/bin/trail-host-core`；确认 arm64 和
      x86_64 软件包只包含声明的架构，且 Rust 主机与 Electron 应用一致。
      确认共享的 `apps/desktop/package.json` macOS 配置生成 arm64 文件
      `Trail-X.Y.Z-arm64.dmg` 和 `Trail-X.Y.Z-arm64-mac.zip`，
@@ -5456,6 +5456,143 @@ eleven-tool-round desktop paths are verified by
   渲染器中覆盖。针对大型真实目录树的完整桌面旅程为草稿（适用变更合入前需在具备
   条件的环境中运行 E2E）。
 
+#### E2E-PROJECT-workspace-index-switch：项目可以退出文件发现
+
+- **先决条件**：两个本地项目，一个通过「项目 → 添加项目」创建，另一个只是打开其文件夹
+  被访问（属于 `legacy` 投影）。两者的会话工作区都是项目组的主根目录。
+- **步骤**：1) 保持工作区索引开关打开来创建项目，在其会话里输入 `@`。2) 打开该项目的
+  编辑弹窗，关闭开关并保存，再次输入 `@`；然后输入一个只有深层搜索才找得到的名字。
+  3) 重启应用后重复第 2 步。4) 为 legacy 项目关闭开关，检查同一个菜单。5) 重新打开开关。
+  6) 检查关闭索引之前就已写进转录那行的 `@path` 引用。7) 在远程项目的弹窗里重复一遍。
+- **预期**：
+  - 开关打开时行为不变：只输入 `@` 会列出索引，停顿后的查询能到达深层文件。
+  - 开关关闭时列表与深层搜索都返回空条目，并且不会为该项目跑任何目录遍历。
+  - 选择能跨重启保留；因其他原因编辑项目（重命名、调整根目录顺序）永远不会重新打开它。
+  - legacy 项目的关闭状态跟着它自己的文件夹走；打开同一组的另一个目录得到同样答案。
+  - 转录里已有的引用仍然能打开对应文件。
+  - 远程项目不显示开关，并保持原有的快照行为。
+- **链接规格**：`03-runtime/01-ipc-protocol.md` §3.1 与 §13c、
+  `03-runtime/04-data-storage.md`、`03-runtime/06-host-rpc-protocol.md`、
+  `08-meta/decisions-log.md`（D679）、ADR 0024
+- **接受**：D — 工作区，F — 持久化，质量
+- **里程碑**：M5
+- **状态**：持久化结构由 `crates/host-core/src/db/tests.rs` 覆盖（没有该字段的旧记录默认
+  为已索引、关闭状态跨重开保留、远程项目组被拒绝、legacy 按路径的兜底在升级时被清除），
+  快照闸门由 `apps/desktop/test/workspace-roots.test.mjs` 覆盖；弹窗接线、通道闸门与文案由
+  `apps/desktop/test/project-create-dialog.test.mjs`、
+  `apps/desktop/test/project-edit.test.mjs` 以及
+  `apps/desktop/test/composer-deep-file-search-user-path.test.mjs` 的通道断言覆盖。完整
+  桌面旅程为草稿（适用变更合入前需在具备条件的环境中运行 E2E）。
+
+#### E2E-PROJECT-workspace-icon-and-colour：项目保留自己的图形与色调
+
+- **先决条件**：一个通过「项目 → 添加项目」创建的项目、一个只是打开其文件夹被访问的
+  项目（属于 `legacy` 投影）和一个远程项目。
+- **步骤**：1) 创建项目，在确认之前于弹窗里选择图标和颜色；两行都在工作区索引开关之上，
+  图标行同时提供 Lucide 图形与用户自备的图形。2) 查看它的侧栏行，然后重新打开编辑弹窗。
+  3) 只改颜色并保存。4) 只改图标并保存。5) 重命名项目，两行都不碰。6) 重启应用后查看
+  那一行。7) 为 legacy 项目重复第 1–2 步，再把两行都设回各自的第一格。8) 打开远程项目的
+  两个弹窗。
+- **预期**：
+  - 侧栏行用所选图形配所选色调绘制，取代原来的文件夹；被置顶的行仍然保留星标。
+  - 自备图形和 Lucide 图形一样被染色：它以 `currentColor` 绘制的 path 数据交付，所以
+    没有任何一格会无视颜色行。
+  - 两行互相独立：改其中一行不动另一行的已存值，编辑弹窗精确预选已存的那一对。
+  - 重命名不保存任何一行，因此装饰和项目的「最近更新」排序都不被改动。
+  - 这一对值跨重启保留；格子来自宿主记录，而不是渲染器本地状态。
+  - 两行都回到第一格时不写入任何值：那一行回退成主题自身文字色的文件夹图形，legacy
+    项目按路径键入的那条记录被删除。
+  - legacy 项目的装饰跟着它自己的文件夹走，并在该文件夹升级为真实项目组时被清除。
+  - 远程项目两行都不显示，仍走重命名路径。
+- **链接规格**：`03-runtime/01-ipc-protocol.md` §3.1、`03-runtime/04-data-storage.md`、
+  `03-runtime/06-host-rpc-protocol.md`、`04-ux/07-ui-design-system.md` §11.13、
+  `08-meta/decisions-log.md`（D680、D681）
+- **接受**：D — 工作区，F — 持久化，质量
+- **里程碑**：M5
+- **状态**：持久化与 RPC 结构由 `crates/host-core/src/db/tests.rs`（没有这一对的旧记录取
+  空默认值、这一对跨重开保留、远程项目组被拒绝、legacy 按路径的兜底在升级时被清除）和
+  `crates/host-core/src/rpc/mod.rs`（缺省保持已存值、重命名保留它、非法图标或颜色被拒绝）
+  覆盖；目录、选择器、侧栏行与 store 查找由
+  `apps/desktop/test/project-appearance.test.mjs` 覆盖；弹窗接线与更新负载由
+  `apps/desktop/test/project-create-dialog.test.mjs`、
+  `apps/desktop/test/project-edit.test.mjs` 和
+  `apps/desktop/test/sidebar-navigation.test.mjs` 覆盖。完整桌面旅程为草稿（该表面变更时
+  在具备条件的环境中运行）。
+
+#### E2E-UI-sidebar-token-meter：侧栏一年 token 与产生它的模型
+
+- **前置条件**：一份配置文件的已完成回合至少跨两个不同模型、且最近十二个月内
+  至少有一天没有任何用量；另一份配置文件在窗口内有超过五个模型。侧栏可在 240 px
+  下限与 520 px 上限之间拖动。
+- **步骤**：1) 打开应用，读项目列表之上、底部栏之下的这张卡。2) 切到按模型排行再切回
+  按日方格。3) 用另一个模型完成一个回合，等最后一个运行中的会话结束后不重载直接再读两个
+  视图，然后重启再读一次。4) 在模型视图下把侧栏从最窄拖到最宽，并选择最大字号预设。
+  5) 悬停一个有用量的一天和一个没有用量的一天。
+  6) 模型多于五个时读最后一行。7) 让宿主查询失败（宿主停止）并重载。8) 在没有任何已完成
+  回合的配置文件中重复步骤 1–2。
+- **预期**：
+  - 总量与范围标签来自一次 `stats.getTokenUsageHistory`（桶为 `day`、不传日期），
+    即窗口由宿主自己决定；渲染层不再维护第二套日期规则。
+  - 切换视图从不改变总量：模型行加上折叠的尾部行等于同一个总数，因为宿主由同一次
+    已完成回合扫描折叠两个视图（D682）。
+  - 方格按周成列，每一天都落在自己的星期行里。宿主没返回的一天仍按日期定位，所以稀疏的
+    一年不会把整张网格横向错位。首尾补齐格是不可见，而不是零。
+  - 墨色层级按四分位在有用量的日子里切分；没有用量的天保持淡底；整个范围都没有用量时
+    一点不亮。
+  - 加宽侧栏会放大每一列。在 240 px 下限时每一列停在自己的可读下限，更早的周向侧面滚动
+    出视野，用的是壳层统一的那套安静滚动条——6px、无轨道、静止时透明，只有悬停、聚焦或
+    滚动才现形——因此格子永远不会窄过旁边的间隔；方格区打开时停在包含今天的那一周。既然它
+    会滚动，它也就是一个可聚焦的区域——Tab 能到达它，方向键能到达更早的周。任何内容都不被
+    裁切，且因为每格保持正方，网格在侧栏每个边界上高度一致。
+  - 卡打开时完成的回合无需重载就会出现：等没有会话在运行后这张卡会重新读取一次，而更早的
+    回答永远不会覆盖更新的回答。
+  - 未存储模型的回合仍是一条「未知模型」行，不会从排行里消失；中止的回合两个视图都不计。
+  - 模型多于五个时折成一行，写明数量并汇总它们的 token 与回合数，因此占比仍加得回整体。
+    每一根条——包括这一行——都按视图里实际画出的最宽一行来定长度，所以比头部模型更重的
+    尾部只会显示为更长，不会撑出自己的轨道。
+  - 读取失败说明用量不可用，空范围说明窗口内没有用量；两者都不会画出编造的图。
+  - 所有文案、视图开关的 `aria-pressed` 状态与方格区的 `aria-label` 摘要在九个已发布
+    语言中都被本地化。
+- **关联规格**：`04-ux/01-ui-ia.md` §3.2、`04-ux/06-settings-ia.md`、
+  `03-runtime/01-ipc-protocol.md` §8 stats、`03-runtime/06-host-rpc-protocol.md`、
+  `04-ux/07-ui-design-system.md`、`08-meta/decisions-log.md`（D682）、ADR 0171、ADR 0173
+- **验收**：F（持久化）、品质
+- **里程碑**：M5
+- **状态**：聚合结构由 `crates/host-core/src/sessions/usage_history.rs` 覆盖（模型行合计
+  等于 `totals`、无模型的回合保留一行、中止的回合不计费，以及连续 400 天各自保住自己的桶、
+  仍能加回 `totals`）；网格、阈值、折叠、可读下限与卡的接线由
+  `apps/desktop/test/token-usage-meter.test.mjs` 覆盖。渲染后的布局由
+  `pnpm test:e2e:sidebar-token-meter`（`scripts/e2e-sidebar-token-meter.mjs`）在 240 / 275 / 520 px
+  三个侧栏边界上把关：它用真实构建出来的样式表测量，一旦格子低于 5 px、不再正方，或滚动条槽宽过
+  统一的 6px 就失败。这张卡读的是真实
+  配置文件的数据；完整桌面旅程为草稿（该表面变更时在具备条件的环境中运行）。
+
+#### E2E-SETTINGS-window-actions-minimize-and-fullscreen：设置里可达的窗口操作
+
+- **前置条件**：各平台各一份——macOS 用原生交通灯，Windows/Linux 用无边框标题栏。主窗口
+  可以最大化并进入全屏。
+- **步骤**：1) 打开设置 → 常规，读窗口卡。2) 按「最小化」。3) 按「全屏」，再按一次。
+  4) 先最大化再按「全屏」，然后退出全屏。5) 用窗口文案搜索设置。6) 在对应动作无法响应时
+  按其中一个按钮。
+- **预期**：
+  - 这张卡在每个平台都渲染，且不持久化任何东西：重启后没有存下的窗口偏好，而设置搜索能
+    找到它。
+  - 「最小化」使主窗口最小化；「全屏」做切换，走的是与原生菜单同一个
+    `pi-desktop/menu/nativeAction`（`toggleFullScreen`）处理器，所以 issue #1655 的
+    全屏/最大化互锁只有一份实现。
+  - 从最大化的窗口进入全屏会先取消最大化，退出全屏时回到最大化；窗口不会同时带着两个
+    标记，也不会被留在当前工作区之外。
+  - 「全屏」文案是切换而非状态读取：`getState` 只返回 `maximized`，因此按钮不声称自己知道
+    窗口是否已经全屏。
+  - 动作被拒绝时给出一次本地化错误提示，窗口保持原样。
+- **关联规格**：`04-ux/06-settings-ia.md`、`03-runtime/01-ipc-protocol.md`、
+  `08-meta/decisions-log.md`（D683）
+- **验收**：品质（关键操作手感精致）
+- **里程碑**：M5
+- **状态**：接线由 `apps/desktop/test/token-usage-meter.test.mjs` 覆盖（断言两个通道与设置在
+  的位置）；互锁本身由既有的窗口生命周期测试覆盖。完整桌面旅程为草稿（该表面变更时在具备
+  条件的环境中运行）。
+
 #### E2E-102b：未答复的停止恢复紧凑的文件参考草稿
 
 - **先决条件**：Agent 会话可以延迟其第一个辅助事件。的
@@ -5978,6 +6115,15 @@ eleven-tool-round desktop paths are verified by
 | G——插件（聊天文件引用） | E2E-CHAT-file-ref-opens-the-surface-that-owns-it、E2E-PLUGIN-file-view-collapse-persists |
 | 品质（聊天文件引用） | E2E-CHAT-shorthand-file-ref-opens-the-matching-file、E2E-CHAT-file-ref-opens-the-surface-that-owns-it、E2E-PLUGIN-file-view-collapse-persists |
 | C / 品质（Composer 深层文件引用） | E2E-COMPOSER-deep-file-mentions |
+| D — 工作区（工作区索引开关） | E2E-PROJECT-workspace-index-switch |
+| F — 持久化（工作区索引开关） | E2E-PROJECT-workspace-index-switch |
+| 品质（工作区索引开关） | E2E-PROJECT-workspace-index-switch |
+| D — 工作区（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
+| F — 持久化（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
+| 品质（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
+| F — 持久化（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
+| 品质（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
+| 品质（设置窗口操作） | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | G——插件（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
 | 安全性（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
 | 品质（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -6033,6 +6179,10 @@ eleven-tool-round desktop paths are verified by
 | M6+（独立会话通信） | E2E-SESSION-independent-top-level-communication、E2E-SESSION-hover-card-model-and-links |
 | M5（聊天文件引用） | E2E-CHAT-shorthand-file-ref-opens-the-matching-file、E2E-CHAT-file-ref-opens-the-surface-that-owns-it |
 | M5（Composer 深层文件引用） | E2E-COMPOSER-deep-file-mentions |
+| M5（工作区索引开关） | E2E-PROJECT-workspace-index-switch |
+| M5（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
+| M5（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
+| M5（设置窗口操作） | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | M5（对话 MP4 附件） | E2E-CHAT-mp4-attachment-opens-in-system-player |
 | M6+（聊天文件引用） | E2E-PLUGIN-file-view-collapse-persists |
 | M6+（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -6910,14 +7060,14 @@ eleven-tool-round desktop paths are verified by
 - **步骤**：1）从平台常规入口再次启动应用（开始菜单/桌面快捷方式、
   `.AppImage`、macOS 上的 `open -n`），同时观察窗口与进程列表。2）把窗口最小化
   到托盘后再次启动。3）在关闭行为为 `tray` 的 Windows/Linux 上关闭窗口后再次
-  启动。4）在应用运行期间，用指向空目录的 `PI_DESKTOP_DATA_DIR` 启动一个构建。
+  启动。4）在应用运行期间，用指向空目录的 `TRAIL_DATA_DIR` 启动一个构建。
   5）在正式版仍在运行时启动一个开发构建（`dev` 脚本，不设
-  `PI_DESKTOP_DATA_DIR`）。6）退出应用，确认没有残留进程，然后再启动一次。
+  `TRAIL_DATA_DIR`）。6）退出应用，确认没有残留进程，然后再启动一次。
 - **预期**：步骤 1–3 不会创建第二个窗口、托盘图标、host-core、agent sidecar 或
   日志文件：已有窗口被恢复并聚焦，重复的进程退出，运行中实例的会话列表、进行中
   的轮次和 `pi.sqlite` 都不受影响。步骤 4 作为面向自有数据目录的独立实例正常
   启动。步骤 5 同样正常启动：开发构建使用自己的 `userData` 与
-  `~/.pi-desktop-dev`，既不等待也不打扰正在运行的正式版。步骤 6 干净地启动单个
+  `~/.trail-dev`，既不等待也不打扰正在运行的正式版。步骤 6 干净地启动单个
   实例，证明锁在退出时释放，不会留下过期阻塞。
 - **链接规格**：`03-runtime/07-process-model.md`、
   `08-meta/decisions-log.md`（D236、D599、D002）、ADR 0094
@@ -6959,7 +7109,7 @@ eleven-tool-round desktop paths are verified by
 #### E2E-126：外观卡片选择全局界面字体
 
 - **前置条件**：应用在 macOS 上运行，系统装有与内置令牌栈不同的字体
-  （例如 PingFang SC）；使用干净的 `~/.pi-desktop` 配置。
+  （例如 PingFang SC）；使用干净的 `~/.trail` 配置。
 - **步骤**：
   1) 打开设置 → 常规，确认外观卡片在主题与语言下方显示一个字体行，
      触发器标签为「跟随系统」。
@@ -6992,7 +7142,7 @@ eleven-tool-round desktop paths are verified by
 
 #### E2E-193：外观卡片设置全局文字缩放
 
-- **前置条件**：干净的 `~/.pi-desktop` 配置，并有一条能看到会话内容、输入框和侧栏的对话。
+- **前置条件**：干净的 `~/.trail` 配置，并有一条能看到会话内容、输入框和侧栏的对话。
 - **步骤**：
   1) 打开设置 → 常规，确认外观卡片在字体行下方显示字体大小，「大杯」选中，滑杆为 100%。
   2) 选择「超大杯」。确认会话、输入框、设置标签、侧栏会话标题和 Lucide 图标无需重载即按相对阶一起变大，控件显示 115%。
@@ -7543,7 +7693,7 @@ eleven-tool-round desktop paths are verified by
 
 - **前提条件**：可以打开设置；本机可以启动系统浏览器。
 - **步骤**：1）打开设置 → 信息。2）确认「应用」行显示当前版本。3）用设置搜索查找「问题反馈」。4）点击「打开 GitHub」。
-- **预期**：该行可被设置搜索索引，并停留在信息页。动作调用 `pi-desktop/app/openFeedback`，渲染器不提供 URL。Main 打开 `https://github.com/vastsa/PI-Desktop/issues/new`，带 `template=bug_report.yml`，并预填 `app-version`、`os` 和 `environment`。GitHub bug 表单仍要求描述、复现步骤、预期、实际、版本和操作系统；空白 issue 保持禁用。
+- **预期**：该行可被设置搜索索引，并停留在信息页。动作调用 `pi-desktop/app/openFeedback`，渲染器不提供 URL。Main 打开 `https://github.com/CharonZou/trail/issues/new`，带 `template=bug_report.yml`，并预填 `app-version`、`os` 和 `environment`。GitHub bug 表单仍要求描述、复现步骤、预期、实际、版本和操作系统；空白 issue 保持禁用。
 - **链接规格**：`04-ux/06-settings-ia.md`、`03-runtime/01-ipc-protocol.md`、
   `06-delivery/03-ai-development-workflow.md`、`08-meta/decisions-log.md`（D313）、ADR 0157
 - **验收**：H（诊断）、质量
@@ -7858,7 +8008,7 @@ eleven-tool-round desktop paths are verified by
   Redistributable、Node.js 或其他本地代理运行时；已有 x64 NSIS 安装程序。
 - **步骤**：1）安装 Trail。2）首次启动。3）等待启动 splash 让出给主 shell。4）检查运行时和
   timing 日志，然后打开“设置 → 信息”。
-- **预期**：捆绑的 x64 `pi-desktop-host-core.exe` 启动并完成 `app.handshake`，没有
+- **预期**：捆绑的 x64 `trail-host-core.exe` 启动并完成 `app.handshake`，没有
   `0xC0000135`（`STATUS_DLL_NOT_FOUND`）；shell 不会停留在“无法连接本地服务”，主机状态健康，
   “设置 → 信息”显示主机版本而非 `host unknown`。软件包使用静态链接的 MSVC CRT，无需单独安装运行时。
   原生 Windows ARM64 工件仍不在范围内。
@@ -7991,7 +8141,7 @@ eleven-tool-round desktop paths are verified by
 #### E2E-204：显式退出在关机前确认（D363）
 
 - **前提条件**：普通交互会话正在运行（不是 boot / supervision / capture 探针）。主窗口可见或已藏到托盘。
-- **步骤**：1) 从托盘菜单选择退出，或按 Cmd+Q / 应用菜单退出；若窗口藏在托盘，确认主窗口先恢复。2) 确认显示主题化应用内弹窗、标题与正文分开且初始焦点为“取消”；弹窗打开时再次触发退出，确认仍只等待同一个决定，既不重复弹窗也不绕过确认。分别按 Escape、点击遮罩取消，确认窗口、托盘、host-core 和 sidecar 仍在。3) 再次操作并确认退出，验证有序关机。4) Windows/Linux 在关闭行为未设置时关窗，确认 D230 主题弹窗提供取消 / 关闭到托盘 / 退出；取消保持未设置，选择退出不会二次询问。5) 以 `PI_DESKTOP_BOOT_PROBE=1`（及 supervision/capture 等价项）启动，确认 `app.quit()` 不弹窗。6) 在打包的 Windows NSIS 或 Linux AppImage 安装上选择“重启以更新”，确认退出警告不出现且安装器完成升级和重启。
+- **步骤**：1) 从托盘菜单选择退出，或按 Cmd+Q / 应用菜单退出；若窗口藏在托盘，确认主窗口先恢复。2) 确认显示主题化应用内弹窗、标题与正文分开且初始焦点为“取消”；弹窗打开时再次触发退出，确认仍只等待同一个决定，既不重复弹窗也不绕过确认。分别按 Escape、点击遮罩取消，确认窗口、托盘、host-core 和 sidecar 仍在。3) 再次操作并确认退出，验证有序关机。4) Windows/Linux 在关闭行为未设置时关窗，确认 D230 主题弹窗提供取消 / 关闭到托盘 / 退出；取消保持未设置，选择退出不会二次询问。5) 以 `TRAIL_BOOT_PROBE=1`（及 supervision/capture 等价项）启动，确认 `app.quit()` 不弹窗。6) 在打包的 Windows NSIS 或 Linux AppImage 安装上选择“重启以更新”，确认退出警告不出现且安装器完成升级和重启。
 - **预期**：显式退出可取消；待确认期间的重复退出不会重复弹窗或绕过确认，取消后后续退出会再次询问。托盘退出即使窗口隐藏也能呈现弹窗。已在 D230 选择退出的关窗路径不会再次确认。renderer 不可用、崩溃或超时无响应时限时回退到原生弹窗；原生弹窗也不可用时不得阻塞退出。自动化探针和应用内更新重启均跳过警告，后者直接进入有序关机。
 - **链接规格**：`04-ux/08-component-spec.md`、`04-ux/09-interaction-patterns.md`、`08-meta/decisions-log.md`（D216、D230、D363）、ADR 0022、ADR 0090
 - **验收**：A、质量
@@ -8030,7 +8180,7 @@ eleven-tool-round desktop paths are verified by
 
 #### E2E-220：本地 MCP 控制驱动运行中的桌面
 
-- **前提条件**：使用 `PI_DESKTOP_MCP_CONTROL=1` 和干净配置启动 Trail。
+- **前提条件**：使用 `TRAIL_MCP_CONTROL=1` 和干净配置启动 Trail。
   有可用的本地项目目录，Electron 用户数据目录可写，桌面已完成后端启动。
 - **步骤**：1）读取 `mcp-control.json`，使用其中的 URL 和 bearer token。2）调用
   `initialize`、`tools/list` 和 `pi_control_describe`。3）调用 `pi_project_open` 打开
@@ -8054,7 +8204,7 @@ eleven-tool-round desktop paths are verified by
 
 #### E2E-MCP-session-get-projects-large-compaction：超大 compaction 记录不再让 pi_session_get 整包截断
 
-- **前提条件**：使用 `PI_DESKTOP_MCP_CONTROL=1` 启动 Trail。存在一个持久会话，其
+- **前提条件**：使用 `TRAIL_MCP_CONTROL=1` 启动 Trail。存在一个持久会话，其
   `session.compaction` 记录（`summary` / `retainedTail` / `details.modifiedFiles`）单独
   序列化即超过 512 KiB 的 MCP 结果上限。
 - **步骤**：1）读取 `mcp-control.json`，用其 URL 和 bearer token 完成 MCP 握手。2）对该会话
@@ -8263,12 +8413,12 @@ runner 会在运行时的隔离临时目录中生成六个插件形态 fixture�
 
 - **前提条件**：一个项目包含 `.env`、`.env.example`、`server.pem`、`keys/id_rsa`、
   `notes.txt`、`node_modules/pkg/index.js`、`generated/out.txt`、`debug.log`，以及
-  根目录下写有 `generated/` 的 `.pi-desktopignore`。每个文件都包含单词 `needle`。
+  根目录下写有 `generated/` 的 `.trailignore`。每个文件都包含单词 `needle`。
   会话为 Agent 模式，权限模式 `auto`。
 - **步骤**：1）请求 `Read` `.env`，再请求 `Read` `.env.example`。2）请求 `Write`
   到 `keys/id_rsa`。3）对 `needle` 运行无范围的 `Grep` 和 `Glob`。4）以
   `path: node_modules/pkg` 和 `path: generated` 运行 `Grep`。5）分别在安装了系统 `rg`
-  和设置 `PI_DESKTOP_DISABLE_RG=1` 的情况下重复步骤 1。
+  和设置 `TRAIL_DISABLE_RG=1` 的情况下重复步骤 1。
 - **预期**：步骤 1 和 2 以 `WORKSPACE_PATH_DENIED` 失败，`.env.example` 的读取成功，
   且不会创建 `keys/id_rsa` 文件。无范围搜索只列出 `notes.txt` 和 `.env.example`：
   `.env`、`server.pem`、`node_modules`、`generated` 和 `debug.log` 都不出现。显式路径
@@ -8758,7 +8908,7 @@ runner 会在运行时的隔离临时目录中生成六个插件形态 fixture�
 - **状态**：`pnpm test:e2e:layout` 调用 `scripts/e2e/sidebar-settings.mjs`，使用可信
   CDP 指针/键盘、挂载时与后续几何采样、动画事件及计算样式。测试启用 CDP 焦点模拟，
   防止原生窗口被遮挡后 Chromium 冻结动画与悬停输入。平台和主题为渲染层模拟，
-  不等同于原生 Windows/Linux 或系统材质/主题验证。可通过 `PI_DESKTOP_LAYOUT_ARTIFACT_DIR`
+  不等同于原生 Windows/Linux 或系统材质/主题验证。可通过 `TRAIL_LAYOUT_ARTIFACT_DIR`
   保存渲染截图。`sidebar-settings-return.test.mjs` 覆盖首次显示、两种中断阶段、
   隐藏时状态变化和反转；`pnpm test:e2e:theme-surfaces` 在真实 Chromium 验证不透明回退及旧主题覆盖。
 
@@ -9201,7 +9351,7 @@ the latest destination. These assertions measure work counts, not device FPS.
   also has `apps/desktop/test/traffic-light-reserve.test.mjs` contract coverage.
 - **Status:** Automated for the executing native platform; run on macOS/Linux
   runners for native qualification. Optional screenshots are written only to
-  `PI_DESKTOP_CHROME_ARTIFACT_DIR`.
+  `TRAIL_CHROME_ARTIFACT_DIR`.
 
 ### E2E-PLUGIN-slow-tool-is-not-cut-off-by-host-dispatch
 
@@ -9868,7 +10018,7 @@ Follow the [current S3 acceptance scenario](/spec/06-delivery/04-e2e-test-plan#e
 **自动化：** `node --test apps/desktop/test/slash-command-source.test.mjs`、
 `node --test apps/desktop/test/session-transcript-empty-read.test.mjs`、
 `node --test apps/desktop/test/plugin-timeout-budgets.test.mjs`、
-`pnpm --filter @pi-desktop/shared test`、`pnpm --filter @pi-desktop/host-runtime test`。
+`pnpm --filter @trail/shared test`、`pnpm --filter @trail/host-runtime test`。
 
 ## E2E-PROVIDER-endpoint-guidance-and-search
 
@@ -9889,7 +10039,7 @@ Follow the [current S3 acceptance scenario](/spec/06-delivery/04-e2e-test-plan#e
 #### E2E-260：Windows 更新缓存可安全迁移和回收
 
 - **前提：** 已打包的 Windows x64 NSIS 安装、隔离用户配置，以及非系统卷上的可写缓存目录。使用本地更新源 fixture；不得访问 GitHub 或付费服务。
-- **步骤：** 1）在旧 `%LOCALAPPDATA%` 更新缓存中准备 `installer.exe`、`current.blockmap` 和待安装更新。2）设置 `PI_DESKTOP_UPDATE_CACHE_DIR` 为隔离缓存根目录后启动。3）确认 Main 将差分基线和待安装更新迁移至配置目录，并清理旧目录。4）完成更新并启动新版本。5）fixture 报告没有更新后检查配置目录。
+- **步骤：** 1）在旧 `%LOCALAPPDATA%` 更新缓存中准备 `installer.exe`、`current.blockmap` 和待安装更新。2）设置 `TRAIL_UPDATE_CACHE_DIR` 为隔离缓存根目录后启动。3）确认 Main 将差分基线和待安装更新迁移至配置目录，并清理旧目录。4）完成更新并启动新版本。5）fixture 报告没有更新后检查配置目录。
 - **预期：** 缓存子目录名以 `app-update.yml` 为准；迁移保留待安装更新及差分基线。确认当前版本已是最新版本后，只移除 `pending/`，`installer.exe` 和 `current.blockmap` 仍供下次增量更新使用。未设置覆盖变量时默认路径保持不变；应用不会将下载写入 `Program Files`。
 - **规格：** `03-runtime/07-process-model.md`、ADR 0022。
 - **验收：** 缓存路径、迁移和清理单测通过；Windows task-candidate 验证应覆盖更新源传输、安装器交接和文件系统行为，且不连接真实发布源。
@@ -9912,7 +10062,7 @@ Follow the [current S3 acceptance scenario](/spec/06-delivery/04-e2e-test-plan#e
   malformed metadata, temporary prompt replacement, deterministic catalog order,
   the 128-tool boundary and insufficient-context fallback.
 - Automated: `node scripts/e2e-fixed-tool-declarations.mjs` with built
-  shared/host-runtime/agent-runtime and `PI_DESKTOP_HOST_BIN` set to the candidate
+  shared/host-runtime/agent-runtime and `TRAIL_HOST_BIN` set to the candidate
   Host binary; `fixed-tool-runtime.test.ts` and `fixed-tool-declarations.test.ts`
   cover HTTP payload and policy contracts. Electron UI/outbox is outside this
   fixture's scope.

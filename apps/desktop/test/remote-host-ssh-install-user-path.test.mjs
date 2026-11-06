@@ -50,7 +50,7 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@trail/shared";
 import { loadRendererResources } from "./src/lib/renderer-catalogs";
 import { api } from "./src/lib/api";
 import { RemoteHostsPage } from "./src/components/settings/RemoteHostsPage";

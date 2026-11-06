@@ -5,7 +5,7 @@ import {
   type AgentCapabilityLevel,
   type BuiltinSkillRecord,
   type UserSkillRecord,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { api } from "../../lib/api";
 import { capabilityQuery, deriveProjectOverrides, type CapabilityOverride } from "../../lib/capability-scope";
 import { useAppStore } from "../../stores/app-store";

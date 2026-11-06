@@ -1,12 +1,13 @@
 export const PROTOCOL_VERSION = 11 as const;
 export const SCHEMA_VERSION = 16 as const;
 export const APP_ID = "net.aiuo.pi-desktop";
-// User-facing display brand. The legacy machine identity (APP_ID, data
-// directory, deep-link scheme, IPC prefix, npm scope) intentionally keeps the
-// old `pi-desktop` tokens so existing installs keep their data and upgrades
-// stay compatible.
+// User-facing display brand. `APP_ID` keeps the identity the OS keychain and
+// the packaged profile were created under, and the `pi-desktop/*` channel
+// prefixes below keep the names already published to plugins, worktrees and
+// paired remote hosts — renaming those strands existing data and breaks
+// contracts that ship outside this repository, not just this build.
 export const APP_NAME = "Trail";
-export const APP_VERSION = "1.0.1";
+export const APP_VERSION = "1.0.2";
 
 export const APP_MENU_COMMANDS = [
   "newTask",

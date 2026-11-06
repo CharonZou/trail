@@ -6,7 +6,7 @@ security reports seriously and appreciate responsible disclosure.
 ## Supported Versions
 
 Security fixes are provided for the latest release published on the
-[GitHub Releases page](https://github.com/vastsa/PI-Desktop/releases). Older
+[GitHub Releases page](https://github.com/CharonZou/trail/releases). Older
 releases and development builds may not receive security fixes.
 
 ## Reporting a Vulnerability
@@ -23,7 +23,7 @@ Send a private report to **hhxk666@gmail.com** with the subject:
 If private vulnerability reporting is enabled for this repository, you may
 also use GitHub's private security advisory form:
 
-<https://github.com/vastsa/PI-Desktop/security/advisories/new>
+<https://github.com/CharonZou/trail/security/advisories/new>
 
 Please include as much of the following information as you can:
 

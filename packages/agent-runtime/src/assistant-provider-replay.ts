@@ -19,7 +19,7 @@ import type {
   AssistantProviderReplay,
   AssistantProviderReplayBlock,
   AssistantProviderReplayToolCall,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 /**
  * Per-row ceiling for the serialized replay data. Signatures are opaque and

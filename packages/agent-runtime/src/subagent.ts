@@ -50,7 +50,7 @@ import {
   type SubagentRunStatus as SharedSubagentRunStatus,
   type SubagentThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { classifyAgentError } from "./agent-errors.js";
 import { readLocalRequestErrorDetails } from "./local-request-errors.js";
 import { recoverMalformedToolCalls } from "./tool-call-recovery.js";

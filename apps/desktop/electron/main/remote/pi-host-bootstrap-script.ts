@@ -46,6 +46,19 @@ export type PiHostBootstrapScriptInput = {
 /** Smallest Node major the bundle is built for (`bundle.mjs --target=node22`). */
 const MIN_NODE_MAJOR = 22;
 
+/**
+ * Where the Host installs below the remote user's `$HOME`, frozen on purpose.
+ *
+ * A release line before the Trail rename put the Host at
+ * `~/.pi-desktop/pi-host`, and both the bootstrap and the daily supervisor
+ * identify the running Host by that exact entry-point path. A second name would
+ * leave the pre-Trail Host — or one a different desktop manages — running
+ * beside this one, and two host-core processes over one SQLite file is the
+ * divergence D236 exists to prevent. The remote install path therefore stays
+ * whatever the machine already has; only local profile names were moved.
+ */
+export const REMOTE_PI_HOST_HOME_PATH = ".pi-desktop/pi-host";
+
 /** POSIX-safe single-quoted literal; `'` becomes `'\''`. */
 export function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
@@ -104,7 +117,7 @@ need() {
 
 need tar
 
-base="$HOME/.pi-desktop/pi-host"
+base="$HOME/${REMOTE_PI_HOST_HOME_PATH}"
 work="$base/.bootstrap"
 mkdir -p "$work"
 chmod 700 "$work" 2>/dev/null || die "bootstrap-permissions"
@@ -215,7 +228,7 @@ fi
 
 : > "$log"
 : > "$err"
-nohup "$node" "$HOME/.pi-desktop/pi-host/current/pi-host.js" \\
+nohup "$node" "$HOME/${REMOTE_PI_HOST_HOME_PATH}/current/pi-host.js" \\
   --port "$PORT" \\
   --pair \\
   --pairing-lifetime-ms "$PAIRING_LIFETIME_MS" \\

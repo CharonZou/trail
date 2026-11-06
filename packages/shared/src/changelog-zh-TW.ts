@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const zhTWEntries: ChangelogEntry[] = [
   {
+    version: "1.0.2",
+    date: "2026-11-06",
+    highlights: [
+      "為每個專案選擇工作區圖示和工作區顏色，側邊欄的專案列會直接顯示它們，不再全部使用同一個資料夾圖示。",
+      "在專案建立與編輯對話框中可單獨關閉工作區索引；關閉後 @ 建議不再列出檔案，但對話中已引用的路徑仍可正常解析。",
+      "側邊欄新增 Token 用量：近一年總量、依日的熱力條，以及同一總量依模型的拆分。",
+      "設定新增「視窗」卡片，可直接最小化或全螢幕，無需依賴功能表列。",
+      "更多服務在供應商清單中顯示官方識別圖示，包括 Mistral、Kimi 與 Moonshot。",
+      "應用程式圖示在所有介面統一為乾淨的品牌標記，包括 Windows 工作列與 Alt+Tab。",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-11-04",
     highlights: [
@@ -132,7 +144,7 @@ export const zhTWEntries: ChangelogEntry[] = [
       "排程工作新增間隔節奏：從啟用時起算，最短 5 分鐘、最長 24 小時。",
       "「排程」頁面把工作清單與所選工作配對顯示：最近結果、下次執行、指令與執行紀錄。",
       "每次執行所在的對話帶有返回其工作與執行的返回列，工作可自行決定每次執行要開新對話或延續原對話。",
-      "在輸入框貼上 pi-desktop://session/<id> 連結，即可把一段對話交給另一輪對話。",
+      "在輸入框貼上 trail://session/<id> 連結，即可把一段對話交給另一輪對話。",
       "聊天、工作面板與內建檔案管理員都能開啟 path:line 形式的檔案引用，並直接跳到對應行。",
       "可解析為真實檔案路徑的行內程式碼現在可以點擊開啟，其餘行內程式碼與程式碼區塊維持原樣。",
       "每個 MCP 服務可個別設定連線逾時（1-600 秒），清空後回復預設值。",
@@ -705,7 +717,7 @@ export const zhTWEntries: ChangelogEntry[] = [
       "支援登入多個供應商賬號，併為每個供應商選擇實際使用的賬號。",
       "根據模型能力決定是否支援圖片附件。",
       "在輸入框中直接選擇支援該功能的模型的推理強度。",
-      "每個資料目錄只執行一個 PI-Desktop 例項，避免會話衝突。",
+      "每個資料目錄只執行一個 Trail 例項，避免會話衝突。",
       "重新整理設定分組，簡化供應商賬號管理。",
       "讓內建子代理遵循父級對話的許可權模式。",
     ],
@@ -749,7 +761,7 @@ export const zhTWEntries: ChangelogEntry[] = [
       "在啟動器中記住最近使用的外掛，加快訪問速度。",
       "為開發者模式新增複製會話路徑的上下文選單。",
       "修復字型選擇器裁剪和系統預設重置問題。",
-      "關閉視窗後保持 macOS PI-Desktop 在 Dock 和 Cmd+Tab 中可見。",
+      "關閉視窗後保持 macOS Trail 在 Dock 和 Cmd+Tab 中可見。",
       "傳送訊息後收起輸入框時保持聊天記錄停留在最新位置。",
       "為工作面板新增真實的空狀態介面和更清晰的引導。",
     ],
@@ -789,7 +801,7 @@ export const zhTWEntries: ChangelogEntry[] = [
     date: "2026-08-12",
     highlights: [
       "修復 Windows 下的 Alt+Space 全域性外掛啟動器，即使當前焦點在其他應用也能喚起。",
-      "最小化後可通過系統托盤訪問 PI-Desktop，並支援 macOS、Windows 和 Linux。",
+      "最小化後可通過系統托盤訪問 Trail，並支援 macOS、Windows 和 Linux。",
       "最佳化淺色和深色主題下原生選擇選單的可讀性。",
     ],
   },
@@ -865,8 +877,8 @@ export const zhTWEntries: ChangelogEntry[] = [
     version: "0.4.1",
     date: "2026-08-02",
     highlights: [
-      "將 GitHub Releases 與自動更新連結統一到正式的 PI-Desktop 倉庫。",
-      "更新專案、外掛和釋出文件中的倉庫名稱，統一使用 PI-Desktop。",
+      "將 GitHub Releases 與自動更新連結統一到正式的 Trail 倉庫。",
+      "更新專案、外掛和釋出文件中的倉庫名稱，統一使用 Trail。",
     ],
   },
   {

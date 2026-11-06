@@ -3,13 +3,13 @@ import type {
   Mode,
   ProviderPublic,
   SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   imageGenerationBindings,
   initialThinkingLevelForBinding,
   initialThinkingLevelForUnmatchedModel,
   isImageGenerationModel,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   composerModelBinding,

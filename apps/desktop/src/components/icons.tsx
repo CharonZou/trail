@@ -13,7 +13,10 @@ import {
   Bell,
   BookOpen,
   Bot,
+  Bug,
+  CakeSlice,
   Camera,
+  Cat,
   Check,
   CheckCheck,
   ChevronDown,
@@ -27,6 +30,7 @@ import {
   Clock,
   CloudDownload,
   Code2,
+  Coffee,
   Database,
   Download,
   Copy,
@@ -37,23 +41,28 @@ import {
   FileDiff,
   FileSpreadsheet,
   FileText,
+  FlaskConical,
+  Flower,
   Folder,
   FolderOpen,
   FolderPlus,
   GripVertical,
   Globe2,
+  Ghost,
   GitFork,
   GitPullRequestArrow,
   Image,
   Info,
   Keyboard,
   KeyRound,
+  Leaf,
   Link,
   ListChecks,
   LogOut,
   Mic,
   MicOff,
   Minus,
+  Martini,
   MessageSquare,
   MessageSquarePlus,
   Monitor,
@@ -76,7 +85,9 @@ import {
   Power,
   RefreshCcw,
   RefreshCw,
+  Rocket,
   RotateCw,
+  Sailboat,
   Search,
   Server,
   Settings,
@@ -260,6 +271,19 @@ export const IconTriangleAlert = icon(TriangleAlert);
 /* Password field reveal toggle (see PasswordInput). */
 export const IconEye = icon(Eye);
 export const IconEyeOff = icon(EyeOff);
+/* Project appearance picker (see lib/project-appearance): the stored id is the
+   catalog key, so these names are part of persisted project data. */
+export const IconCoffee = icon(Coffee);
+export const IconMartini = icon(Martini);
+export const IconCake = icon(CakeSlice);
+export const IconSailboat = icon(Sailboat);
+export const IconFlower = icon(Flower);
+export const IconBug = icon(Bug);
+export const IconLeaf = icon(Leaf);
+export const IconCat = icon(Cat);
+export const IconGhost = icon(Ghost);
+export const IconRocket = icon(Rocket);
+export const IconFlask = icon(FlaskConical);
 
 export function IconStop({ size = 16, style, ...props }: IconProps) {
   return (

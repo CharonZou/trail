@@ -21,7 +21,7 @@ const { electronBinary } = resolveElectronBinary(root);
 const fixtureDir = join(root, "scripts", "e2e", "fixtures", "window-surface");
 const execFileAsync = promisify(execFile);
 const temp = await mkdtemp(join(tmpdir(), "pi-window-surface-"));
-const userArtifactDir = process.env.PI_DESKTOP_WINDOW_SURFACE_ARTIFACT_DIR;
+const userArtifactDir = process.env.TRAIL_WINDOW_SURFACE_ARTIFACT_DIR;
 const artifactDir = userArtifactDir
   ? resolve(userArtifactDir)
   : await mkdtemp(join(tmpdir(), "pi-window-surface-artifacts-"));
@@ -76,14 +76,14 @@ async function stopFixture(child) {
 async function runSurfaceCase(radius, backdropColor, backdropName) {
   const profile = join(temp, `profile-${radius}-${backdropName}`);
   const env = { ...process.env,
-    PI_DESKTOP_ELECTRON_PACKAGE: join(appDir, "node_modules", "electron"),
-    PI_DESKTOP_WINDOW_SHAPE: join(appDir, "electron", "main", "window-shape.ts"),
-    PI_DESKTOP_WINDOW_NATIVE_CORNERS: join(appDir, "electron", "main", "window-native-corners.ts"),
-    PI_DESKTOP_WINDOW_BACKGROUND: join(appDir, "electron", "main", "window-background.ts"),
-    PI_DESKTOP_E2E_HOST_HELPER: join(root, "scripts", "e2e", "host.mjs"),
-    PI_DESKTOP_SURFACE_PROFILE: profile,
-    PI_DESKTOP_SURFACE_RADIUS: String(radius),
-    PI_DESKTOP_SURFACE_BACKDROP: backdropColor,
+    TRAIL_ELECTRON_PACKAGE: join(appDir, "node_modules", "electron"),
+    TRAIL_WINDOW_SHAPE: join(appDir, "electron", "main", "window-shape.ts"),
+    TRAIL_WINDOW_NATIVE_CORNERS: join(appDir, "electron", "main", "window-native-corners.ts"),
+    TRAIL_WINDOW_BACKGROUND: join(appDir, "electron", "main", "window-background.ts"),
+    TRAIL_E2E_HOST_HELPER: join(root, "scripts", "e2e", "host.mjs"),
+    TRAIL_SURFACE_PROFILE: profile,
+    TRAIL_SURFACE_RADIUS: String(radius),
+    TRAIL_SURFACE_BACKDROP: backdropColor,
   };
   delete env.ELECTRON_RUN_AS_NODE;
   const child = spawn(electronBinary, [fixtureDir, `--user-data-dir=${profile}`], {

@@ -11,7 +11,7 @@ import {
   PLUGIN_VIEW_ICONS,
   validateManifest,
   type PluginManifest,
-} from "@pi-desktop/plugin-sdk";
+} from "@trail/plugin-sdk";
 import {
   MAX_PACKAGE_BYTES,
   MAX_PACKAGE_FILES,

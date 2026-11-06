@@ -1,7 +1,7 @@
 /**
  * VoiceService — orchestrates voice input in the Electron main process.
  *
- * Lazily loads @pi-desktop/voice-runtime on first use so that Voice disabled
+ * Lazily loads @trail/voice-runtime on first use so that Voice disabled
  * means zero import overhead at startup.
  */
 
@@ -15,12 +15,12 @@ import type {
   VoiceResult,
   VoiceSettings,
   VoiceState,
-} from "@pi-desktop/voice-runtime";
+} from "@trail/voice-runtime";
 
 // Lazy-loaded runtime classes
-type VoiceControllerT = import("@pi-desktop/voice-runtime").VoiceController;
-type TranscriptionEngineT = import("@pi-desktop/voice-runtime").TranscriptionEngine;
-type ModelManagerT = import("@pi-desktop/voice-runtime").ModelManager;
+type VoiceControllerT = import("@trail/voice-runtime").VoiceController;
+type TranscriptionEngineT = import("@trail/voice-runtime").TranscriptionEngine;
+type ModelManagerT = import("@trail/voice-runtime").ModelManager;
 
 // The recommended whisper-large-v3-turbo weights alone hold ~1.5 GiB of
 // main-process memory once loaded, and transcription buffers sit on top of
@@ -78,7 +78,7 @@ export class VoiceService {
       VoiceController,
       TranscriptionEngine,
       ModelManager,
-    } = await import("@pi-desktop/voice-runtime");
+    } = await import("@trail/voice-runtime");
 
     this.modelManager = new ModelManager(this.modelCacheDir);
     this.engine = new TranscriptionEngine(this.modelManager);

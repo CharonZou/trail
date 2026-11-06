@@ -14,7 +14,7 @@ import {
   type CcSwitchProviderRow,
   type ModelConfigImportDraft,
   type ModelConfigImportEnv,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 export type ModelConfigScanOptions = {
   homeDir?: string;

@@ -33,13 +33,13 @@ focuses its main window from `second-instance`, recreating a window that was
 closed or hidden into the tray, exactly as the tray's Show action does. The lock
 is Electron's, so its scope is `userData` — derived from the application name,
 which is therefore set before the request — rather than the data directory: a
-run pointed at its own `PI_DESKTOP_DATA_DIR` (E2E harnesses, the capture rig, a
+run pointed at its own `TRAIL_DATA_DIR` (E2E harnesses, the capture rig, a
 side-by-side profile) shares no database, outbox, or logs with the default
 installation and stays launchable while one is running (D236, ADR 0094).
 
 A development build is its own installation rather than a second process of
-the same one: it runs under `PI-Desktop Dev` in the OS application-data root
-and reads `~/.pi-desktop-dev`. `pnpm dev` therefore starts while a packaged app
+the same one: it runs under `Trail Dev` in the OS application-data root
+and reads `~/.trail-dev`. `pnpm dev` therefore starts while a packaged app
 holds its lock, and the two never share a database, an outbox, or a log tree
 (D599, ADR 0094). An explicit `--user-data-dir` is honored instead, because the
 E2E harnesses point a build at a throwaway profile with it.
@@ -112,7 +112,7 @@ errors remain readable instead of becoming replacement characters.
 
 Crashpad is started local-only (`uploadToServer: false`) before `ready`, and
 dumps are stored under `<data_dir>/crash-dumps` (D602) so a
-`PI_DESKTOP_DATA_DIR` profile does not share dumps with another installation.
+`TRAIL_DATA_DIR` profile does not share dumps with another installation.
 An unexpected renderer exit records its reason and exit code, then reloads the
 current main window when it is still live. A clean renderer exit and an accepted
 window close do not trigger recovery.
@@ -285,7 +285,7 @@ front of the launcher or a plugin panel (ADR 0086).
 reaches `downloaded`. Electron still emits `before-quit`, so the normal
 sidecar/host shutdown sequence runs before the updater replaces the app.
 
-For Windows NSIS installs, `PI_DESKTOP_UPDATE_CACHE_DIR` may override the
+For Windows NSIS installs, `TRAIL_UPDATE_CACHE_DIR` may override the
 electron-updater cache base with an absolute, writable directory. The packaged
 `app-update.yml` remains authoritative for the cache subdirectory name. On first
 startup after relocation, Main adopts the differential installer and block map
@@ -322,13 +322,13 @@ the next launch rather than changing the NSIS installer or writing into
 
 ### Release
 - package Electron app
-- ship Rust host binary in resources (`Resources/bin/pi-desktop-host-core`)
+- ship Rust host binary in resources (`Resources/bin/trail-host-core`)
 - agent sidecar runs the bundled `agent-runtime/sidecar.js` on the Electron
   binary itself with `ELECTRON_RUN_AS_NODE=1` — no separate Node runtime is
   shipped (resolves **D008**)
 - `Resources/agent-runtime/sidecar.js` is the sidecar's only independent
   release entry. ASAR does not carry a second complete
-  `@pi-desktop/agent-runtime` package tree; Electron Main may inline the
+  `@trail/agent-runtime` package tree; Electron Main may inline the
   pure-JS helpers it calls without changing process or protocol ownership
 - renderer dependencies ship through Vite output rather than duplicate raw
   package trees; no interactive PTY native module is packaged

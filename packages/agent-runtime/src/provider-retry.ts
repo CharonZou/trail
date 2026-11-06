@@ -9,7 +9,7 @@ import {
   type Model,
   type SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
-import { PROVIDER_RETRY_MAX_RETRIES } from "@pi-desktop/shared";
+import { PROVIDER_RETRY_MAX_RETRIES } from "@trail/shared";
 import {
   classifyAgentError,
   type ClassifiedAgentError,
@@ -556,13 +556,13 @@ export const STREAM_IDLE_TIMEOUT_DEFAULT_MS = 180_000;
 export const STREAM_IDLE_TIMEOUT_FLOOR_MS = 30_000;
 
 /**
- * `PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS` overrides the zero-event idle budget;
+ * `TRAIL_STREAM_IDLE_TIMEOUT_MS` overrides the zero-event idle budget;
  * `0` disables the watchdog, and any other override is clamped up to
  * `STREAM_IDLE_TIMEOUT_FLOOR_MS` (see above). A value that is not a number, or
  * is negative, keeps the default.
  */
 export function streamIdleTimeoutMs(): number {
-  const raw = process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+  const raw = process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
   if (raw === undefined || raw.trim() === "") {
     return STREAM_IDLE_TIMEOUT_DEFAULT_MS;
   }

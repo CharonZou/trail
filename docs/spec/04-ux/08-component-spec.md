@@ -76,7 +76,7 @@ Outer frame that positions Topbar, Sidebar, MainChat, and WorkPanel. Owns resize
   excludes the shell action lane in both sidebar states on every platform.
   On macOS, collapsed-sidebar preview reserves 88px in windowed mode and 8px
   in fullscreen through the shared `--ds-window-lead-inset` token — the
-  traffic-light cluster's right edge (76px, from `@pi-desktop/shared`) plus a
+  traffic-light cluster's right edge (76px, from `@trail/shared`) plus a
   12px gap. The main process uses that same shared geometry.
 - Work panel resize: its inner left-edge handle changes the committed panel
   width in the renderer, so dragging left gives the panel more internal space
@@ -215,8 +215,8 @@ Outer frame that positions Topbar, Sidebar, MainChat, and WorkPanel. Owns resize
   window before showing a themed confirmation with Cancel focused. Escape or a
   backdrop click cancels. If the main renderer is unavailable, a native warning
   is the bounded fallback before shutdown (D363). On macOS the tray uses a
-  transparent monochrome template of the PI mark rather than the rounded
-  application tile, so it remains readable in the menu bar.
+  transparent monochrome template of the bar glyph rather than the rounded
+  application plate, so it remains readable in the menu bar.
 - Windows/Linux do not render File/Edit/View/Window/Help in the titlebar and
   do not reserve left-side space for an application menubar. F10 and
   Shift+F10 remain available to focused content.
@@ -542,7 +542,7 @@ visually distinct from list content.
   hidden live workbench or durable preference across application restart.
 - Plugin detail, settings, permission-review, template, and install-progress
   surfaces are viewport-wide overlays. Their backdrops and surfaces mount on
-  `#pi-desktop-overlays`, outside the route scroll container and sidebar
+  `#trail-overlays`, outside the route scroll container and sidebar
   stacking contexts, so an expanded sidebar cannot cover the surface or its
   close/cancel controls.
 - The footer action group stays on the left and the build/version chip stays
@@ -1580,7 +1580,7 @@ near-zero duration. A folded group keeps its rows mounted, `aria-hidden`, and
   session path opens `<data_dir>/scratch/<sessionId>/` in the system file
   manager, creating the directory if it does not exist yet. Both actions
   appear only while developer mode is on.
-- Copy conversation link writes the `pi-desktop://session/<id>` reference to
+- Copy conversation link writes the `trail://session/<id>` reference to
   the clipboard without developer mode. Pasting it into another conversation's
   Composer draft sends a bounded excerpt of that conversation with the turn,
   and the user message then shows it as a chip (§20B).
@@ -3627,7 +3627,7 @@ Anatomy:
   main selects image blocks or path fallbacks from the exact model capability.
   Reference-only drafts are sendable. Builtin/plugin dispatch still bypasses
   the model-ready gate when no prompt text or file reference is sent.
-- A `pi-desktop://session/<id>` link in the draft is the reference itself: no
+- A `trail://session/<id>` link in the draft is the reference itself: no
   new trigger symbol joins `@` files and `/` commands, and the link stays
   visible plaintext while the draft is unsent. Immediately before dispatch,
   main resolves each link to another conversation in the same project into a
@@ -4199,7 +4199,7 @@ default nor provider configuration. OAuth accounts remain in their separate sect
 | Busy row | Test/update/delete actions disabled for that card |
 
 ### 19.4 Interactions
-- Add provider opens a modal dialog on a full-window overlay portaled to `#pi-desktop-overlays` on the document element (it can shrink below its 1040px preferred width). The chooser groups unconfigured API-key providers declared by loaded plugins under their optional category, searches their category / plugin / provider / endpoint / model labels, and shows the plugin name and endpoint on each tile. Selecting one opens a Host-owned key form for its existing provider row; saving uses the provider secret path and removes that row from the chooser. Category and provider metadata render as text. Focused credential fields keep their 2px accent ring fully visible: the scrolling body reserves that gutter instead of clipping the ring. Cancel/close resets fields and dismisses the dialog
+- Add provider opens a modal dialog on a full-window overlay portaled to `#trail-overlays` on the document element (it can shrink below its 1040px preferred width). The chooser groups unconfigured API-key providers declared by loaded plugins under their optional category, searches their category / plugin / provider / endpoint / model labels, and shows the plugin name and endpoint on each tile. Selecting one opens a Host-owned key form for its existing provider row; saving uses the provider secret path and removes that row from the chooser. Category and provider metadata render as text. Focused credential fields keep their 2px accent ring fully visible: the scrolling body reserves that gutter instead of clipping the ring. Cancel/close resets fields and dismisses the dialog
 - The model picker searches and toggles multiple models without using a native
   multiple select. Its portaled menu closes on outside press, Escape, scroll,
   and resize; model selection immediately adds or removes its configuration
@@ -4476,7 +4476,7 @@ TASKS (2)                     │ Nightly dependency check   [Enabled] [Run now]
 ### 20B.1 Purpose
 
 Carry another conversation into a turn without retyping it. The
-`pi-desktop://session/<id>` link is the whole interaction: a reader copies it
+`trail://session/<id>` link is the whole interaction: a reader copies it
 from the conversation overflow menu and pastes it into a Composer draft (issue
 #1324, option B). Copy conversation ID stays the developer-mode identifier.
 
@@ -4509,7 +4509,7 @@ Conversation overflow                    Composer draft (unsent)
 
 ### 20B.4 Interaction
 
-- Copy conversation link writes `pi-desktop://session/<sessionId>` from the
+- Copy conversation link writes `trail://session/<sessionId>` from the
   conversation overflow menu. The durable id is the reference; Copy
   conversation ID still exposes the bare id in developer mode.
 - Sending a turn whose draft holds the link attaches a bounded excerpt of the
@@ -4547,7 +4547,7 @@ Conversation overflow                    Composer draft (unsent)
 - The chip carries the button role with a catalog-built accessible name and a
   tooltip naming the conversation it opens; it is keyboard-activatable and leaves
   the surrounding selectable message text intact.
-- `pi-desktop://` is not yet an operating-system protocol handler; opening a
+- `trail://` is not yet an operating-system protocol handler; opening a
   link from outside the app is a separate change (issue #1324, option A). This
   section covers the in-app reference.
 ## 21. Acceptance criteria (all components)

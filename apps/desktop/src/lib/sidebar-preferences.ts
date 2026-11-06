@@ -1,6 +1,6 @@
-import type { ProjectWorkspace, SessionSort } from "@pi-desktop/shared";
-export type { SessionSort } from "@pi-desktop/shared";
-export { sortSessions, sessionIsPinned, sessionIsArchived } from "@pi-desktop/shared";
+import type { ProjectWorkspace, SessionSort } from "@trail/shared";
+export type { SessionSort } from "@trail/shared";
+export { sortSessions, sessionIsPinned, sessionIsArchived } from "@trail/shared";
 
 /** Local copy keeps this pure module runnable in Node's TS test loader. */
 export function normalizeProjectPath(projectPath?: string | null): string | null {

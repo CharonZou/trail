@@ -32,12 +32,12 @@ Trail.app
 窗口、托盘、日志行或子进程之前退出；持有锁的实例通过 `second-instance` 恢复并
 聚焦自己的主窗口，若窗口已关闭或隐藏到托盘则重新创建，与托盘的“显示”操作完全
 一致。该锁是 Electron 的锁，作用域是 `userData`（由应用名派生，因此应用名在请求
-之前设置），而不是数据目录：指向自有 `PI_DESKTOP_DATA_DIR` 的运行（E2E 测试装置、
+之前设置），而不是数据目录：指向自有 `TRAIL_DATA_DIR` 的运行（E2E 测试装置、
 截图装置、并行 profile）与默认安装不共享数据库、outbox 或日志，在已有实例运行时
 仍可启动（D236、ADR 0094）。
 
 开发构建本身就是独立安装，而不是同一安装的第二个进程：它运行在操作系统应用
-数据根目录下的 `PI-Desktop Dev`，数据目录为 `~/.pi-desktop-dev`。因此正式打包版
+数据根目录下的 `Trail Dev`，数据目录为 `~/.trail-dev`。因此正式打包版
 持有锁时 `pnpm dev` 仍可启动，两者不会共享数据库、outbox 或日志树（D599、
 ADR 0094）。显式 `--user-data-dir` 仍然优先，E2E 装置正是用它把构建指向临时
 profile。
@@ -76,7 +76,7 @@ queued/running `plan_approvals` 执行状态已中断并中止它们
 | Electron 主要崩溃 | 完整的应用程序退出 |
 
 Crashpad 在 `ready` 之前以本地模式启动（`uploadToServer: false`），转储放在
-`<data_dir>/crash-dumps`（D602），因此 `PI_DESKTOP_DATA_DIR` profile 不会与
+`<data_dir>/crash-dumps`（D602），因此 `TRAIL_DATA_DIR` profile 不会与
 其它安装共用转储。下一次持有单实例锁的启动会为新于 `crash-dumps.json` 的
 转储写一条诊断记录。Crashpad 记录 Chromium 进程崩溃（main、renderer、GPU、
 utility）；应用已经恢复的 renderer 崩溃仍会留下转储，并记为 warn。host-core
@@ -206,13 +206,13 @@ sidecar/host 关闭序列在更新程序替换应用程序之前运行。
 
 ### 发布
 - Electron 应用程序包
-- 在资源中发送 Rust 主机二进制文件 (`Resources/bin/pi-desktop-host-core`)
+- 在资源中发送 Rust 主机二进制文件 (`Resources/bin/trail-host-core`)
 - 代理 sidecar 在 Electron 上运行捆绑的 `agent-runtime/sidecar.js`
   二进制文件本身与 `ELECTRON_RUN_AS_NODE=1` — 没有单独的 Node 运行时
   已发货（解决 **D008**）
 - `Resources/agent-runtime/sidecar.js` 是 sidecar 唯一独立的
   释放条目。 ASAR 不携带第二个完整的
-  `@pi-desktop/agent-runtime` 包树； Electron 主要可能内联
+  `@trail/agent-runtime` 包树； Electron 主要可能内联
   它调用的纯 JS 助手无需更改进程或协议所有权
 - 渲染器依赖项通过 Vite 输出传送，而不是重复原始数据
   包树；桌面包不再携带交互式 PTY 原生模块

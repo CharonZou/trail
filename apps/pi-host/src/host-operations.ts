@@ -1,11 +1,12 @@
 import { createWorkspaceFiles } from "./workspace-files.js";
+import { DEFAULT_DATA_DIR_NAME } from "./config.js";
 import { createWorkspacePluginFiles } from "./plugin-workspace-files.js";
 import { createWorkspaceTools } from "./workspace-tools.js";
 import { readdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 
-import { RacpError, type Principal, type SessionSummary } from "@pi-desktop/agent-host";
+import { RacpError, type Principal, type SessionSummary } from "@trail/agent-host";
 import {
   collectWorkspaceDiff,
   listDir,
@@ -14,9 +15,9 @@ import {
   type HostRpc,
   type HostSessionRecord,
   type RuntimeService,
-} from "@pi-desktop/host-runtime";
-import type { RacpHostOperations, RacpProjectCatalog, RacpSessionCatalog, RacpWorkspaceAccess } from "@pi-desktop/racp";
-import type { RacpProjectSummary } from "@pi-desktop/shared";
+} from "@trail/host-runtime";
+import type { RacpHostOperations, RacpProjectCatalog, RacpSessionCatalog, RacpWorkspaceAccess } from "@trail/racp";
+import type { RacpProjectSummary } from "@trail/shared";
 
 /** A project row as host-core lists it. */
 type ProjectRow = { id: number; path: string; name: string; pinned?: boolean };
@@ -261,7 +262,7 @@ export function createHostOperations(deps: HostOperationsDeps): Omit<RacpHostOpe
     workspaceFiles: createWorkspaceFiles(),
     workspacePluginFiles: createWorkspacePluginFiles({
       browseRoot: deps.browseRoot ?? homedir(),
-      protectedPaths: [deps.dataDir ?? join(homedir(), ".pi-desktop")],
+      protectedPaths: [deps.dataDir ?? join(homedir(), DEFAULT_DATA_DIR_NAME)],
       isRegisteredRoot: async (root) => {
         const host = requireHost(deps.getHost);
         const result = await host.call<{ projects: ProjectRow[] }>("projects.list", {}).catch(hostError);

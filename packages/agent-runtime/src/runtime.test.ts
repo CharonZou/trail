@@ -11,7 +11,7 @@ import {
   toToolDeclaration,
   type AssistantMessage,
 } from "@earendil-works/pi-ai";
-import { formatSessionMessage, type SessionMessageOrigin } from "@pi-desktop/shared";
+import { formatSessionMessage, type SessionMessageOrigin } from "@trail/shared";
 import { estimateContextTokens as estimateTranscriptTokens } from "@earendil-works/pi-ai/utils/estimate";
 import { buildSessionContext } from "./session-context.js";
 import { estimateContextTokens as estimateAgentContextTokens, estimateTokens } from "./pi-runtime-estimates.js";
@@ -124,7 +124,7 @@ import {
   DEFAULT_SUBAGENT_IDLE_TIMEOUT_SECONDS,
   MAX_RESUMABLE_CHAINS_PER_AGENT,
   MAX_SUBAGENT_CONCURRENCY,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type {
   AgentEventEnvelope,
   ContextCompactionRecord,
@@ -135,7 +135,7 @@ import type {
   SessionThinkingLevel,
   SubagentDefinition,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 const provider: RuntimeProviderConfig = {
   id: "local",
@@ -1684,8 +1684,8 @@ describe("DesktopAgentRuntime configuration matching", () => {
   });
 
   it("keeps the root prompt after reading a file outside the project", async () => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
-    const outside = await mkdtemp(join(tmpdir(), "pi-desktop-attachment-"));
+    const root = await mkdtemp(join(tmpdir(), "trail-instructions-"));
+    const outside = await mkdtemp(join(tmpdir(), "trail-attachment-"));
     try {
       await mkdir(join(root, "nested"));
       await writeFile(join(root, "AGENTS.md"), "Use root rules.");
@@ -1964,7 +1964,7 @@ describe("DesktopAgentRuntime configuration matching", () => {
       available: true,
       isDefault: false,
     };
-    const windowsScratch = "C:\\Users\\User\\.pi-desktop\\scratch\\sess-123";
+    const windowsScratch = "C:\\Users\\User\\.trail\\scratch\\sess-123";
     const runtime = createRuntime({
       commandShell: gitBash,
       scratchDir: windowsScratch,
@@ -1974,7 +1974,7 @@ describe("DesktopAgentRuntime configuration matching", () => {
       (tool: any) => tool.name === "Bash",
     );
 
-    const posixScratch = "C:/Users/User/.pi-desktop/scratch/sess-123";
+    const posixScratch = "C:/Users/User/.trail/scratch/sess-123";
     expect(systemPrompt).toContain(`\`${posixScratch}\``);
     expect(systemPrompt).toContain("in Bash: $PI_SCRATCH_DIR");
     expect(systemPrompt).not.toContain(windowsScratch);
@@ -11299,7 +11299,7 @@ describe("DesktopAgentRuntime compaction request headers", () => {
     expect(calls[0]?.sessionId).toBe("session-1");
     expect(calls[0]?.headers).toMatchObject({
       "x-opencode-session": "session-1",
-      "x-opencode-client": "pi-desktop",
+      "x-opencode-client": "trail",
       "X-Team": "platform",
     });
     await runtime.dispose();

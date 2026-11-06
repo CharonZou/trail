@@ -16,6 +16,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { TooltipButton, cx } from "./ui";
+import { TokenUsageCard } from "./TokenUsageCard";
 
 import { portalToBody } from "../lib/portal-visibility";
 import {
@@ -64,8 +65,8 @@ import {
   ProjectRunCount,
   ProjectRunRail,
 } from "./ProjectRunIndicator";
-import { ErrorCodes, formatSessionLink } from "@pi-desktop/shared";
-import type { SessionSummary } from "@pi-desktop/shared";
+import { ErrorCodes, formatSessionLink } from "@trail/shared";
+import type { SessionSummary } from "@trail/shared";
 import type {
   ProjectMeta,
   ProjectSort,
@@ -104,6 +105,7 @@ import { useArmedDelete } from "../hooks/use-armed-delete";
 import { useUpdateState } from "../hooks/use-update-state";
 import { ProjectDeleteDialog } from "./ProjectDeleteDialog";
 import { ProjectEditDialog } from "./ProjectEditDialog";
+import { ProjectAppearanceGlyph } from "./ProjectAppearance";
 import { SessionRenameDialog } from "./SessionRenameDialog";
 import {
   IconArchive,
@@ -142,7 +144,7 @@ type ProjectEntry = {
 };
 
 /** Private MIME so a sidebar session drag is never mistaken for an OS file drop. */
-const SESSION_DRAG_MIME = "application/x-pi-desktop-session";
+const SESSION_DRAG_MIME = "application/x-trail-session";
 
 type SidebarResizeState = {
   pointerId: number;
@@ -268,6 +270,7 @@ export function Sidebar({
   const openProjectPathsState = useAppStore((s) => s.openProjectPaths);
   const activeProjectPathState = useAppStore((s) => s.activeProjectPath);
   const projectMeta = useAppStore((s) => s.projectMeta);
+  const projectAppearance = useAppStore((s) => s.projectAppearance);
   const projectCollapsed = useAppStore((s) => s.projectCollapsed);
   const sessionMeta = useAppStore((s) => s.sessionMeta);
   const sessionView = useAppStore((s) => s.sessionView);
@@ -2400,7 +2403,10 @@ export function Sidebar({
                 aria-hidden
               />
             ) : (
-              <IconFolder size={13} aria-hidden />
+              <ProjectAppearanceGlyph
+                appearance={projectAppearance[entry.key]}
+                size={13}
+              />
             )}
             <span>{entry.name}</span>
             {showRunBadge ? <ProjectRunBadge summary={runSummary} /> : null}
@@ -2765,6 +2771,8 @@ export function Sidebar({
               showLastReplyDate: settings?.sidebarSessionTime === true,
             })} />
         </div>
+
+        <TokenUsageCard />
 
         <div className="sidebar-footer no-drag">
           <div className="footer-actions">

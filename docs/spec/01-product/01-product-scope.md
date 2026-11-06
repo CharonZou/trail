@@ -131,7 +131,7 @@ the internal `page = "chat"` route value; that value is not an operating mode.
 ## 8. Naming
 
 - Product: `Trail`
-- Package: `pi-desktop`
+- Package: `trail`
 - Application ID: `net.aiuo.pi-desktop`
 - Window title: `Trail`
 

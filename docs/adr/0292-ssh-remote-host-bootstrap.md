@@ -61,7 +61,12 @@ extended boot hook, and one new IPC channel.
    functions with no network and no SSH.
 
 3. **One script runs remotely (`pi-host-bootstrap-script.ts`).** It downloads the
-   pinned URL, verifies the digest, installs under `$HOME/.pi-desktop/pi-host`,
+   pinned URL, verifies the digest, installs under `$HOME/.pi-desktop/pi-host`
+   (that path and the Host's default profile directory stay pre-Trail names: both
+   scripts and the daily supervisor identify the running Host by that exact
+   entry point, so a second name would leave a pre-Trail Host running beside this
+   one and two host-core processes writing one database — see
+   `REMOTE_PI_HOST_HOME_PATH`),
    (re)starts the host on loopback with `--pair`, and echoes `PI_HOST_READY` /
    `PI_HOST_PAIRING_TOKEN`. It runs under `umask 077`, so the single-use pairing
    token only ever exists in a work file inside the bootstrap directory and on

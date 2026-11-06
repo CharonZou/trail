@@ -11,7 +11,12 @@ use super::repositories::{
 const GROUP_NAMESPACE: &str = "projectGroups";
 const GROUP_MEMORY_NAMESPACE: &str = "projectGroupMemory";
 const GROUP_INSTRUCTIONS_NAMESPACE: &str = "projectGroupInstructions";
+/// Indexing choice of a legacy project, which has no group record of its own.
+const GROUP_WORKSPACE_INDEX_NAMESPACE: &str = "projectGroupWorkspaceIndex";
+/// Icon and tint of a legacy project, which has no group record of its own.
+const GROUP_APPEARANCE_NAMESPACE: &str = "projectGroupAppearance";
 pub const MAX_PROJECT_GROUP_NAME_CHARS: usize = 80;
+pub const MAX_PROJECT_GROUP_ICON_CHARS: usize = 40;
 pub const MAX_PROJECT_GROUP_INSTRUCTIONS_BYTES: usize = 32 * 1024;
 
 pub const REMOTE_PROJECT_PREFIX: &str = "remote-project:";
@@ -47,6 +52,84 @@ pub struct ProjectGroupRoot {
     pub position: i64,
 }
 
+/// Icon id and tint the user picked for one project. The renderer owns the
+/// icon catalog, so the host keeps only the identifier it was handed and never
+/// interprets it; the tint is a plain hex color because the renderer writes it
+/// straight into a style.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct ProjectGroupAppearance {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+}
+
+impl ProjectGroupAppearance {
+    /// Whether the user has picked nothing, so the project keeps its defaults.
+    pub fn is_empty(&self) -> bool {
+        self.icon.is_none() && self.color.is_none()
+    }
+
+    /// Normalises a submitted pair: trims, lowercases the tint and turns an
+    /// empty value into "no choice". Anything the picker could not produce is
+    /// refused, because these strings reach the renderer as a style value.
+    pub fn normalized(icon: Option<&str>, color: Option<&str>) -> Result<Self> {
+        let icon = icon
+            .map(valid_icon_id)
+            .transpose()?
+            .filter(|value| !value.is_empty());
+        let color = color
+            .map(valid_color)
+            .transpose()?
+            .filter(|value| !value.is_empty());
+        Ok(Self { icon, color })
+    }
+
+    fn from_value(value: &Value) -> Self {
+        let field = |name: &str| {
+            value.get(name).and_then(Value::as_str).and_then(|raw| {
+                let text = raw.trim();
+                (!text.is_empty()).then(|| text.to_string())
+            })
+        };
+        Self {
+            icon: field("icon"),
+            color: field("color"),
+        }
+    }
+}
+
+fn valid_icon_id(raw: &str) -> Result<String> {
+    let icon = raw.trim();
+    if icon.is_empty() {
+        return Ok(String::new());
+    }
+    if icon.len() > MAX_PROJECT_GROUP_ICON_CHARS
+        || !icon.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !icon
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+    {
+        return Err(anyhow!("project group icon is invalid"));
+    }
+    Ok(icon.to_string())
+}
+
+fn valid_color(raw: &str) -> Result<String> {
+    let color = raw.trim().to_lowercase();
+    if color.is_empty() {
+        return Ok(String::new());
+    }
+    let Some(digits) = color.strip_prefix('#') else {
+        return Err(anyhow!("project group color must be a hex color"));
+    };
+    if digits.len() != 6 || !digits.chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err(anyhow!("project group color must be a hex color"));
+    }
+    Ok(color)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectGroupRecord {
@@ -63,8 +146,20 @@ pub struct ProjectGroupRecord {
     /// Roots removed without chats remain suppressed as legacy projections.
     #[serde(default)]
     pub detached_paths: Vec<String>,
+    /// Whether the workspace file index may be built for this project's
+    /// folders. Records written before this field existed keep indexing on.
+    #[serde(default = "default_workspace_index")]
+    pub workspace_index: bool,
+    /// Icon and tint the user picked. Records written before this field existed
+    /// render with the historical folder glyph.
+    #[serde(default, skip_serializing_if = "ProjectGroupAppearance::is_empty")]
+    pub appearance: ProjectGroupAppearance,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remote: Option<RemoteWorkspace>,
+}
+
+fn default_workspace_index() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -102,7 +197,11 @@ fn group_from_value(raw: &str) -> Result<ProjectGroupRecord> {
     Ok(group)
 }
 
-fn legacy_group(project: &ProjectRecord) -> ProjectGroupRecord {
+fn legacy_group(
+    project: &ProjectRecord,
+    workspace_index: bool,
+    appearance: ProjectGroupAppearance,
+) -> ProjectGroupRecord {
     ProjectGroupRecord {
         id: format!("legacy:{}", project.path),
         name: project.name.clone(),
@@ -118,6 +217,8 @@ fn legacy_group(project: &ProjectRecord) -> ProjectGroupRecord {
         last_opened_at: project.last_opened_at,
         legacy: true,
         detached_paths: Vec::new(),
+        workspace_index,
+        appearance,
         remote: None,
     }
 }
@@ -174,6 +275,8 @@ impl Database {
             last_opened_at: now,
             legacy: false,
             detached_paths: Vec::new(),
+            workspace_index: true,
+            appearance: ProjectGroupAppearance::default(),
             remote: Some(remote),
         };
         let transaction = self.conn.unchecked_transaction()?;
@@ -224,7 +327,9 @@ impl Database {
         }
         for project in projects {
             if !used_paths.contains(&project.path) {
-                groups.push(legacy_group(&project));
+                let workspace_index = self.workspace_index_for_path(&project.path)?;
+                let appearance = self.appearance_for_path(&project.path)?;
+                groups.push(legacy_group(&project, workspace_index, appearance));
             }
         }
         groups.sort_by(|left, right| {
@@ -254,6 +359,120 @@ impl Database {
         Ok(self
             .project_group_for_path(path)?
             .filter(|group| !group.legacy))
+    }
+
+    /// The indexing choice of a project that has no group record: a legacy
+    /// projection keeps its override under its own path, and only when
+    /// indexing is off, so an untouched project is always indexed.
+    fn workspace_index_for_path(&self, path: &str) -> Result<bool> {
+        Ok(self
+            .kv_get(GROUP_WORKSPACE_INDEX_NAMESPACE, path)?
+            .and_then(|value| value.get("workspaceIndex").and_then(Value::as_bool))
+            .unwrap_or(true))
+    }
+
+    /// Sets whether the workspace file index may be built for one project.
+    /// A stored group keeps the flag on its record; a legacy projection has no
+    /// record of its own, so its flag is keyed by the primary path instead.
+    pub fn set_workspace_index(&self, id: &str, enabled: bool) -> Result<ProjectGroupRecord> {
+        let Some(group) = self.group_by_id(id.trim())? else {
+            return Err(anyhow!("project group not found"));
+        };
+        if group.remote.is_some() {
+            return Err(anyhow!("remote projects have no local workspace index"));
+        }
+        if group.legacy {
+            // The key is the stored project path itself, exactly as
+            // `list_project_groups` reads it, so a renamed folder cannot make
+            // the override unreachable.
+            let path = group.primary_path.clone();
+            if enabled {
+                self.kv_delete(GROUP_WORKSPACE_INDEX_NAMESPACE, &path)?;
+            } else {
+                self.kv_set(
+                    GROUP_WORKSPACE_INDEX_NAMESPACE,
+                    &path,
+                    &serde_json::json!({ "workspaceIndex": false }),
+                )?;
+            }
+            return Ok(ProjectGroupRecord {
+                workspace_index: enabled,
+                ..group
+            });
+        }
+        if group.workspace_index == enabled {
+            return Ok(group);
+        }
+        let mut updated = ProjectGroupRecord {
+            workspace_index: enabled,
+            ..group
+        };
+        updated.updated_at = now_ms();
+        self.kv_set(
+            GROUP_NAMESPACE,
+            &updated.id,
+            &serde_json::to_value(&updated)?,
+        )?;
+        Ok(updated)
+    }
+
+    /// The icon and tint of a project that has no group record. Only what the
+    /// user picked is stored, so an untouched project has no row at all.
+    fn appearance_for_path(&self, path: &str) -> Result<ProjectGroupAppearance> {
+        Ok(self
+            .kv_get(GROUP_APPEARANCE_NAMESPACE, path)?
+            .map(|value| ProjectGroupAppearance::from_value(&value))
+            .unwrap_or_default())
+    }
+
+    /// Sets the icon and tint of one project. The pair replaces what was
+    /// stored, so an empty field clears it. A stored group keeps the pair on
+    /// its record; a legacy projection has no record of its own, so the pair is
+    /// keyed by the primary path instead.
+    pub fn set_appearance(
+        &self,
+        id: &str,
+        appearance: ProjectGroupAppearance,
+    ) -> Result<ProjectGroupRecord> {
+        let Some(group) = self.group_by_id(id.trim())? else {
+            return Err(anyhow!("project group not found"));
+        };
+        if group.remote.is_some() {
+            return Err(anyhow!("remote projects have no local workspace icon"));
+        }
+        if group.legacy {
+            // The key is the stored project path itself, exactly as
+            // `list_project_groups` reads it, so a renamed folder cannot make
+            // the choice unreachable.
+            let path = group.primary_path.clone();
+            if appearance.is_empty() {
+                self.kv_delete(GROUP_APPEARANCE_NAMESPACE, &path)?;
+            } else {
+                self.kv_set(
+                    GROUP_APPEARANCE_NAMESPACE,
+                    &path,
+                    &serde_json::to_value(&appearance)?,
+                )?;
+            }
+            return Ok(ProjectGroupRecord {
+                appearance,
+                ..group
+            });
+        }
+        if group.appearance == appearance {
+            return Ok(group);
+        }
+        let mut updated = ProjectGroupRecord {
+            appearance,
+            ..group
+        };
+        updated.updated_at = now_ms();
+        self.kv_set(
+            GROUP_NAMESPACE,
+            &updated.id,
+            &serde_json::to_value(&updated)?,
+        )?;
+        Ok(updated)
     }
 
     /// Delete a stored project group record together with its group-scoped
@@ -322,9 +541,17 @@ impl Database {
             last_opened_at: now,
             legacy: false,
             detached_paths: Vec::new(),
+            workspace_index: true,
+            appearance: ProjectGroupAppearance::default(),
             remote: None,
         };
         self.kv_set(GROUP_NAMESPACE, &group.id, &serde_json::to_value(&group)?)?;
+        // The record owns these choices from now on, so a path-keyed fallback
+        // left by an earlier legacy project must not outlive creation.
+        for path in &canonical_paths {
+            self.kv_delete(GROUP_WORKSPACE_INDEX_NAMESPACE, path)?;
+            self.kv_delete(GROUP_APPEARANCE_NAMESPACE, path)?;
+        }
         Ok(group)
     }
 
@@ -465,9 +692,17 @@ impl Database {
             last_opened_at: current.last_opened_at,
             legacy: false,
             detached_paths,
+            workspace_index: current.workspace_index,
+            appearance: current.appearance,
             remote: None,
         };
         if current.legacy {
+            // The promoted record owns these choices from now on, so the
+            // path-keyed fallbacks must not outlive it and re-apply later.
+            for path in &ordered {
+                self.kv_delete(GROUP_WORKSPACE_INDEX_NAMESPACE, path)?;
+                self.kv_delete(GROUP_APPEARANCE_NAMESPACE, path)?;
+            }
             // A legacy project may already have path-scoped memory. Merge the
             // memory of every selected legacy root into the new group so
             // upgrading a project never silently discards user context.
@@ -578,6 +813,8 @@ impl Database {
             last_opened_at: current.last_opened_at,
             legacy: false,
             detached_paths: current.detached_paths,
+            workspace_index: current.workspace_index,
+            appearance: current.appearance,
             remote: current.remote,
         };
         self.kv_set(GROUP_NAMESPACE, &group.id, &serde_json::to_value(&group)?)?;

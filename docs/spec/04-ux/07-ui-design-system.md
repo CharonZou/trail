@@ -532,7 +532,7 @@ the expanded sidebar's Collapse sidebar icon button right-aligned
 in that same row. The macOS row omits the sidebar logo/title, reserves `88px`
 on the left for native chrome in windowed mode, and reclaims that padding in
 fullscreen. That reserve is the shared `--ds-window-lead-inset` token — the
-cluster's `76px` right edge (the same `@pi-desktop/shared` geometry the main
+cluster's `76px` right edge (the same `@trail/shared` geometry the main
 process positions the buttons with) plus `12px` of breathing room. Windows/Linux
 keep the identity and sidebar actions in their first row and reserve the
 rightmost 120px for three frameless-window controls. The
@@ -1104,7 +1104,7 @@ owns the preview pane's drag area. Its border box, not just its padding, exclude
 the left action lane plus an 8px gap in both sidebar states on all platforms.
 The left inset is 8px except for collapsed-sidebar windowed macOS (88px).
 That macOS reserve is the shared `--ds-window-lead-inset` token — the traffic-light
-cluster's 76px right edge (native geometry from `@pi-desktop/shared`, the same
+cluster's 76px right edge (native geometry from `@trail/shared`, the same
 constants the main process positions the buttons with) plus a 12px gap.
 The action lane uses the shared 28px control size plus an 8px gap when expanded,
 and the shared preview action lane (two controls, 4px spacing, 8px gap) when collapsed.
@@ -1355,6 +1355,56 @@ is reserved for non-Settings contexts where OS-level rendering is acceptable.
 Appearance pickers use the scaled `--ds-settings-picker-height` metric.
 `SettingsMenuSelect` triggers keep `--ds-field-height` so they align with
 adjacent form inputs; dense surfaces may override that metric locally.
+
+### 11.13 ProjectAppearancePicker
+
+Implementation: `components/ProjectAppearance.tsx` — `ProjectAppearancePicker`
+(the two rows in the Create project and Edit project dialogs) and
+`ProjectAppearanceGlyph` (the leading icon of a sidebar project row).
+
+| Property | Value |
+|---|---|
+| Tiles | `--radius-md`, `--appearance-tile` (23px) grid tracks, 6px gap |
+| CSS classes | `.project-appearance-row` / `.project-appearance-tile` / `.project-appearance-swatch` / `.project-appearance-swatch-dot` |
+| Catalog | 22 icon choices (the untouched default, 14 Lucide glyphs, 7 supplied glyphs) and 15 colour choices |
+| Content | a 15px glyph per icon tile; a 12px `currentColor` dot per colour tile |
+| Selected | `--ds-tile-deep` fill plus `--ds-focus` border and 1px ring — never a colour-only signal |
+| Roles | row is `role="group"` with `aria-label`; each tile is a `TooltipButton` with `aria-pressed` and a composed `aria-label` |
+| Disabled | the dialog's busy state — no separate disabled styling |
+| Motion | fast background / border transition, removed under `prefers-reduced-motion` |
+| Copy | every tile name comes from `project.appearance.*` in all nine catalogs |
+
+Both project dialogs **must** share `ProjectAppearancePicker` so tile order,
+selection semantics and the stored pair cannot drift apart between the two entry
+points, and it stays hidden for a remote project, which has no local decoration
+to store (D680). The picker rows come first and the workspace index switch last,
+so the dialog reads workspace → icon → colour → index.
+
+Tile one of each row stores nothing and is selected when the project carries no
+stored half, so an undecorated project keeps the historical folder glyph and the
+theme's own text colour rather than a copy of them. `ProjectGlyph` resolves one
+stored id to artwork: the id → glyph map in this component for the Lucide family,
+otherwise the id → shape map in `lib/project-icon-shapes.ts`. Both maps are
+private data modules — `lib/project-appearance.ts` and
+`lib/project-icon-shapes.ts` must stay free of component imports so the store can
+reach them — and the two together have to cover every catalog id, which
+`test/project-appearance.test.mjs` enforces. A stored colour reaches a style only
+after `resolveProjectColor` proves it is a `#rrggbb`.
+
+The supplied glyphs are flattened path data, not Lucide components: each `<path>`
+paints `currentColor` and the source colour survives only as an opacity, so the
+workspace colour tints them exactly like a stroke icon. A hard-coded fill would
+make the colour row a silent no-op for those tiles. Each shape carries a square
+`viewBox` cut around its own measured ink box, so a wide export still centres
+inside a square tile instead of inheriting the source aspect ratio.
+
+The row is a `repeat(auto-fill, minmax(23px, 1fr))` grid with
+`grid-auto-rows: 23px`, not a fixed-width flex row: the dialog column is 444px,
+so a row of fixed 26px tiles overflows it and the last choices drop onto a second
+line on their own. Fluid tracks fit fifteen columns on a line at the dialog's own
+width — the colour row is then one line and the icon row continues onto a second
+line of the same fifteen columns — and they only drop below fifteen columns once
+the column is too narrow for a bare 23px tile.
 
 
 ## 12. State patterns

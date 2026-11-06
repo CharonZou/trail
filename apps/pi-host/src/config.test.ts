@@ -1,9 +1,14 @@
 import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { parseArgs, resolveConfig } from "./config.js";
+import {
+  DEFAULT_DATA_DIR_NAME,
+  dataDirOverride,
+  parseArgs,
+  resolveConfig,
+} from "./config.js";
 import { FileCredentialStore, loadOrCreateHostId } from "./credentials.js";
 
 const dirs: string[] = [];
@@ -25,6 +30,18 @@ describe("config", () => {
     expect(() => resolveConfig({ port: "70000", "host-core": "/bin/hc", sidecar: "/s.js" }, {})).toThrow(/invalid port/);
     expect(() => resolveConfig({ "host-core": "/bin/hc", sidecar: "/s.js", port: "abc" }, {})).toThrow(/invalid port/);
     expect(resolveConfig({ "host-core": "/bin/hc", sidecar: "/s.js", "log-level": "warn" }, {}).logLevel).toBe("warn");
+  });
+
+  it("reads either data-directory variable and keeps the frozen remote default", () => {
+    expect(dataDirOverride({ TRAIL_DATA_DIR: "/trail", PI_DESKTOP_DATA_DIR: "/legacy" })).toBe("/trail");
+    expect(dataDirOverride({ PI_DESKTOP_DATA_DIR: "/legacy" })).toBe("/legacy");
+    expect(dataDirOverride({})).toBeUndefined();
+    expect(resolveConfig({ "host-core": "/bin/hc", sidecar: "/s.js" }, { TRAIL_DATA_DIR: "/from-env" }).dataDir)
+      .toBe(resolve("/from-env"));
+    // Frozen: a paired remote already owns its sessions, providers and vault
+    // under this name, and a second default would put two Hosts over one
+    // SQLite file. Renaming it needs a migration, not a rebrand.
+    expect(DEFAULT_DATA_DIR_NAME).toBe(".pi-desktop");
   });
 });
 

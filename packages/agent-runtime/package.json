@@ -1,6 +1,6 @@
 {
-  "name": "@pi-desktop/agent-runtime",
-  "version": "1.0.1",
+  "name": "@trail/agent-runtime",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -34,7 +34,7 @@
     "@earendil-works/pi-agent-core": "1.4.0",
     "@earendil-works/pi-ai": "1.4.0",
     "@earendil-works/pi-coding-agent": "1.4.0",
-    "@pi-desktop/shared": "workspace:*",
+    "@trail/shared": "workspace:*",
     "jiti": "2.7.0",
     "typebox": "1.3.27",
     "undici": "8.10.2",

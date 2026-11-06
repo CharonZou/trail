@@ -1069,39 +1069,39 @@ describe("opaque bad-request repair", () => {
 
 describe("stream idle watchdog", () => {
   it("reads the idle budget from the environment with a safe default", () => {
-    const previous = process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+    const previous = process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
     try {
-      delete process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+      delete process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
       expect(streamIdleTimeoutMs()).toBe(STREAM_IDLE_TIMEOUT_DEFAULT_MS);
-      process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "45000";
+      process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "45000";
       expect(streamIdleTimeoutMs()).toBe(45_000);
-      process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "0";
+      process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "0";
       expect(streamIdleTimeoutMs()).toBe(0);
-      process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "not-a-number";
+      process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "not-a-number";
       expect(streamIdleTimeoutMs()).toBe(STREAM_IDLE_TIMEOUT_DEFAULT_MS);
     } finally {
       if (previous === undefined) {
-        delete process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+        delete process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
       } else {
-        process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = previous;
+        process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = previous;
       }
     }
   });
 
   it("clamps a positive override up to the supported idle minimum", () => {
-    const previous = process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+    const previous = process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
     try {
       // Keep the existing positive minimum; `0` still disables the watchdog.
-      process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "1000";
+      process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "1000";
       expect(streamIdleTimeoutMs()).toBe(STREAM_IDLE_TIMEOUT_FLOOR_MS);
       expect(STREAM_IDLE_TIMEOUT_FLOOR_MS).toBeGreaterThan(1_000);
-      process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = "0";
+      process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = "0";
       expect(streamIdleTimeoutMs()).toBe(0);
     } finally {
       if (previous === undefined) {
-        delete process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+        delete process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS;
       } else {
-        process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS = previous;
+        process.env.TRAIL_STREAM_IDLE_TIMEOUT_MS = previous;
       }
     }
   });

@@ -9,7 +9,7 @@
 
 ### E2E-TRANSCRIPT-lossless-tool-images
 
-- Entry: `PI_DESKTOP_HOST_BIN=<candidate-host> pnpm test:e2e:tool-result-persistence`
+- Entry: `TRAIL_HOST_BIN=<candidate-host> pnpm test:e2e:tool-result-persistence`
   after building Host, shared, agent-runtime and host-runtime.
 - Environment: Real isolated Host, SQLite and JSONL, production Desktop IPC and
   outbox; only Electron shell and unused importer/search services are stubs.
@@ -258,7 +258,7 @@
   background acknowledgement. subagent.test.ts checks conservative policy
   inheritance.
 - Run `node scripts/e2e-parallel-read-batches.mjs` after building agent-runtime,
-  shared and host-core. Set `PI_DESKTOP_HOST_BIN` when reusing a shared target.
+  shared and host-core. Set `TRAIL_HOST_BIN` when reusing a shared target.
   It uses a local HTTP provider, real parent/delegate loops and a real Host in
   temporary directories. A gated response proves overlapping Read dispatch;
   actual Read/Glob/Grep results, source-order model results and parent prompt
@@ -266,7 +266,7 @@
   production throughput or Electron UI behavior. UI-only project-edit E2E is
   not evidence for agent Edit scheduling.
 - Run `node scripts/e2e-task-read-batches.mjs` under the same build and
-  `PI_DESKTOP_HOST_BIN` preconditions. Against the pre-fix implementation it
+  `TRAIL_HOST_BIN` preconditions. Against the pre-fix implementation it
   fails with `read:start` before `write:start`, which is the regression the
   maintainer asked for.
 
@@ -276,7 +276,7 @@
   compatible host toolchain, built host-core and desktop, isolated temporary data
   and Chromium profiles. No user's running desktop, provider, or network is used.
 - **First-install / new-directory regression:** Run
-  `node scripts/e2e-storage-directory.mjs` with `PI_DESKTOP_HOST_BIN` pointing
+  `node scripts/e2e-storage-directory.mjs` with `TRAIL_HOST_BIN` pointing
   to the candidate Host. The production storage controls and preload invoke real
   Main handlers through native mouse clicks, schedule cold maintenance, and reopen
   the migrated Electron profile and Host. Cover an absent data root with missing
@@ -1046,7 +1046,7 @@ levels does not waive the relevant E2E gate.
 | Requirement | Detail |
 |---|---|
 | Platform | macOS arm64 and Intel x64, Windows x64, and Linux x64 and arm64 release targets (D126/D285, D638 / ADR 0318) |
-| Profile | Clean `~/.pi-desktop` profile (no prior config) |
+| Profile | Clean `~/.trail` profile (no prior config) |
 | Fixtures | Sample project directory (`examples/fixtures/sample-project/`) |
 | Sample plugin | `examples/plugins/hello` loaded from local path |
 | Provider | At least one provider with a valid key (test account) |
@@ -1218,9 +1218,9 @@ identify the platform validation still needed.
   arm64 `ubuntu-22.04-arm` runner is available to the repository.
 - **Steps**: 1) Run the tag release workflow. 2) Confirm the arm64 lane ran on
   an `aarch64` runner and that the packaged
-  `target/release/pi-desktop-host-core` is an AArch64 binary. 3) Inspect the
+  `target/release/trail-host-core` is an AArch64 binary. 3) Inspect the
   published Release assets for `Trail-X.Y.Z-linux-arm64.AppImage`,
-  `pi-desktop_X.Y.Z_arm64.deb`, `pi-desktop-X.Y.Z-aarch64.rpm`,
+  `trail_X.Y.Z_arm64.deb`, `trail-X.Y.Z-aarch64.rpm`,
   `Trail-X.Y.Z-linux-arm64.asar`, and
   `pi-host-X.Y.Z-linux-arm64.tar.gz` with its `.sha256`. 4) Confirm
   `latest-linux.yml` still lists the x64 AppImage while
@@ -1244,13 +1244,13 @@ identify the platform validation still needed.
   for installation and launch.
 - **Steps**: 1) Build the Linux targets and inspect the RPM with `rpm -qip` and
   `rpm -qpl`. 2) Confirm the package contains the application archive,
-  host-core, `pi-desktop.desktop`, and the 512px `pi-desktop` icon. 3) Confirm
+  host-core, `trail.desktop`, and the 512px `trail` icon. 3) Confirm
   the RPM has no global `/usr/lib/.build-id` links. 4) Install the RPM on the
   Fedora KDE/Wayland machine and launch Trail from its desktop entry.
   5) Inspect the taskbar grouping and the installed desktop entry.
 - **Expected**: The x64 RPM is produced with the documented name and uploads
-  with the release artifacts. Its desktop entry contains `Icon=pi-desktop` and
-  `StartupWMClass=pi-desktop`; the running Wayland window groups with the
+  with the release artifacts. Its desktop entry contains `Icon=trail` and
+  `StartupWMClass=trail`; the running Wayland window groups with the
   Trail launcher and shows its icon instead of a generic Electron icon.
   The package remains notify-and-link for updates, and the bundled Electron
   binaries do not create global build-id links.
@@ -1312,7 +1312,7 @@ identify the platform validation still needed.
   `Developer ID Application: XingYu Liu (DUV63RKYTW)`. 3) Run
   `codesign --verify --deep --strict --verbose=2`,
   `spctl --assess --type execute --verbose=4`, and `xcrun stapler validate`
-  against the app, including `Contents/Resources/bin/pi-desktop-host-core`.
+  against the app, including `Contents/Resources/bin/trail-host-core`.
   4) Confirm the app stapler shim retries only `xcrun stapler staple` up to six
   total attempts after the app submission is accepted, then confirm the
   workflow's DMG step reported an Apple notary status of `Accepted` and run
@@ -1358,7 +1358,7 @@ identify the platform validation still needed.
 
 #### E2E-001: App launches and shows main window
 
-- **Preconditions**: macOS arm64 or Intel x64; no prior `~/.pi-desktop` profile. For the
+- **Preconditions**: macOS arm64 or Intel x64; no prior `~/.trail` profile. For the
   development lane, workspace package build outputs are absent or older than
   their TypeScript sources.
 - **Steps**: 1) Launch Trail. In the development lane, use `pnpm dev`.
@@ -1416,7 +1416,7 @@ identify the platform validation still needed.
 
 #### E2E-004: First-run inline checklist appears
 
-- **Preconditions**: Fresh profile (no `~/.pi-desktop`).
+- **Preconditions**: Fresh profile (no `~/.trail`).
 - **Steps**: 1) Launch app on fresh profile. 2) Observe onboarding checklist.
 - **Expected**: Inline checklist is displayed; provider/key items open Settings
   → Agent, and the optional plugin item opens the app-shell Plugins
@@ -1463,7 +1463,7 @@ identify the platform validation still needed.
 - **Preconditions**: Isolated settings profile and a local OpenAI-compatible fixture that lists a model without credentials; no live or paid provider.
 - **Steps**: 1) Open Settings → Model configuration → Add provider → Custom endpoint. 2) Enter a name and the fixture URL; leave the optional API key empty, without selecting an authentication mode. 3) Confirm model discovery succeeds without a key, select the returned model, and save. 4) Reopen and save without changes, then type a key and save; confirm API-key authentication is restored. 5) Edit an API-key provider and save with a blank input; confirm its key is retained. Reopen and confirm **Clear saved API key** is an icon-only button to the right of the input on the same row, with a localized accessible name and tooltip. Activate it, confirm focus returns to the input, and confirm subsequent discovery does not reuse the stored key. Close without saving and confirm no credential changed. Repeat Clear followed by Save, and Clear followed by a replacement key and Save. 6) Confirm the no-auth provider and model are offered by chat/default-model and subagent selectors. 7) Send a request through the no-auth provider fixture.
 - **Expected**: The custom form has no no-key switch and keeps the key input enabled. An empty or whitespace-only key with no saved credential automatically saves `authKind: "none"` without `secretValue`; a supplied key uses API-key authentication. A blank edit retains an existing key. Clear is staged until Save and a replacement key takes precedence over removal. The enabled no-auth provider with `hasSecret: false` remains selectable for chat, defaults, subagents, and image generation where its model supports that operation. Named cloud presets remain unchanged. Runtime requests contain no API-key or Authorization credentials.
-- **Automation**: `node --test apps/desktop/test/custom-provider-no-api-key-user-path.test.mjs` covers empty/whitespace keys, keyed creation, save/reopen, preservation, staged removal/cancellation, discovery without the old secret, and replacement. `pnpm test:e2e:provider-api-style` renders the production setup form in English and Simplified Chinese with a stubbed model-discovery/API boundary and verifies create/update payloads and chat/default/subagent selector eligibility. `pnpm --filter @pi-desktop/agent-runtime exec vitest run src/provider-binding.test.ts` verifies request headers; `apps/desktop/test/image-generation-default.test.mjs` covers no-auth image-model availability; `cargo test -p host-core --locked switching_provider_to_no_auth_clears_its_api_key` verifies Host persistence and secret removal.
+- **Automation**: `node --test apps/desktop/test/custom-provider-no-api-key-user-path.test.mjs` covers empty/whitespace keys, keyed creation, save/reopen, preservation, staged removal/cancellation, discovery without the old secret, and replacement. `pnpm test:e2e:provider-api-style` renders the production setup form in English and Simplified Chinese with a stubbed model-discovery/API boundary and verifies create/update payloads and chat/default/subagent selector eligibility. `pnpm --filter @trail/agent-runtime exec vitest run src/provider-binding.test.ts` verifies request headers; `apps/desktop/test/image-generation-default.test.mjs` covers no-auth image-model availability; `cargo test -p host-core --locked switching_provider_to_no_auth_clears_its_api_key` verifies Host persistence and secret removal.
 - **Specs linked**: `03-runtime/11-provider-model-system.md`, `03-runtime/12-provider-config-schema.md`, `03-runtime/13-model-catalog-and-selection.md`, `04-ux/06-settings-ia.md`.
 - **Acceptance**: B (model configuration), F (provider persistence), Security.
 - **Milestone**: M2.
@@ -1590,7 +1590,7 @@ identify the platform validation still needed.
   OpenAI-compatible provider.
 - **Expected**: Every OpenCode Go LLM request includes `x-opencode-session`
   equal to the conversation id (or a stable per-call id when no session
-  exists), `x-opencode-client: pi-desktop`, and a `User-Agent` identifying
+  exists), `x-opencode-client: trail`, and a `User-Agent` identifying
   Trail. Follow-up turns reuse the same session header, and so does the
   compaction summary request, which the harness would otherwise send with no
   headers at all. The generic OpenAI-compatible provider does not receive
@@ -1984,7 +1984,7 @@ identify the platform validation still needed.
 - **Specs linked**: `03-runtime/02-agent-runtime.md`, `03-runtime/10-session-state-machine.md`
 - **Acceptance**: C (new session, send message)
 - **Milestone**: M2
-- **Status**: Automated (protocol smoke, live-model lane; requires PI_DESKTOP_TEST_API_KEY)
+- **Status**: Automated (protocol smoke, live-model lane; requires TRAIL_TEST_API_KEY)
 
 #### E2E-008d: Composer Enter-to-send and modifier send
 
@@ -2518,7 +2518,7 @@ identify the platform validation still needed.
   draft, send it, and inspect the user message. 3) Ask a follow-up in B without
   repeating the link. 4) Paste C's link into B and send. 5) In A, send A's own
   link. 6) Rename A from its conversation overflow menu, then return to B.
-- **Expected**: The clipboard holds `pi-desktop://session/<A's id>`. B's user
+- **Expected**: The clipboard holds `trail://session/<A's id>`. B's user
   message keeps the link text visible and shows a chat-icon chip labelled with
   the catalog's reference label and A's title; activating the chip opens A. The
   answer uses A's content, and the follow-up still reads the same reference
@@ -3957,7 +3957,7 @@ identify the platform validation still needed.
 
 #### E2E-024S: Package host allowlist refuses an untrusted download
 
-- **Preconditions**: An isolated host-core test uses `PI_DESKTOP_PLUGIN_MARKET_URL` to load a catalog fixture whose version URL points at a host outside the allowlist, plus fixtures with embedded credentials and plain HTTP.
+- **Preconditions**: An isolated host-core test uses `TRAIL_PLUGIN_MARKET_URL` to load a catalog fixture whose version URL points at a host outside the allowlist, plus fixtures with embedded credentials and plain HTTP.
 - **Steps**: 1) Refresh the fixture catalog. 2) Inspect the plugin card and detail sheet. 3) Attempt an install. 4) Repeat with a private catalog whose packages sit on its own host.
 - **Expected**: The row does not offer an install action for an off-allowlist URL; an attempted install fails with `PLUGIN_MARKET_UNTRUSTED_HOST` naming the rejected host before any request leaves the machine; a credentialed URL and non-loopback plain HTTP are refused the same way; a private catalog can still serve packages from the host that served it, without widening the allowlist for third-party hosts.
 - **Specs linked**: `07-plugins/07-plugin-marketplace.md`, `07-plugins/04-plugin-security.md`
@@ -3975,7 +3975,7 @@ identify the platform validation still needed.
 
 #### E2E-024U: Trust tier and host version bound are enforced by the client
 
-- **Preconditions**: Test runs use `PI_DESKTOP_PLUGIN_MARKET_URL` for a catalog claiming `trust: "verified"`, a catalog with an unrecognised tier, and a version whose `minPiDesktop` exceeds the running host.
+- **Preconditions**: Test runs use `TRAIL_PLUGIN_MARKET_URL` for a catalog claiming `trust: "verified"`, a catalog with an unrecognised tier, and a version whose `minPiDesktop` exceeds the running host.
 - **Steps**: 1) Load the fixture catalog. 2) Inspect the card and detail sheet badges. 3) Attempt to install the version pinned to a newer host. 4) Repeat with a `minPiDesktop` that is a range expression rather than a version.
 - **Expected**: A `verified` claim from a non-official source renders as community with no shield; an unrecognised tier renders as unknown; the version requiring a newer host is not offered and an explicit install fails with `PLUGIN_HOST_TOO_OLD` naming both versions; an unparseable bound is ignored rather than making the plugin uninstallable.
 - **Specs linked**: `07-plugins/07-plugin-marketplace.md`, `07-plugins/15-plugin-center.md`
@@ -4422,7 +4422,7 @@ window; opening a normal panel afterward must still work.
 #### E2E-034: NDJSON log files are written and redacted
 
 - **Preconditions**: Fresh profile; provider configured; one chat turn completed.
-- **Steps**: 1) Run a prompt with a tool call. 2) Open `~/.pi-desktop/logs/`. 3) Inspect the categorized files under `app/`, `host/`, and `agent/`.
+- **Steps**: 1) Run a prompt with a tool call. 2) Open `~/.trail/logs/`. 3) Inspect the categorized files under `app/`, `host/`, and `agent/`.
 - **Expected**: NDJSON records exist with `ts/level/channel/category/event/message`; a normal tool call produces one completion or failure record carrying `sessionId`/`toolCallId`, safe tool metadata, and bounded result/duration information; an interrupted tool remains traceable by the same id; no API key, authorization value, raw command output, or local absolute path appears; each category file rotates at 5 MB; lifecycle, permission, tool, provider, plugin, persistence, updater, and error records remain available without creating dedicated timing category files.
 - **Specs linked**: `03-runtime/09-logging-and-observability.md`
 - **Acceptance**: H (diagnostics)
@@ -4457,7 +4457,7 @@ window; opening a normal panel afterward must still work.
 - **Steps**: 1) Launch so the auto-updater check or model discovery issues a
   main-process `net.fetch` / Electron-updater request. 2) Confirm the native
   exception dialog does not appear. 3) Dismiss nothing; wait for a later
-  updater or discovery request. 4) Open `~/.pi-desktop/logs/app/runtime.log`.
+  updater or discovery request. 4) Open `~/.trail/logs/app/runtime.log`.
 - **Expected**: No Electron "A JavaScript error occurred in the main process"
   dialog. The app stays running and does not quit. `runtime.log` contains an
   error record with `code: "NON_ASCII_HTTP_HEADER"` and `recoverable: true`.
@@ -6081,7 +6081,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 - **Preconditions**: Native macOS, Windows, and Linux runners; built desktop
   app; English and zh-CN locales available. The Windows/Linux harness can set
-  `PI_DESKTOP_START_MAXIMIZED=1` before launch so Main maximizes the hidden
+  `TRAIL_START_MAXIMIZED=1` before launch so Main maximizes the hidden
   native window before renderer mount.
 - **Steps**: 1) On macOS, launch both `pnpm dev` and a packaged build. Confirm
   the application-menu title is Trail, open About Trail, and inspect
@@ -6218,7 +6218,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   remain. 3) Repeat and Confirm; verify ordered shutdown. 4) On Windows/Linux
   with close behavior unset, close the window. Verify the themed D230 dialog
   offers Cancel / Close to tray / Quit: cancel leaves the preference unset, and
-  choosing Quit causes no second dialog. 5) Launch with `PI_DESKTOP_BOOT_PROBE=1`
+  choosing Quit causes no second dialog. 5) Launch with `TRAIL_BOOT_PROBE=1`
   (and supervision/capture equivalents) and confirm `app.quit()` exits without a
   dialog. 6) On packaged Windows NSIS or Linux AppImage, restart to install an
   update; confirm no quit warning appears and the installer completes upgrade
@@ -6468,7 +6468,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Acceptance**: C (sessions), Quality
 - **Milestone**: M6+
 - **Status**: Automated (`scripts/e2e-electron-boot.mjs` via
-  `pnpm test:e2e:boot`, using the existing `PI_DESKTOP_BOOT_PROBE` entry point).
+  `pnpm test:e2e:boot`, using the existing `TRAIL_BOOT_PROBE` entry point).
 
 #### E2E-071e: Regenerating from a paged-back transcript replaces the right turn
 
@@ -7726,7 +7726,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
      modules, source maps, tests/examples/declarations, Chromium locales, and
      native prebuild targets.
   3. On each macOS package, run `file` (or `lipo -info`) against the app
-     executable and `Resources/bin/pi-desktop-host-core`; confirm arm64 and
+     executable and `Resources/bin/trail-host-core`; confirm arm64 and
      x86_64 packages contain only their declared architecture and that the
      Rust host matches the Electron app. Confirm the shared
      `apps/desktop/package.json` macOS configuration produces arm64 assets named
@@ -8558,7 +8558,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   `node scripts/e2e-regenerate-root.mjs` exercises the real Host process,
   production main persistence and renderer projections with an isolated
   3,484-message transcript, three follow-up turns, restart, and a revision
-  round trip. Set `PI_DESKTOP_HOST_BIN` to a host built from the candidate.
+  round trip. Set `TRAIL_HOST_BIN` to a host built from the candidate.
 
 #### E2E-REVIEW-append-state: Rolling back a historical tool card does not rewrite its session
 
@@ -8578,7 +8578,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Acceptance**: C (conversation), F (persistence), Quality.
 - **Milestone**: M6.
 - **Status**: Automated by `pnpm test:e2e:review-state`; set
-  `PI_DESKTOP_HOST_BIN` to the candidate Host binary. No provider or user data
+  `TRAIL_HOST_BIN` to the candidate Host binary. No provider or user data
   is used. `transcripts::review_state_tests` additionally covers duplicate IDs,
   snapshot isolation, disk cache reuse, intentional rewrites and torn appends.
   `equal_length_state_appends_replay_in_file_order_across_cached_reads` pins
@@ -9384,6 +9384,198 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   Electron renderer. The full desktop journey against a large real tree is
   Draft (run only in a capable environment when this surface changes).
 
+#### E2E-PROJECT-workspace-index-switch: a project can opt out of file discovery
+
+- **Preconditions**: Two local projects, one created through Project → Add
+  project and one reached only by opening its folder (a `legacy` group). Each
+  has a session whose workspace is the project's primary root.
+- **Steps**: 1) Create a project with the Workspace index switch left on and
+  type `@` in its session. 2) Open the same project's edit dialog, turn the
+  switch off, save, and type `@` again; then type a name that only a deep
+  search would find. 3) Reopen the app and repeat step 2's check. 4) Turn the
+  switch off for the legacy project and check the same menu. 5) Turn it back
+  on. 6) Inspect a `@path` reference that was written into the transcript
+  before indexing was turned off. 7) Repeat in a remote project's dialog.
+- **Expected**:
+  - With the switch on nothing changes: the bare `@` lists the index and a
+    paused query reaches deep files.
+  - With the switch off both the list and the deep search answer with no
+    entries, and no directory listing is run for that project.
+  - The choice survives a restart, and editing the project for another reason
+    (a rename, a root reorder) never re-enables it.
+  - A legacy project's off-state follows its own folder; opening a different
+    folder of the same group answers the same way.
+  - A reference already in a transcript still opens its file.
+  - A remote project shows no switch and keeps its existing snapshot behavior.
+- **Specs linked**: `03-runtime/01-ipc-protocol.md` §3.1 and §13c,
+  `03-runtime/04-data-storage.md`, `03-runtime/06-host-rpc-protocol.md`,
+  `08-meta/decisions-log.md` (D679), ADR 0024
+- **Acceptance**: D — Workspace, F — Persistence, Quality
+- **Milestone**: M5
+- **Status**: Unit-covered for the persistence shape
+  (`crates/host-core/src/db/tests.rs`: the default-on read of a record written
+  without the field, the off-state surviving a reopen, a remote group
+  refusing the switch, and the legacy path-keyed fallback cleared on
+  promotion) and for the snapshot gate
+  (`apps/desktop/test/workspace-roots.test.mjs`); the dialog wiring, the
+  channel gate, and the copy are covered by
+  `apps/desktop/test/project-create-dialog.test.mjs`,
+  `apps/desktop/test/project-edit.test.mjs`, and the channel assertions of
+  `apps/desktop/test/composer-deep-file-search-user-path.test.mjs`. The full
+  desktop journey is Draft (run only in a capable environment when this
+  surface changes).
+
+#### E2E-PROJECT-workspace-icon-and-colour: a project keeps its own glyph and tint
+
+- **Preconditions**: One project created through Project → Add project, one
+  reached only by opening its folder (a `legacy` group), and one remote project.
+- **Steps**: 1) Create a project and pick an icon and a colour in the dialog
+  before confirming; both rows sit above the Workspace index switch, and the icon
+  row offers both the Lucide glyphs and the supplied ones. 2) Inspect its sidebar
+  row, then reopen the edit dialog. 3) Change only the colour and save. 4) Change
+  only the icon and save. 5) Rename
+  the project without touching either row. 6) Reopen the app and inspect the row.
+  7) Repeat steps 1–2 for the legacy project, then set it back to the first tile
+  of each row. 8) Open the remote project's dialogs.
+- **Expected**:
+  - The sidebar row draws the chosen glyph in the chosen tint instead of the
+    folder; a pinned row keeps its star.
+  - A supplied glyph tints exactly like a Lucide one: it ships as path data painted
+    with `currentColor`, so no tile ignores the colour row.
+  - Both rows are independent: changing one leaves the other stored value, and
+    the edit dialog preselects exactly what is stored.
+  - A rename saves neither row, so the decoration and the project's
+    "last updated" ordering are untouched.
+  - The pair survives a restart; the tiles come from the host record, not from
+    renderer-local state.
+  - Returning both rows to their first tile stores nothing: the row falls back to
+    the folder glyph in the theme's own text colour, and a legacy project's
+    path-keyed record is deleted.
+  - A legacy project's decoration follows its own folder and is cleared when that
+    folder is promoted into a real group.
+  - A remote project shows neither row and stays on the rename path.
+- **Specs linked**: `03-runtime/01-ipc-protocol.md` §3.1,
+  `03-runtime/04-data-storage.md`, `03-runtime/06-host-rpc-protocol.md`,
+  `04-ux/07-ui-design-system.md` §11.13, `08-meta/decisions-log.md` (D680)
+- **Acceptance**: D — Workspace, F — Persistence, Quality
+- **Milestone**: M5
+- **Status**: Unit-covered for the persistence and RPC shape
+  (`crates/host-core/src/db/tests.rs`: the empty default of a record written
+  without the pair, the pair surviving a reopen, a remote group refusing it, and
+  the legacy path-keyed fallback cleared on promotion;
+  `crates/host-core/src/rpc/mod.rs`: an absent pair leaves the stored one, a
+  rename keeps it, and a malformed icon or colour is rejected) and for the
+  catalog, picker, sidebar row and store lookup
+  (`apps/desktop/test/project-appearance.test.mjs`); the dialog wiring and the
+  update payload are covered by `apps/desktop/test/project-create-dialog.test.mjs`,
+  `apps/desktop/test/project-edit.test.mjs`, and
+  `apps/desktop/test/sidebar-navigation.test.mjs`. The full desktop journey is
+  Draft (run only in a capable environment when this surface changes).
+
+#### E2E-UI-sidebar-token-meter: a year of tokens and the models behind them
+
+- **Preconditions**: A profile whose completed turns span at least two
+  different models and at least one idle day inside the last twelve months, and
+  a profile with more than five models in range. The sidebar can be dragged
+  between its 240 px floor and its 520 px ceiling.
+- **Steps**: 1) Open the app and read the card under the project list, above
+  the footer. 2) Switch to the model ranking and back to the daily strip.
+  3) Complete a turn on another model, wait for the last running session to
+  end, and read both views again without reloading; then restart and read once
+  more. 4) Drag the sidebar from its narrowest to its widest while the model
+  view is open, with the largest font preset selected. 5) Hover one active day
+  and one day with no usage. 6) With more than five models, read the last row.
+  7) Make the host query fail (stopped host) and reload. 8) Repeat steps 1–2 in
+  a profile that has no completed turn.
+- **Expected**:
+  - The headline total and the range label come from one
+    `stats.getTokenUsageHistory` call with bucket `day` and no dates, so the
+    window is the host's own default; the renderer keeps no second date rule.
+  - Switching views never changes the headline number: the model rows, plus the
+    folded tail row, add up to the same total because the host folds both views
+    from one pass over completed turns (D682).
+  - The strip is one column per week and every day sits in its own weekday row.
+    A day the host left out is still placed by its date, so a sparse year cannot
+    slide the grid sideways. Leading and trailing padding cells are invisible,
+    not zero.
+  - Ink levels split the active days by quartile; a day with no usage keeps the
+    base tone, and a range with no usage at all lights nothing up.
+  - Widening the sidebar grows the columns. At the 240 px floor a column stops
+    at its legibility floor and the older weeks scroll sideways out of view on
+    the shell's own quiet scrollbar — 6px, trackless, transparent at rest and
+    revealed only by hover, focus or scrolling — so a cell is never narrower
+    than the gutter beside it;
+    the strip opens on the week that contains today, and because it scrolls it is
+    also a focus target — Tab reaches it and the arrow keys reach the older
+    weeks. Nothing is clipped, and the grid keeps the same height at every
+    sidebar bound because each cell stays square.
+  - A turn that finishes while the card is open shows up without a reload: the
+    meter re-reads once no session is running any more, and an older answer
+    never overwrites a newer one.
+  - A turn whose row stores no model stays a visible unknown-model row instead of
+    vanishing from the ranking; an aborted turn is counted in neither view.
+  - More than five models fold into one row that names the count and sums their
+    tokens and turns, so the shares still add to the whole. Every bar, that row
+    included, is sized against the widest row actually drawn, so a tail heavier
+    than the leading model reads as heavier instead of overflowing its track.
+  - A failed read states that usage is unavailable and an empty range states
+    that; neither paints a chart with invented values.
+  - Every label, the view switch's `aria-pressed` state and the strip's
+    `aria-label` summary are localized in all nine shipped locales.
+- **Specs linked**: `04-ux/01-ui-ia.md` §3.2, `04-ux/06-settings-ia.md`,
+  `03-runtime/01-ipc-protocol.md` §8 stats,
+  `03-runtime/06-host-rpc-protocol.md`, `04-ux/07-ui-design-system.md`,
+  `08-meta/decisions-log.md` (D682), ADR 0171, ADR 0173
+- **Acceptance**: F (persistence), Quality
+- **Milestone**: M5
+- **Status**: Unit-covered for the aggregation shape
+  (`crates/host-core/src/sessions/usage_history.rs`: the model rows summing to
+  `totals`, a turn with no model keeping its row, an aborted turn billing
+  nowhere, and 400 consecutive days each keeping a bucket that adds back to
+  `totals`) and for the grid, thresholds, folding, legibility floor and card
+  wiring (`apps/desktop/test/token-usage-meter.test.mjs`). The rendered layout is
+  gated at the 240 / 275 / 520 px sidebar bounds by
+  `pnpm test:e2e:sidebar-token-meter` (`scripts/e2e-sidebar-token-meter.mjs`),
+  which measures the real built sheet and fails when a cell drops under 5 px,
+  stops being square, or reserves a scrollbar lane wider than the shared 6px. The card is read from a real
+  profile; the full desktop journey is Draft (run only in a capable environment
+  when this surface changes).
+
+#### E2E-SETTINGS-window-actions-minimize-and-fullscreen: window controls reachable from Settings
+
+- **Preconditions**: Each platform: macOS with the native traffic lights, and
+  Windows/Linux with the frameless titlebar. The main window can be maximized
+  and taken fullscreen.
+- **Steps**: 1) Open Settings → General and read the Window card. 2) Press
+  Minimize. 3) Press Full screen, then press it again. 4) Maximize the window
+  first, then press Full screen, and leave fullscreen. 5) Search settings for
+  the window labels. 6) Press either button when the host of that action cannot
+  respond.
+- **Expected**:
+  - The card renders on every platform and persists nothing: relaunching the app
+    leaves no stored window preference behind, and Settings search finds it.
+  - Minimize iconifies the main window; Full screen toggles it, through the same
+    `pi-desktop/menu/nativeAction` (`toggleFullScreen`) handler the native menu
+    uses, so there is one implementation of the fullscreen/maximize interlock of
+    issue #1655.
+  - Entering fullscreen from a maximized window unmaximizes first and returns to
+    maximized on exit; the window never keeps both flags and never ends up
+    stranded outside the current work area.
+  - The Full screen label is a toggle, not a state read: `getState` reports only
+    `maximized`, so the button does not claim to know whether the window is
+    already fullscreen.
+  - A rejected action surfaces one localized error toast and leaves the window
+    as it was.
+- **Specs linked**: `04-ux/06-settings-ia.md`,
+  `03-runtime/01-ipc-protocol.md`, `08-meta/decisions-log.md` (D683)
+- **Acceptance**: Quality (key operations feel polished)
+- **Milestone**: M5
+- **Status**: Unit-covered for the wiring
+  (`apps/desktop/test/token-usage-meter.test.mjs` asserts the two channels and
+  the settings placement); the interlock itself is covered by the existing
+  window-lifecycle tests. The full desktop journey is Draft (run only in a
+  capable environment when this surface changes).
+
 #### E2E-102b: Unanswered Stop restores compact file-reference drafts
 
 - **Preconditions**: An Agent session can delay its first assistant event. The
@@ -9784,7 +9976,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 #### E2E-CAPABILITY-move-across-levels: MCP servers and skills move between the global and project `.agents` levels
 
 - **Preconditions**: The app runs against a disposable global `.agents` root
-  (an isolated HOME, or `PI_DESKTOP_AGENTS_DIR` when the bare host is driven
+  (an isolated HOME, or `TRAIL_AGENTS_DIR` when the bare host is driven
   directly). Projects A and B are registered. The global root owns
   `~/.agents/servers/echo.json` (id `echo`, label `Echo`),
   `~/.agents/skills/review.md` (frontmatter name `Review`), and nothing else
@@ -10858,6 +11050,15 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 | G — Plugins (Chat file references) | E2E-CHAT-file-ref-opens-the-surface-that-owns-it, E2E-PLUGIN-file-view-collapse-persists |
 | Quality (Chat file references) | E2E-CHAT-shorthand-file-ref-opens-the-matching-file, E2E-CHAT-file-ref-opens-the-surface-that-owns-it, E2E-PLUGIN-file-view-collapse-persists |
 | C / Quality (Composer deep file mentions) | E2E-COMPOSER-deep-file-mentions |
+| D — Workspace (workspace index switch) | E2E-PROJECT-workspace-index-switch |
+| F — Persistence (workspace index switch) | E2E-PROJECT-workspace-index-switch |
+| Quality (workspace index switch) | E2E-PROJECT-workspace-index-switch |
+| D — Workspace (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
+| F — Persistence (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
+| Quality (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
+| F — Persistence (sidebar token meter) | E2E-UI-sidebar-token-meter |
+| Quality (sidebar token meter) | E2E-UI-sidebar-token-meter |
+| Quality (settings window actions) | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | G — Plugins (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
 | Security (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
 | Quality (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -10896,6 +11097,10 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 | M6+ (Independent session communication) | E2E-SESSION-independent-top-level-communication, E2E-SESSION-hover-card-model-and-links |
 | M5 (Chat file references) | E2E-CHAT-shorthand-file-ref-opens-the-matching-file, E2E-CHAT-file-ref-opens-the-surface-that-owns-it |
 | M5 (Composer deep file mentions) | E2E-COMPOSER-deep-file-mentions |
+| M5 (workspace index switch) | E2E-PROJECT-workspace-index-switch |
+| M5 (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
+| M5 (sidebar token meter) | E2E-UI-sidebar-token-meter |
+| M5 (settings window actions) | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | M5 (Conversation MP4 attachments) | E2E-CHAT-mp4-attachment-opens-in-system-player |
 | M6+ (Chat file references) | E2E-PLUGIN-file-view-collapse-persists |
 | M6+ (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -12006,7 +12211,7 @@ This test plan spec is accepted when:
   on a covered window brings it to the front.
   Close to tray is the only Windows/Linux close path that hides the window,
   while Quit exits. On macOS the menu bar icon is a readable transparent
-  monochrome PI mark without the rounded application tile, and native minimize
+  monochrome bar glyph without the rounded application plate, and native minimize
   remains tray-resident. Show/click/double-click/app activation restores the
   existing window; the localized menu contains Show Trail and Quit
   Trail. Quit runs the normal shutdown sequence and leaves no orphan host,
@@ -12031,16 +12236,16 @@ This test plan spec is accepted when:
   both the window and the process list. 2) Minimize the window into the tray,
   then launch again. 3) On Windows/Linux with close behavior `tray`, close the
   window, then launch again. 4) While the app is running, launch a build with
-  `PI_DESKTOP_DATA_DIR` set to an empty directory. 5) Still while the packaged
+  `TRAIL_DATA_DIR` set to an empty directory. 5) Still while the packaged
   app is running, start a development build (the `dev` script, with no
-  `PI_DESKTOP_DATA_DIR`). 6) Quit the app, confirm no process remains, and
+  `TRAIL_DATA_DIR`). 6) Quit the app, confirm no process remains, and
   launch once more.
 - **Expected**: Steps 1–3 never create a second window, tray icon, host-core,
   agent sidecar, or log file: the existing window is restored and focused, the
   duplicate process exits, and the running instance's session list, in-flight
   turn, and `pi.sqlite` are untouched. Step 4 starts normally as an independent
   instance against its own data directory. Step 5 also starts normally: the
-  development build takes its own `userData` and `~/.pi-desktop-dev`, so it
+  development build takes its own `userData` and `~/.trail-dev`, so it
   neither waits for nor disturbs the running packaged app. Step 6 starts a clean
   single instance, proving the lock is released on exit and never leaves a stale
   block.
@@ -12085,7 +12290,7 @@ This test plan spec is accepted when:
 
 - **Preconditions**: App running on macOS with an installed system font
   distinct from the built-in token stack (for example PingFang SC); a clean
-  `~/.pi-desktop` profile.
+  `~/.trail` profile.
 - **Steps**:
   1) Open Settings → General and confirm the Appearance card shows a Font row
      below Theme and Language with a trigger labeled "System default".
@@ -12134,7 +12339,7 @@ This test plan spec is accepted when:
 
 #### E2E-193: Appearance card sets a global type scale
 
-- **Preconditions**: App running with a clean `~/.pi-desktop` profile and an
+- **Preconditions**: App running with a clean `~/.trail` profile and an
   open conversation that shows transcript text, the composer, and the sidebar.
 - **Steps**:
   1) Open Settings → General and confirm the Appearance card shows a Font
@@ -13902,7 +14107,7 @@ are withdrawn with ADR 0165.
   4) Activate Open GitHub.
 - **Expected**: The row is indexed by Settings search and stays on Info. The
   action calls `pi-desktop/app/openFeedback` with no URL from the renderer.
-  Main opens `https://github.com/vastsa/PI-Desktop/issues/new` with
+  Main opens `https://github.com/CharonZou/trail/issues/new` with
   `template=bug_report.yml` and prefills `app-version`, `os`, and
   `environment`. The GitHub bug form still requires description, reproduction
   steps, expected, actual, version, and OS; blank issues remain disabled.
@@ -14388,9 +14593,12 @@ are withdrawn with ADR 0165.
   - Token Insights is the heatmap / KPI dashboard. When the plugin is
     installed, Trail remainders from the host turns table appear there
     without rewriting `message.usage`.
+  - The compact sidebar meter (D682,
+    `E2E-UI-sidebar-token-meter`) is not a Settings destination either; it
+    reads this same RPC and does not replace the plugin dashboard.
 - **Specs linked**: `04-ux/06-settings-ia.md`,
   `03-runtime/01-ipc-protocol.md`, `03-runtime/06-host-rpc-protocol.md`,
-  ADR 0171, ADR 0173, `08-meta/decisions-log.md` (D331, D335)
+  ADR 0171, ADR 0173, `08-meta/decisions-log.md` (D331, D335, D682)
 - **Acceptance**: F (persistence), Quality
 - **Milestone**: M5
 - **Status**: Unit-covered (agent-runtime usage split, host-core history
@@ -15054,7 +15262,7 @@ are withdrawn with ADR 0165.
 - **Steps**: 1) Install Trail. 2) Launch it for the first time. 3) Wait
   for the startup splash to yield to the main shell. 4) Inspect the runtime
   logs, then open Settings → Info.
-- **Expected**: The bundled x64 `pi-desktop-host-core.exe` starts and completes
+- **Expected**: The bundled x64 `trail-host-core.exe` starts and completes
   `app.handshake` without `0xC0000135` (`STATUS_DLL_NOT_FOUND`), the shell does
   not remain on “Can't reach the local service”, host status is healthy, and
   Settings → Info reports the host version instead of `host unknown`. The
@@ -15126,7 +15334,7 @@ are withdrawn with ADR 0165.
 #### E2E-220: Local MCP control drives a running desktop
 
 - **Preconditions**: Start Trail with
-  `PI_DESKTOP_MCP_CONTROL=1` and a clean profile. A local project directory is
+  `TRAIL_MCP_CONTROL=1` and a clean profile. A local project directory is
   available, the Electron user-data directory is writable, and the desktop
   has completed backend boot.
 - **Steps**: 1) Read `mcp-control.json` and use its URL and bearer token. 2)
@@ -15159,7 +15367,7 @@ are withdrawn with ADR 0165.
 
 #### E2E-MCP-session-get-projects-large-compaction
 
-- **Preconditions**: Start Trail with `PI_DESKTOP_MCP_CONTROL=1`. A durable
+- **Preconditions**: Start Trail with `TRAIL_MCP_CONTROL=1`. A durable
   session exists whose `session.compaction` record (`summary` / `retainedTail` /
   `details.modifiedFiles`) alone serializes to more than the 512 KiB MCP result
   limit. A second durable session exists whose `session.compactions` history
@@ -15192,14 +15400,14 @@ are withdrawn with ADR 0165.
 
 - **Preconditions**: A project containing `.env`, `.env.example`,
   `server.pem`, `keys/id_rsa`, `notes.txt`, `node_modules/pkg/index.js`,
-  `generated/out.txt`, `debug.log`, and a root `.pi-desktopignore` with
+  `generated/out.txt`, `debug.log`, and a root `.trailignore` with
   `generated/`. Every file contains the word `needle`. The session is Agent
   in `auto` permission mode.
 - **Steps**: 1) Ask for `Read` of `.env`, then of `.env.example`. 2) Ask for
   `Write` to `keys/id_rsa`. 3) Run an unscoped `Grep` and `Glob` for `needle`.
   4) Run `Grep` with `path: node_modules/pkg` and with `path: generated`.
   5) Repeat step 1 with a system `rg` installed and with
-  `PI_DESKTOP_DISABLE_RG=1`.
+  `TRAIL_DISABLE_RG=1`.
 - **Expected**: Steps 1 and 2 fail with `WORKSPACE_PATH_DENIED`, the
   `.env.example` read succeeds, and no `keys/id_rsa` file is created. The
   unscoped search lists `notes.txt` and `.env.example` only: `.env`,
@@ -17057,7 +17265,7 @@ plugin-form fixtures in an isolated temporary directory at runtime.
   window is occluded; otherwise Chromium can freeze CSS motion and hover input.
   Platform branches and palettes are renderer emulation, not native
   Windows/Linux or OS material/theme validation. Optional
-  `PI_DESKTOP_LAYOUT_ARTIFACT_DIR` captures renderer screenshots. State tests in
+  `TRAIL_LAYOUT_ARTIFACT_DIR` captures renderer screenshots. State tests in
   `sidebar-settings-return.test.mjs` cover initial presentation, both interrupted
   phases, hidden-state changes and reversals. The CDP layout journey verifies
   that Settings preserves the same chat surface node across round trips.
@@ -18055,7 +18263,7 @@ the latest destination. These assertions measure work counts, not device FPS.
   also has `apps/desktop/test/traffic-light-reserve.test.mjs` contract coverage.
 - **Status:** Automated for the executing native platform; run on macOS/Linux
   runners for native qualification. Optional screenshots are written only to
-  `PI_DESKTOP_CHROME_ARTIFACT_DIR`.
+  `TRAIL_CHROME_ARTIFACT_DIR`.
 
 ### E2E-PLUGIN-slow-tool-is-not-cut-off-by-host-dispatch
 
@@ -18569,7 +18777,7 @@ the latest destination. These assertions measure work counts, not device FPS.
 Task delegation, and saved-history recovery. No real model or search service.
 
 **Entry:** `pnpm test:e2e:hosted-search`, which rebuilds the shared
-package and `@pi-desktop/agent-runtime` sidecar bundle. The test starts that
+package and `@trail/agent-runtime` sidecar bundle. The test starts that
 bundle over its ordinary stdio RPC interface, with an isolated data root,
 a synthetic Host and a loopback-only Responses endpoint. Source-only mocks
 or an already installed desktop application do not satisfy this test.
@@ -18638,8 +18846,8 @@ renderer's durable transcript reads. No real model or provider is contacted.
 **Automation:** `node --test apps/desktop/test/slash-command-source.test.mjs`,
 `node --test apps/desktop/test/session-transcript-empty-read.test.mjs`,
 `node --test apps/desktop/test/plugin-timeout-budgets.test.mjs`,
-`pnpm --filter @pi-desktop/shared test`, and
-`pnpm --filter @pi-desktop/host-runtime test`.
+`pnpm --filter @trail/shared test`, and
+`pnpm --filter @trail/host-runtime test`.
 
 ## E2E-PROVIDER-endpoint-guidance-and-search
 
@@ -18667,7 +18875,7 @@ renderer's durable transcript reads. No real model or provider is contacted.
 #### E2E-260: Windows updater cache can be relocated and reclaimed safely
 
 - **Preconditions:** Packaged Windows x64 NSIS install, isolated user profile, and a writable cache directory on a non-system volume. Use a local updater-feed fixture; do not contact GitHub or a paid service.
-- **Steps:** 1) Seed the legacy `%LOCALAPPDATA%` updater cache with `installer.exe`, `current.blockmap`, and a staged update. 2) Launch with `PI_DESKTOP_UPDATE_CACHE_DIR` set to the isolated cache base. 3) Confirm Main adopts the baselines and staged update into the configured cache and removes the legacy cache. 4) Complete the staged update and launch the new version. 5) When the fixture reports no newer version, inspect the configured cache.
+- **Steps:** 1) Seed the legacy `%LOCALAPPDATA%` updater cache with `installer.exe`, `current.blockmap`, and a staged update. 2) Launch with `TRAIL_UPDATE_CACHE_DIR` set to the isolated cache base. 3) Confirm Main adopts the baselines and staged update into the configured cache and removes the legacy cache. 4) Complete the staged update and launch the new version. 5) When the fixture reports no newer version, inspect the configured cache.
 - **Expected:** `app-update.yml` determines the cache subdirectory; the pending update and differential baselines survive relocation; when the running version is current only `pending/` is removed, while `installer.exe` and `current.blockmap` remain for the next delta. The default path remains unchanged when the override is unset. The app does not write the download into `Program Files`.
 - **Specs:** `03-runtime/07-process-model.md`, ADR 0022.
 - **Acceptance:** Cache-path, migration, and cleanup unit tests pass; Windows task-candidate validation confirms the updater feed transport, installer handoff, and filesystem behavior without a live release feed.
@@ -18725,7 +18933,7 @@ renderer's durable transcript reads. No real model or provider is contacted.
   replaying old tool results. Remove the final skill and verify its catalog and
   executable schema disappear without recreating the runtime.
 - Automated: `node scripts/e2e-system-transcript.mjs` with
-  `PI_DESKTOP_HOST_BIN` pointing to the candidate Host binary. Requires built
+  `TRAIL_HOST_BIN` pointing to the candidate Host binary. Requires built
   shared/host-runtime/agent-runtime packages. Renderer projection tests ensure
   model-state records stay hidden while ordinary system notices remain visible.
 - Adapter contract tests cover exact model/API/endpoint capability binding,
@@ -18761,7 +18969,7 @@ renderer's durable transcript reads. No real model or provider is contacted.
   malformed metadata, temporary prompt replacement, deterministic catalog order,
   the 128-tool boundary and insufficient-context fallback.
 - Automated: `node scripts/e2e-fixed-tool-declarations.mjs` with built
-  shared/host-runtime/agent-runtime and `PI_DESKTOP_HOST_BIN` set to the candidate
+  shared/host-runtime/agent-runtime and `TRAIL_HOST_BIN` set to the candidate
   Host binary; `fixed-tool-runtime.test.ts` and `fixed-tool-declarations.test.ts`
   cover HTTP payload and policy contracts. Electron UI/outbox is outside this
   fixture's scope.

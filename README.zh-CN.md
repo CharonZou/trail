@@ -12,18 +12,16 @@
 
 <br />
 
-[![Release](https://img.shields.io/github/v/release/vastsa/PI-Desktop?label=release)](https://github.com/vastsa/PI-Desktop/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/vastsa/PI-Desktop/total?label=downloads)](https://github.com/vastsa/PI-Desktop/releases)
-[![Stars](https://img.shields.io/github/stars/vastsa/PI-Desktop?style=flat\&label=stars)](https://github.com/vastsa/PI-Desktop/stargazers)
-[![CI](https://github.com/vastsa/PI-Desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/vastsa/PI-Desktop/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/vastsa/PI-Desktop)](LICENSE)
-[![Reddit](https://img.shields.io/badge/Reddit-r%2FAIUO-FF4500?logo=reddit\&logoColor=white)](https://www.reddit.com/r/AIUO/)
-[![QQ 群：点击加入 Trail 开发者交流群](https://img.shields.io/badge/QQ-%E5%8A%A0%E5%85%A5%E5%BC%80%E5%8F%91%E8%80%85%E4%BA%A4%E6%B5%81%E7%BE%A4-12B7F5?logo=tencentqq&logoColor=white)](https://qm.qq.com/q/iWP8i0XxIc)
+[![Release](https://img.shields.io/github/v/release/CharonZou/trail?label=release)](https://github.com/CharonZou/trail/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/CharonZou/trail/total?label=downloads)](https://github.com/CharonZou/trail/releases)
+[![Stars](https://img.shields.io/github/stars/CharonZou/trail?style=flat\&label=stars)](https://github.com/CharonZou/trail/stargazers)
+[![CI](https://github.com/CharonZou/trail/actions/workflows/ci.yml/badge.svg)](https://github.com/CharonZou/trail/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/CharonZou/trail)](LICENSE)
 
 <br />
 
-**[立即下载](https://github.com/vastsa/PI-Desktop/releases/latest)** ·
-[使用文档](https://pi-docs.aiuo.net/) ·
+**[立即下载](https://github.com/CharonZou/trail/releases/latest)** ·
+[使用文档](docs/guide/index.md) ·
 [插件开发](docs/plugin-development.md) ·
 [界面预览](docs/guide/screenshots.md) ·
 [English](README.md)
@@ -566,7 +564,7 @@ Agent / Plan / Goal
 
 <div align="center">
 
-### [下载 Trail →](https://github.com/vastsa/PI-Desktop/releases/latest)
+### [下载 Trail →](https://github.com/CharonZou/trail/releases/latest)
 
 **macOS · Windows · Linux**
 
@@ -608,7 +606,7 @@ ldd --version
 
 ## Built on Pi
 
-Trail 构建在 [pi](https://github.com/badlogic/pi-mono) 生态之上。
+Trail 构建在 [pi](https://github.com/earendil-works/pi) 生态之上。
 
 Agent Runtime 使用：
 
@@ -657,8 +655,8 @@ Trail 也可以作为开发者构建 Agent 产品的宿主平台。
 #### Start
 
 ```bash
-git clone https://github.com/vastsa/PI-Desktop.git
-cd PI-Desktop
+git clone https://github.com/CharonZou/trail.git
+cd trail
 
 pnpm install
 
@@ -680,7 +678,7 @@ pnpm test
 
 ### 文档
 
-[Documentation](https://pi-docs.aiuo.net/) ·
+[Documentation](docs/guide/index.md) ·
 [Architecture](docs/spec/02-architecture/01-architecture.md) ·
 [Specification](docs/spec/README.md) ·
 [Plugin Development](docs/plugin-development.md) ·
@@ -702,22 +700,11 @@ pnpm test
 
 让 Core 保持克制，让生态持续生长。
 
-**[提交 Issue](https://github.com/vastsa/PI-Desktop/issues/new/choose)** ·
-[查看 Issues](https://github.com/vastsa/PI-Desktop/issues) ·
+**[提交 Issue](https://github.com/CharonZou/trail/issues/new/choose)** ·
+[查看 Issues](https://github.com/CharonZou/trail/issues) ·
 [开发插件](docs/plugin-development.md)
 
 ---
-
-## 项目趋势
-
-<div align="center">
-
-<a href="https://trendshift.io/repositories/178787?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-178787">
-<img src="https://trendshift.io/api/badge/repositories/178787" alt="Trail on Trendshift" width="230" height="51" />
-</a>
-
-</div>
-
 ---
 
 ## 友情链接
@@ -735,6 +722,34 @@ Trail 的开发过程中使用了来自多个 Provider 的模型。
 累计模型使用量已超过 **27 Billion Tokens**。
 
 感谢参与构建 Trail 的每一位贡献者，以及陪我们一起写下这些代码的模型。
+
+---
+
+## 来源与致谢
+
+Trail 不从零写起，它站在两个上游的肩膀上：
+
+- **Agent 引擎**：[earendil-works/pi](https://github.com/earendil-works/pi) 的 `pi-ai`、`pi-agent-core`
+  与 `pi-coding-agent` 提供模型接入、Agent 循环和编码工具底座。
+- **桌面应用**：[vastsa/PI-Desktop](https://github.com/vastsa/PI-Desktop)（LGPL-3.0）提供 Electron
+  工作台、Rust 宿主核心与插件体系。
+
+本仓库是在 PI-Desktop 之上维护的 Trail 发行版：工作区包名、环境变量与本地数据目录改用
+Trail，发布、自动更新与反馈入口指向本仓库；`net.aiuo.pi-desktop` 应用 ID、已落盘的数据格式、
+插件设备 ID 命名空间、内置技能 ID（`pi-desktop/imagegen`、`pi-desktop/visualize`）与会话租约
+锁后缀 `.pi-desktop.lock`、会话工作树的 `pi-desktop/*` 分支命名空间、远端已配对机器上 Host 的
+安装目录与默认数据目录（`~/.pi-desktop/pi-host`、`~/.pi-desktop`），配置同步协议常量，
+渲染进程桥全局名 `window.piDesktop`，以及 IPC／远程控制的方法名和本地 MCP 控制面名称
+（`pi_desktop_invoke`、`X-Pi-Desktop-Token` 头）保持不变，以便老数据与已有仓库直接升级；后两组是对外的线上协议，
+换它们需要协议版本边界，而不是一次改名。插件市场目录与安装记录里的 publisher id 同样沿用
+上游词汇。会话链接改用 `trail://session/<id>`，粘贴进来的旧 `pi-desktop://` 链接仍可解析；
+工作区忽略文件也保留对旧 `.pi-desktopignore` 的读取。只对外发送、本机不回读的值直接改名，
+不做回退：Provider 看到的 `User-Agent` 与 `x-opencode-client`，以及 Linux 可执行文件、
+deb/rpm 包名和图标名——所以旧包名的 `.deb`／`.rpm` 与 Trail 包是两个独立包，不会互相覆盖升级。
+老安装会继续使用改名前的 `~/.pi-desktop` 目录和
+`PI_DESKTOP_DATA_DIR`；其余 `TRAIL_*` 只服务开发与测试脚本，直接改名、不做兼容回退，
+本地 `.env` 与脚本请改用新名。上游社区渠道（
+[r/AIUO](https://www.reddit.com/r/AIUO/)、[QQ 开发者群](https://qm.qq.com/q/iWP8i0XxIc)）仍由原作者运营。
 
 ---
 
@@ -758,8 +773,8 @@ Trail 使用 **GNU Lesser General Public License v3.0**。
 
 <br />
 
-**[立即下载](https://github.com/vastsa/PI-Desktop/releases/latest)** ·
-[Documentation](https://pi-docs.aiuo.net/) ·
+**[立即下载](https://github.com/CharonZou/trail/releases/latest)** ·
+[Documentation](docs/guide/index.md) ·
 [Build a Plugin](docs/plugin-development.md)
 
 <br /><br />

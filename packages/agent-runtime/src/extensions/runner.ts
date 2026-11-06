@@ -23,7 +23,7 @@ import {
 import {
   trustedExtensionAgentProviderId,
   type TrustedExtensionAgentModelConfig,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   createVirtualModules,
   knownMissingCodingAgentApis,

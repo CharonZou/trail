@@ -7,7 +7,7 @@ import {
   readNdjsonLines,
   rpcTimeoutMs,
   stripProxyEnv,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 const HOST_DISPOSE_GRACE_MS = 3_000;
 const HOST_FORCE_KILL_GRACE_MS = 1_000;
@@ -27,9 +27,9 @@ export type StderrHandler = (text: string) => void;
 export type DiagnosedHostFailure = Error & { errorCode: string };
 
 export type HostProcessOptions = {
-  /** Absolute path of the `pi-desktop-host-core` binary to spawn. */
+  /** Absolute path of the `trail-host-core` binary to spawn. */
   binaryPath: string;
-  /** Data directory handed to host-core as `PI_DESKTOP_DATA_DIR`. */
+  /** Data directory handed to host-core as `TRAIL_DATA_DIR`. */
   dataDir: string;
   /**
    * Extra environment for the child. The inherited environment is copied with
@@ -102,7 +102,7 @@ export class HostProcess {
       stdio: ["pipe", "pipe", "pipe"],
       env: {
         ...stripProxyEnv(process.env),
-        PI_DESKTOP_DATA_DIR: options.dataDir,
+        TRAIL_DATA_DIR: options.dataDir,
         ...(options.env ?? {}),
       },
     });

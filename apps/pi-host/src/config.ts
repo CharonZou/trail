@@ -24,6 +24,26 @@ export type PiHostConfig = {
 const DEFAULT_PORT = 0;
 const DEFAULT_PAIRING_LIFETIME_MS = 10 * 60 * 1000;
 
+/**
+ * The home directory a Host without `--data-dir` or an override variable uses,
+ * frozen on purpose.
+ *
+ * A release line before the Trail rename wrote a remote Host's sessions,
+ * providers and vault under `~/.pi-desktop`, and the desktop that pairs that
+ * machine manages the install at the matching path. Renaming only the Host
+ * would point an upgraded desktop at a second, empty profile beside the one
+ * holding the user's data, and let both be written by different processes. The
+ * desktop application moved its own profile to `~/.trail`; a Host the desktop
+ * launches always receives an explicit directory, so this default only speaks
+ * for a Host started by hand on a remote machine.
+ */
+export const DEFAULT_DATA_DIR_NAME = ".pi-desktop";
+
+/** `TRAIL_DATA_DIR`, then the `PI_DESKTOP_DATA_DIR` an existing host exports. */
+export function dataDirOverride(env: NodeJS.ProcessEnv): string | undefined {
+  return env.TRAIL_DATA_DIR ?? env.PI_DESKTOP_DATA_DIR;
+}
+
 function here(): string {
   return dirname(fileURLToPath(import.meta.url));
 }
@@ -33,11 +53,11 @@ export function hostCoreCandidates(root = here()): string[] {
   const exe = process.platform === "win32" ? ".exe" : "";
   return [
     process.env.PI_HOST_CORE_BIN ?? "",
-    process.env.PI_DESKTOP_HOST_BIN ?? "",
-    join(root, `bin/pi-desktop-host-core${exe}`),
-    join(root, `../bin/pi-desktop-host-core${exe}`),
-    join(root, `../../../target/release/pi-desktop-host-core${exe}`),
-    join(root, `../../../target/debug/pi-desktop-host-core${exe}`),
+    process.env.TRAIL_HOST_BIN ?? "",
+    join(root, `bin/trail-host-core${exe}`),
+    join(root, `../bin/trail-host-core${exe}`),
+    join(root, `../../../target/release/trail-host-core${exe}`),
+    join(root, `../../../target/debug/trail-host-core${exe}`),
   ].filter(Boolean);
 }
 
@@ -82,7 +102,7 @@ export function parseArgs(argv: string[]): CliArgs {
 }
 
 export function resolveConfig(args: CliArgs, env: NodeJS.ProcessEnv = process.env): PiHostConfig {
-  const dataDir = resolve(String(args["data-dir"] ?? env.PI_DESKTOP_DATA_DIR ?? join(homedir(), ".pi-desktop")));
+  const dataDir = resolve(String(args["data-dir"] ?? dataDirOverride(env) ?? join(homedir(), DEFAULT_DATA_DIR_NAME)));
   const port = Number(args.port ?? env.PI_HOST_PORT ?? DEFAULT_PORT);
   if (!Number.isInteger(port) || port < 0 || port > 65_535) {
     throw Object.assign(new Error(`invalid port ${String(args.port ?? env.PI_HOST_PORT)}`), { errorCode: "INVALID_ARGUMENT" });

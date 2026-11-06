@@ -16,7 +16,7 @@ console.log("REMOTE_FILE_MANAGER_PLUGIN " + JSON.stringify({ pluginDir }));
 const qa = createRequire(join(process.env.PI_FILE_MANAGER_QA_DIR || join(pluginDir, "tests/electron"), "package.json"));
 const { _electron } = qa("playwright");
 const temp = await mkdtemp(join(tmpdir(), "pi-remote-manager-e2e-"));
-process.env.PI_DESKTOP_DATA_DIR = join(temp, "desktop-data");
+process.env.TRAIL_DATA_DIR = join(temp, "desktop-data");
 register(new URL("../apps/desktop/test/helpers/ts-import-hooks.mjs", import.meta.url));
 const { PluginRuntime } = await import("../apps/desktop/electron/main/plugin-runtime.ts");
 const { createPluginWorkspaceReader } = await import("../apps/desktop/electron/main/remote/plugin-workspace-files.ts");

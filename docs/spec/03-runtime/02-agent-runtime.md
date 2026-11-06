@@ -141,7 +141,7 @@ transcript-read API. The core runs no title completion of its own.
    bound for a vision model is read into memory; larger images use streamed
    hashing/copying and the existing safe path fallback. An image whose header
    reports a longest edge above 8000 px (D675) also takes the path fallback
-   A `pi-desktop://session/<id>` link in the draft is resolved in the same step
+   A `trail://session/<id>` link in the draft is resolved in the same step
    into a bounded excerpt attachment: the same project only, the current
    conversation dropped before any read, and the runtime quotes it to the model
    as one `<session_reference name="…" session="…">` block ahead of the user's
@@ -216,7 +216,7 @@ callback only covers an established response.
 
 The main turn's idle watchdog measures each active provider attempt separately;
 retry backoff is outside that clock. Its default is 180 seconds with no provider
-events. `PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS` keeps the 30-second positive minimum,
+events. `TRAIL_STREAM_IDLE_TIMEOUT_MS` keeps the 30-second positive minimum,
 and `0` disables the watchdog. A genuine stall aborts that attempt before recovery
 starts another one. It does not abort the retry loop's user-owned signal or spend
 an additional retry merely because a requested backoff elapsed.
@@ -544,7 +544,7 @@ re-estimation, host-core append, `compaction_end`, transcript row, warning:
   being summarized.
 
 The family is resolved from a construction option, then
-`PI_DESKTOP_COMPACTION_STRATEGY`. It is not a setting, is absent from
+`TRAIL_COMPACTION_STRATEGY`. It is not a setting, is absent from
 `AppSettings` and i18n, and exists so the no-summary mechanism is implemented
 and testable.
 
@@ -1376,8 +1376,8 @@ those values, or whose base URL host is `opencode.ai` send:
 
 - `x-opencode-session`: the durable conversation id, or a per-call UUID when
   the caller has no session
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: trail`
+- `User-Agent: trail/<APP_VERSION>`
 
 Caller-supplied headers override the client and User-Agent defaults. An empty
 session header is restored from the conversation id so OpenCode Go cannot

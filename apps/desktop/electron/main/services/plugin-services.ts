@@ -13,13 +13,13 @@ import {
   type ShortcutPlatform,
   type ThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import type {
   PluginCompleteResult,
   PluginNativeNotificationInput,
   PluginNativeNotificationResult,
   PluginNotificationPermission,
-} from "@pi-desktop/plugin-sdk";
+} from "@trail/plugin-sdk";
 import {
   asPluginThinkingLevel,
   listReadyPluginModels,
@@ -31,7 +31,7 @@ import type { LegacyPromptEnhancementSettings } from "../plugin-prompt-enhanceme
 import {
   completeOneShot,
   type RuntimeProviderConfig,
-} from "@pi-desktop/agent-runtime";
+} from "@trail/agent-runtime";
 import { createFsConsentService } from "../plugin-fs-consent";
 import { pluginWorkspaceInfo, projectFolderPaths } from "../workspace-roots";
 import { createDesktopConsentService } from "../plugin-desktop-consent";
@@ -373,7 +373,7 @@ export function createPluginServices({
       const detail = await getHost()!.call<{
         session?: {
           messages?: UiMessage[];
-          compaction?: import("@pi-desktop/shared").ContextCompactionRecord;
+          compaction?: import("@trail/shared").ContextCompactionRecord;
           providerId?: string;
           modelId?: string;
           thinkingLevel?: string;

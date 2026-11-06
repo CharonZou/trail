@@ -64,8 +64,8 @@ git switch main
 git fetch origin main
 git merge --ff-only origin/main
 git worktree add -b <type>/<short-description> \
-  ../PI-Desktop-worktrees/<short-description> origin/main
-cd ../PI-Desktop-worktrees/<short-description>
+  ../Trail-worktrees/<short-description> origin/main
+cd ../Trail-worktrees/<short-description>
 ```
 
 That fast-forward fails once local `main` carries its own integration merge of
@@ -211,7 +211,7 @@ From a clean primary checkout:
 git fetch origin main
 git switch main
 git merge origin/main
-git worktree remove ../PI-Desktop-worktrees/<short-description>
+git worktree remove ../Trail-worktrees/<short-description>
 git branch -d <type>/<short-description>
 git worktree prune
 ```

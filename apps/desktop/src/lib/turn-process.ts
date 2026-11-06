@@ -1,4 +1,4 @@
-import type { AgentActivity, UiMessage } from "@pi-desktop/shared";
+import type { AgentActivity, UiMessage } from "@trail/shared";
 import type {
   AssistantActivityItem,
   AssistantTurnEntry,

@@ -28,7 +28,7 @@ verify() (
   [ -z "$(find . ! -type f ! -type d -print)" ]
   [ "$(find . -type f | wc -l | tr -d ' ')" = "$(($(wc -l < SHA256SUMS) + 1))" ]
   check
-  for executable in bin/node bin/pi-host bin/pi-desktop-host-core install.sh; do
+  for executable in bin/node bin/pi-host bin/trail-host-core install.sh; do
     [ -x "$executable" ]
   done
   [ -f pi-host.js ]
@@ -37,6 +37,9 @@ if [ "${1:-}" = "--verify" ]; then
   verify "$source_dir"
   exit 0
 fi
+# Frozen on purpose: the desktop bootstrap installs into this exact path and
+# then verifies what it launched from it, so the default must not track the
+# display brand (see REMOTE_PI_HOST_HOME_PATH). PI_HOST_INSTALL_DIR overrides.
 root=${PI_HOST_INSTALL_DIR:-$HOME/.pi-desktop/pi-host}
 mkdir -p "$root"
 root=$(CDPATH= cd -- "$root" && pwd -P)

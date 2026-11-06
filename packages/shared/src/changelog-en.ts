@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const enEntries: ChangelogEntry[] = [
   {
+    version: "1.0.2",
+    date: "2026-11-06",
+    highlights: [
+      "Give each project its own workspace icon and colour, and the sidebar row shows them instead of one folder glyph for everything.",
+      "Turn the workspace index off per project in the create and edit dialogs; while it is off, @ suggestions list no files, and a path already referenced in a conversation still resolves.",
+      "See token usage in the sidebar: one total for the last 12 months, a day-by-day heat strip, and the same total split by model.",
+      "Minimize the window or send it full screen from the new Window card in Settings, without the menu bar.",
+      "Provider lists show their official marks for more services, including Mistral, Kimi and Moonshot.",
+      "The app icon is a clean brand mark on every surface, including the Windows taskbar and Alt+Tab.",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-11-04",
     highlights: [
@@ -132,7 +144,7 @@ export const enEntries: ChangelogEntry[] = [
       "Scheduled tasks can run on an interval cadence: every 5 minutes up to 24 hours, counted from when the task was armed.",
       "The Scheduled page pairs the task list with the selected task: its last outcome, next run, instruction and run history.",
       "A run's conversation has a back row to its task and run, and each task chooses whether a run opens a new conversation or continues one.",
-      "Paste a pi-desktop://session/<id> link into the Composer to hand one conversation to another turn.",
+      "Paste a trail://session/<id> link into the Composer to hand one conversation to another turn.",
       "Open path:line file references from chat, the work panel and the bundled file manager, and jump straight to that line.",
       "Inline code that resolves to a real file path is now a clickable link; other inline code and code blocks stay plain.",
       "Every MCP server can set its own connection timeout (1-600 seconds), and clearing it restores the default.",
@@ -704,7 +716,7 @@ export const enEntries: ChangelogEntry[] = [
       "Sign in to multiple vendor accounts and choose the account used for each provider.",
       "Use each model's capabilities to decide when image attachments are supported.",
       "Choose reasoning effort directly from the composer for models that expose it.",
-      "Keep one PI-Desktop instance per data directory to prevent conflicting sessions.",
+      "Keep one Trail instance per data directory to prevent conflicting sessions.",
       "Organize Settings into clearer groups and simplify provider account management.",
       "Keep built-in subagents aligned with the parent conversation's permission mode.",
     ],
@@ -748,7 +760,7 @@ export const enEntries: ChangelogEntry[] = [
       "Remember recently used plugins in the launcher for faster access.",
       "Add copy session path to the context menu for developer mode.",
       "Fix font picker clipping and System default reset issues.",
-      "Keep macOS PI-Desktop in the Dock and Cmd+Tab after window close.",
+      "Keep macOS Trail in the Dock and Cmd+Tab after window close.",
       "Keep chat transcript pinned when composer collapses after sending.",
       "Give the work panel a real empty state with clearer guidance.",
     ],
@@ -788,7 +800,7 @@ export const enEntries: ChangelogEntry[] = [
     date: "2026-08-12",
     highlights: [
       "Restore the Windows Alt+Space global plugin launcher, including when another app is focused.",
-      "Keep PI-Desktop available from the system tray when minimized across macOS, Windows, and Linux.",
+      "Keep Trail available from the system tray when minimized across macOS, Windows, and Linux.",
       "Improve native select menu readability in light and dark themes.",
     ],
   },
@@ -864,8 +876,8 @@ export const enEntries: ChangelogEntry[] = [
     version: "0.4.1",
     date: "2026-08-02",
     highlights: [
-      "Update GitHub Releases and auto-update links to the canonical PI-Desktop repository.",
-      "Refresh project, plugin, and release documentation to use the PI-Desktop repository name.",
+      "Update GitHub Releases and auto-update links to the canonical Trail repository.",
+      "Refresh project, plugin, and release documentation to use the Trail repository name.",
     ],
   },
   {

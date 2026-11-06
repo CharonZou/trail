@@ -71,6 +71,25 @@ with sessions is omitted from `detachedPaths` and remains readable as a standalo
 legacy group; removing a root from group membership never deletes sessions or files.
 Existing path projects are projected as legacy single-root groups at read time;
 their path-scoped memory and filesystem instructions remain readable.
+The same record carries `workspaceIndex`, the project's own choice about
+whether its folders may be listed for the `@` menu (D679); a record without the
+field reads as indexed, so no migration is needed. A legacy projection has no
+record to hold that choice, so turning it off stores one sparse
+`projectGroupWorkspaceIndex` row keyed by the stored project path and only for
+the `false` case; turning it back on deletes the row, and promoting the project
+into a real group clears it so the path-keyed fallback cannot outlive the
+promotion and re-apply later.
+The record also carries `appearance`, the icon id and `#rrggbb` tint the user
+picked for the project (D680). Both halves are optional and a record without the
+field keeps the historical folder glyph in the theme's own text colour, so again
+no migration is needed. A legacy projection is decorated through one sparse
+`projectGroupAppearance` row keyed by the stored project path and written only
+while at least one half is set; clearing both deletes the row, and promoting the
+project into a real group clears it for the same reason as the index fallback —
+the path-keyed record must not outlive the promotion and re-apply later.
+Decorating a project is the only writer of these rows, and the key is the path
+the host already reads the project by, so editing the display name cannot strand
+a decoration.
 5. **Plan/Goal checkpoints are immutable host artifacts** with recorded path,
    hash, and size; the existing approval row also carries execution fields.
    Startup interruption is the process-epoch fence and no work is replayed.
@@ -100,10 +119,12 @@ The original Electron `userData` directory remains the installation identity,
 single-instance lock, and owner-only `storage-location.json` bootstrap anchor.
 Chromium `sessionData` follows `browser/`; this preserves existing localStorage,
 cookies, IndexedDB and persistent partition state by copying the complete old
-profile. An explicit `PI_DESKTOP_DATA_DIR` still overrides the default and disables
+profile. An explicit `TRAIL_DATA_DIR` still overrides the default and disables
 settings-driven maintenance, since such profiles opt out of the installation lock.
+The pre-Trail name `PI_DESKTOP_DATA_DIR` is read as an alias when `TRAIL_DATA_DIR`
+is unset, so launchers and harnesses written before the rename keep their verdict.
 A managed relaunch discards only the environment root published for child services
-through the internal `--pi-managed-storage` argument before reacquiring the lock.
+through the internal `--trail-managed-storage` argument before reacquiring the lock.
 The location is machine-local and never part of cloud configuration sync.
 
 Migration is cold: the accepted settings action journals pending work, then uses
@@ -165,7 +186,7 @@ when present, otherwise the installation's current browser root is retained.
 Dismissal exits without changing the pointer or creating a profile. Missing custom
 roots and pending cache/backup maintenance continue to refuse startup. A queued
 migration may resume with an absent default data root only when its browser root
-still exists, preserving first-install migration. An explicit `PI_DESKTOP_DATA_DIR`
+still exists, preserving first-install migration. An explicit `TRAIL_DATA_DIR`
 remains outside this recovery flow.
 Original directories remain explicit backups. Deleting these requires a separate
 settings confirmation after checking new-location functionality, including plugins
@@ -189,14 +210,17 @@ review snapshots, plugin code/data, models, configuration, or logs. Partial clea
 failure remains observable, retains active roots, and can be retried.
 
 
-A packaged installation keeps this tree in `~/.pi-desktop`. A development build
-keeps the same tree in `~/.pi-desktop-dev`, because a shipped app and a
+A packaged installation keeps this tree in `~/.trail`. A development build
+keeps the same tree in `~/.trail-dev`, because a shipped app and a
 `pnpm dev` host are two installations that have to run at the same time (D599,
-ADR 0094). `PI_DESKTOP_DATA_DIR` replaces either root outright and is resolved
+ADR 0094). `TRAIL_DATA_DIR` replaces either root outright and is resolved
 to an absolute path before it reaches host-core as a child-process variable.
+An installation whose data directory was created before the Trail rename keeps
+that directory: the pre-Trail profile name is used whenever it exists and the
+`~/.trail` profile does not, so an upgrade never moves or duplicates user data.
 
 ```text
-~/.pi-desktop/
+~/.trail/
  ├── pi.sqlite            # index database (WAL: + -wal/-shm) — host-core only
  ├── pi.sqlite.v6.bak     # archived pre-v7 database (D119 breaking reset)
  ├── pi.sqlite.v8.bak     # exact readable backup before v8→v15 destructive work

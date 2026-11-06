@@ -19,7 +19,7 @@ reproduced verbatim here:
 Changes made for Trail:
 
 - Element IDs renamed from `zcode-visualization-*` to
-  `pi-desktop-visualization-*`.
+  `trail-visualization-*`.
 - The variant carousel and the Lucide icon library were removed from the kit
   and the stylesheet.
 - The skill text was edited for the Trail host: host API, parameter

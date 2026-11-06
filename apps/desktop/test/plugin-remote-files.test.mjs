@@ -8,7 +8,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const data = await mkdtemp(join(tmpdir(), "pi-remote-plugin-data-"));
-process.env.PI_DESKTOP_DATA_DIR = data;
+process.env.TRAIL_DATA_DIR = data;
 register(new URL("./helpers/ts-import-hooks.mjs", import.meta.url));
 const { PluginRuntime } = await import("../electron/main/plugin-runtime.ts");
 test.after(() => rm(data, { recursive: true, force: true }));

@@ -23,7 +23,7 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   titlebar remain opaque. Only a nested settings content enter wrapper plays a
   route animation; the scrolling inner pane, rail, and backing never fade or
   translate. That entrance is opacity-only. Settings dialogs and sheets portal
-  to a viewport-fixed `#pi-desktop-overlays` host on the document element and
+  to a viewport-fixed `#trail-overlays` host on the document element and
   cover the full window, including the rail.
 - Returning to the app restores the prior sidebar collapsed/expanded state
   without a sidebar entrance animation or a width ramp. Real toggle and
@@ -223,6 +223,16 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
     The first plaintext hop to such an endpoint shows one informational notice.
     The per-surface acknowledgements this replaced (`networkProxy.allowFakeIp`,
     `configSync.allowInsecureHttp`) are gone (ADR 0304).
+- **Window** card: a Minimize button and a Full screen button. Both are
+  launchers, not preferences — nothing persists, and the card renders on every
+  platform because macOS keeps native traffic lights while Windows and Linux keep
+  a frameless titlebar, so this is the path that always exists. Minimize runs
+  `pi-desktop/window/control` (`minimize`); Full screen runs
+  `pi-desktop/menu/nativeAction` (`toggleFullScreen`), i.e. the same handler the
+  native menu uses, so the fullscreen/maximize interlock of issue #1655 has one
+  implementation. The Full screen label does not report live state:
+  `windowControl("getState")` returns only `maximized`, so the button toggles.
+  The three keys are indexed by settings search.
 - Platform-specific **Close behavior** remains in General because it changes
   application-window behavior rather than agent behavior.
 - File-open target, menu-bar behavior, and bottom-panel behavior are not
@@ -378,9 +388,12 @@ no speech keys.
 
 Token usage is **not a Settings destination** (D335 / ADR 0173). Completed-turn
 history stays host-owned (`session.endTurn.usage`, `stats.getTokenUsageHistory`).
-The user-facing dashboard is marketplace plugin `pi.token-insights`, opened from
+The full dashboard is marketplace plugin `pi.token-insights`, opened from
 the command palette (`usage`, `tokens`, `用量`). Settings search does not index
-a usage tab.
+a usage tab. The app's own surface is the compact sidebar meter
+(D682), which is not a destination either: it reads the same host RPC in the
+default one-year window and switches between the daily strip and the per-model
+ranking in place.
 
 ### Voice
 

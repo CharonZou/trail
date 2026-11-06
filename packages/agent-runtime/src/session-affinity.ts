@@ -21,7 +21,7 @@
  * upstream isolate its prompt cache.
  */
 
-import { addressesPublishedVendorHost } from "@pi-desktop/shared";
+import { addressesPublishedVendorHost } from "@trail/shared";
 import type { SimpleStreamOptions } from "@earendil-works/pi-ai";
 import { clampOpenAIPromptCacheKey } from "@earendil-works/pi-ai/api/openai-prompt-cache";
 import { isOpenCodeEndpoint } from "./opencode-session-headers.js";

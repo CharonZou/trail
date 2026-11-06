@@ -27,7 +27,7 @@ async function main(): Promise<void> {
         "  --host <addr>             bind address; loopback only",
         "  --pair                    print a single-use pairing token at start",
         "  --pairing-lifetime-ms <n> pairing token lifetime (default 600000)",
-        "  --host-core <path>        pi-desktop-host-core binary",
+        "  --host-core <path>        trail-host-core binary",
         "  --sidecar <path>          agent sidecar entry",
         "  --browse-root <dir>       folder-picker root (default home)",
         "  --log-level <level>       info | warn | error",
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   const config = resolveConfig(args);
   const { startPiHost } = await import("./app.js");
   const app = await startPiHost(config);
-  process.stdout.write(`PI_HOST_READY ${JSON.stringify({ hostId: app.hostId, host: app.address.host, port: app.address.port, version: (await import("@pi-desktop/shared")).APP_VERSION })}\n`);
+  process.stdout.write(`PI_HOST_READY ${JSON.stringify({ hostId: app.hostId, host: app.address.host, port: app.address.port, version: (await import("@trail/shared")).APP_VERSION })}\n`);
   if (config.pair) {
     const pairing = await app.issuePairingToken(config.pairingLifetimeMs);
     process.stdout.write(`PI_HOST_PAIRING_TOKEN ${JSON.stringify(pairing)}\n`);

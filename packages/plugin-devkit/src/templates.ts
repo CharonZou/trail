@@ -1,6 +1,6 @@
 import { mkdir, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
-import { PLUGIN_ID_PATTERN } from "@pi-desktop/plugin-sdk";
+import { PLUGIN_ID_PATTERN } from "@trail/plugin-sdk";
 
 /** Template ids match the catalogue in docs/spec/07-plugins/10-plugin-devex.md §3. */
 export const TEMPLATE_NAMES = [

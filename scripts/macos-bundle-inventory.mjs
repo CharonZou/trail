@@ -44,8 +44,8 @@
 //
 // Thresholds (overridable so tests and unusually large bundles do not have to
 // create thousands of files):
-//   PI_DESKTOP_INVENTORY_MAX_FILES       default 2000   (whole bundle)
-//   PI_DESKTOP_INVENTORY_MAX_DIR_FILES   default 500    (single directory)
+//   TRAIL_INVENTORY_MAX_FILES       default 2000   (whole bundle)
+//   TRAIL_INVENTORY_MAX_DIR_FILES   default 500    (single directory)
 //
 // Exit status: 0 for a completed inventory, 1 for a bad path or bad usage.
 // Warnings never change the exit status.
@@ -413,11 +413,11 @@ function run() {
   const { target, json, top } = parseArguments(process.argv.slice(2));
   const bundle = resolveBundle(target);
   const maxFiles = positiveInteger(
-    process.env.PI_DESKTOP_INVENTORY_MAX_FILES,
+    process.env.TRAIL_INVENTORY_MAX_FILES,
     2000,
   );
   const maxDirectoryFiles = positiveInteger(
-    process.env.PI_DESKTOP_INVENTORY_MAX_DIR_FILES,
+    process.env.TRAIL_INVENTORY_MAX_DIR_FILES,
     500,
   );
 

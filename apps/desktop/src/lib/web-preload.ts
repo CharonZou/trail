@@ -13,8 +13,8 @@
  * null (browsers cannot resolve a dropped File to a filesystem path) and live
  * voice over a transferred MessagePort is unavailable.
  */
-import { IPC } from "@pi-desktop/shared/protocol";
-import type { Result } from "@pi-desktop/shared";
+import { IPC } from "@trail/shared/protocol";
+import type { Result } from "@trail/shared";
 
 const BRIDGE_URL = "ws://127.0.0.1:5174";
 

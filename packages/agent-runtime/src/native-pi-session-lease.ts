@@ -29,6 +29,14 @@ type LeaseRecord = {
   target: Pick<NativePiSnapshot, "dev" | "ino" | "size" | "hash" | "leafId">;
 };
 
+/**
+ * Frozen on purpose. This lock sits beside transcripts in the user's session
+ * store, and a release line before the Trail rename holds `.pi-desktop.lock`
+ * there. Two lock names would let that process and this one append to the same
+ * session file at the same time, so the name stays whatever is already on disk.
+ */
+const LEASE_LOCK_SUFFIX = ".pi-desktop.lock";
+
 function hash(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -120,7 +128,12 @@ export class NativePiSessionLease {
     expected: NativePiSnapshot,
   ) {
     this.expected = expected;
-    this.lockPath = `${path}.pi-desktop.lock`;
+    this.lockPath = NativePiSessionLease.lockPath(path);
+  }
+
+  /** The on-disk lease path for a session file. */
+  static lockPath(path: string): string {
+    return `${path}${LEASE_LOCK_SUFFIX}`;
   }
 
   static acquire(path: string, expected: NativePiSnapshot): NativePiSessionLease {
@@ -131,7 +144,7 @@ export class NativePiSessionLease {
 
   static canAcquire(path: string, current: NativePiSnapshot): boolean {
     try {
-      const previous = JSON.parse(readFileSync(`${path}.pi-desktop.lock`, "utf8")) as LeaseRecord;
+      const previous = JSON.parse(readFileSync(NativePiSessionLease.lockPath(path), "utf8")) as LeaseRecord;
       return previous?.hostname === hostname() && !processIsAlive(previous.pid) &&
         Boolean(previous.target) && isCompleteAppendOnlyExtension(previous.target, current);
     } catch (error) {

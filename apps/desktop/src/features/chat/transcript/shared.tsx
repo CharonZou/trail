@@ -11,11 +11,11 @@ import type {
   MessageAttachment,
   MessageUsage,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   formatCompactTokenCount,
   isCertificateVerificationError,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { useOpenChatFileRef, useOpenPreviewTarget } from "../../../hooks/use-preview-target";
 import { useChatFileMenu } from "../../../hooks/use-chat-file-menu";
 import { ContextMenu } from "../../../components/ContextMenu";
@@ -524,7 +524,7 @@ export function FileRefChip({
 
 /**
  * A referenced conversation as a chip. The draft carried a
- * `pi-desktop://session/<id>` link; main attached a bounded excerpt for the
+ * `trail://session/<id>` link; main attached a bounded excerpt for the
  * model, and this chip is how the reader sees and reopens it.
  */
 function SessionChip({ sessionId, fallbackName, ...position }: {
@@ -575,7 +575,7 @@ function SessionChip({ sessionId, fallbackName, ...position }: {
   );
 }
 
-/** A bare `pi-desktop://session/<id>` link in prose, rendered as that chip. */
+/** A bare `trail://session/<id>` link in prose, rendered as that chip. */
 export function SessionLinkChip({ sessionId, ...position }: { sessionId: string } & SourcePositionProps) {
   return (
     <SessionChip sessionId={sessionId} fallbackName={sessionId.slice(0, 8)} {...position} />

@@ -24,7 +24,7 @@ import {
   type CloseBehavior,
   type KeybindingOverrides,
   type PlanExecutionFinishStatus,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { AgentExtensionBridge } from "./agent-extensions";
 import {
   knownProjectGroups,
@@ -45,7 +45,7 @@ import {
   WINDOW_MIN_WIDTH,
   type WorkPanelReservationState,
 } from "./work-panel-window";
-import { InflightCheckpointer } from "@pi-desktop/host-runtime";
+import { InflightCheckpointer } from "@trail/host-runtime";
 import { withGitBranch } from "./workspace-git";
 import { hasSingleInstanceLock, isDevelopmentBuild } from "./installation";
 import { getStorageBootstrap } from "./storage/bootstrap";
@@ -175,7 +175,7 @@ const dataDir = storage.preferences.roots.data;
 // The plugin runtime resolves this root from the environment rather than taking
 // it as a parameter, and a profile split across two directories is the
 // divergence D236 closes.
-process.env.PI_DESKTOP_DATA_DIR = dataDir;
+process.env.TRAIL_DATA_DIR = dataDir;
 
 // Agent extensions (D387/D388, ADR 0214): plugins contribute the modules,
 // the sidecar loads them; this bridge carries commands, diagnostics, and
@@ -470,7 +470,7 @@ function setCurrentWorkspacePath(path: string | null): void {
 
 /** Dev-only Browser Dev Mode: the main process runs headless as a local
  *  backend and the renderer is served to a browser over the Web bridge. */
-const WEB_MODE = process.env.PI_DESKTOP_WEB === "1" || process.argv.includes("--web");
+const WEB_MODE = process.env.TRAIL_WEB === "1" || process.argv.includes("--web");
 /** Started once IPC handlers are registered; null in normal desktop runs. */
 let webBridge: WebBridge | null = null;
 
@@ -485,7 +485,7 @@ function sendToRenderer(channel: string, payload: unknown) {
   }
   if (!IPC_WHITELIST.has(channel)) return;
   // Browser Dev Mode: fan the event out to browser clients alongside the
-  // desktop renderer. The bridge only exists when PI_DESKTOP_WEB is set.
+  // desktop renderer. The bridge only exists when TRAIL_WEB is set.
   webBridge?.broadcast(channel, payload);
   const window = mainState.mainWindow;
   if (
@@ -888,7 +888,7 @@ function registerIpc() {
   const invokeIpc = registerIpcHandlers({
     restartForStorage: () => {
       shutdownState.quitConfirmed = true;
-      app.relaunch({ args: [...process.argv.slice(1).filter((arg) => arg !== "--pi-managed-storage"), "--pi-managed-storage"] });
+      app.relaunch({ args: [...process.argv.slice(1).filter((arg) => arg !== "--trail-managed-storage"), "--trail-managed-storage"] });
       app.quit();
     },
     traySessions: applicationLifecycle!.traySessions,

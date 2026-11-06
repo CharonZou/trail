@@ -45,7 +45,7 @@ test("startup plugin restore notifies the renderer after every enabled plugin lo
   const createRuntimeLifecycle = loadLifecycle({
     "node:fs": { mkdirSync() {} },
     "node:path": { join: (...parts) => parts.join("/") },
-    "@pi-desktop/shared": {
+    "@trail/shared": {
       APP_NAME: "Trail",
       APP_VERSION: "0.0.0-test",
       ErrorCodes: { HOST_UNAVAILABLE: "HOST_UNAVAILABLE" },
@@ -62,7 +62,7 @@ test("startup plugin restore notifies the renderer after every enabled plugin lo
       schemaTooNewOf: () => null,
     },
     "../plugin-display-locale": { syncPluginDisplayLocale: async () => {} },
-    "@pi-desktop/host-runtime": {
+    "@trail/host-runtime": {
       RuntimeSupervisor: class {
         superviseRestart() {
           return Promise.resolve();
@@ -102,7 +102,7 @@ test("startup plugin restore notifies the renderer after every enabled plugin lo
   };
   const lifecycle = createRuntimeLifecycle({
     runtimeState,
-    dataDir: "/tmp/pi-desktop-test",
+    dataDir: "/tmp/trail-test",
     logger: { app: (_area, _level, message, details) => {
       if (message === "plugin restored") order.push(`restored:${details.pluginId}`);
     } },

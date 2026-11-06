@@ -17,6 +17,54 @@ use crate::workspace::WorkspaceState;
 
 pub const PROTOCOL_VERSION: u32 = 11;
 pub const HOST_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Home data directory this host owns, and the names that pointed at it before
+/// the Trail brand and before `TRAIL_DATA_DIR` was its override.
+pub const DATA_DIR_NAME: &str = ".trail";
+pub const DATA_DIR_ENV: &str = "TRAIL_DATA_DIR";
+const LEGACY_DATA_DIR_NAME: &str = ".pi-desktop";
+const LEGACY_DATA_DIR_ENV: &str = "PI_DESKTOP_DATA_DIR";
+
+/// The data directory host-core opens.
+///
+/// An explicit override wins, then `~/.trail`, then the `~/.pi-desktop` profile
+/// an earlier release already created. Falling back rather than migrating keeps
+/// an upgraded install on the tree that holds its own `pi.sqlite`, and never
+/// copies a live database out from under another writer.
+pub fn default_data_dir() -> std::path::PathBuf {
+    let home = dirs::home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+    let current = home.join(DATA_DIR_NAME);
+    let legacy = home.join(LEGACY_DATA_DIR_NAME);
+    pick_data_dir(
+        |name| std::env::var(name).ok(),
+        &home,
+        current.exists(),
+        legacy.is_dir(),
+    )
+}
+
+/// The directory choice, kept separate from the environment and filesystem so
+/// the upgrade fallback has a test that touches neither.
+fn pick_data_dir(
+    configured: impl Fn(&str) -> Option<String>,
+    home: &std::path::Path,
+    current_exists: bool,
+    legacy_is_dir: bool,
+) -> std::path::PathBuf {
+    for name in [DATA_DIR_ENV, LEGACY_DATA_DIR_ENV] {
+        if let Some(configured) = configured(name) {
+            let trimmed = configured.trim();
+            if !trimmed.is_empty() {
+                return std::path::PathBuf::from(trimmed);
+            }
+        }
+    }
+    let current = home.join(DATA_DIR_NAME);
+    if !current_exists && legacy_is_dir {
+        return home.join(LEGACY_DATA_DIR_NAME);
+    }
+    current
+}
 const BASH_ABORT_TOMBSTONE_TTL: Duration = Duration::from_secs(60);
 const MAX_BASH_ABORT_TOMBSTONES: usize = 1024;
 const TOOL_ABORT_TOMBSTONE_TTL: Duration = Duration::from_secs(60);
@@ -430,6 +478,54 @@ impl AppState {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn data_dir_prefers_trail_and_falls_back_to_the_pre_trail_profile() {
+        let home = std::path::Path::new("/home/user");
+        let none = |_: &str| None;
+
+        // Nothing on disk yet, and a fresh install of both profiles.
+        assert_eq!(pick_data_dir(none, home, false, false), home.join(".trail"),);
+        assert_eq!(pick_data_dir(none, home, true, true), home.join(".trail"),);
+
+        // Only the directory an earlier release created: stay on it rather than
+        // opening an empty second database.
+        assert_eq!(
+            pick_data_dir(none, home, false, true),
+            home.join(".pi-desktop"),
+        );
+
+        // An explicit override wins over either, and the pre-Trail variable
+        // name still means the same thing.
+        assert_eq!(
+            pick_data_dir(
+                |name| (name == DATA_DIR_ENV).then(|| "/mnt/pi".to_string()),
+                home,
+                false,
+                true,
+            ),
+            std::path::PathBuf::from("/mnt/pi"),
+        );
+        assert_eq!(
+            pick_data_dir(
+                |name| (name == LEGACY_DATA_DIR_ENV).then(|| " /mnt/pi-old ".to_string()),
+                home,
+                true,
+                false,
+            ),
+            std::path::PathBuf::from("/mnt/pi-old"),
+        );
+        // A blank override is not an override: it would name a relative tree.
+        assert_eq!(
+            pick_data_dir(
+                |name| (name == DATA_DIR_ENV).then(|| "   ".to_string()),
+                home,
+                false,
+                true,
+            ),
+            home.join(".pi-desktop"),
+        );
+    }
 
     #[test]
     fn shutdown_cancels_pending_permissions_and_active_bash() {

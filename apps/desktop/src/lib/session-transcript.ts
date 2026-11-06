@@ -1,6 +1,6 @@
 import { preservePlanHistory } from "./plan-history";
-import type { AgentEvent, MessageAttachment, UiMessage } from "@pi-desktop/shared";
-import { formatPromptPathText, locateInlinePromptPaths } from "@pi-desktop/shared";
+import type { AgentEvent, MessageAttachment, UiMessage } from "@trail/shared";
+import { formatPromptPathText, locateInlinePromptPaths } from "@trail/shared";
 import {
   getSessionMessageSnapshot,
   registerSessionMessageAppend,

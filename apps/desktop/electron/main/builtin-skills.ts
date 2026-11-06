@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseSkillFrontmatter } from "@pi-desktop/plugin-sdk";
-import { GEN_UI_SKILL_ID } from "@pi-desktop/shared";
-import type { PluginSkillDef } from "@pi-desktop/agent-runtime";
+import { parseSkillFrontmatter } from "@trail/plugin-sdk";
+import { GEN_UI_SKILL_ID } from "@trail/shared";
+import type { PluginSkillDef } from "@trail/agent-runtime";
 import type { LoadedSkillDocument } from "./skill-document";
 import { getModuleDirectory } from "./module-path";
 import { pluginWorkspaceContains } from "./plugin-workspace-contains";

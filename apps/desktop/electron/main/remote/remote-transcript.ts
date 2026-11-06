@@ -14,7 +14,7 @@ import type {
   SessionDetail,
   SessionSummary,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { parseRemoteSessionId } from "./backend-router.js";
 
 /** Build the flat summary a session list / header row renders. */

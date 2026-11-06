@@ -5,7 +5,7 @@ import type {
   LiveWorkSelectionOption,
   LiveWorkStopOperationResult,
   SessionSource,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 export function liveWorkUnselectedSessionId(callId: string): string {
   return `live-work-unselected:${callId}`;

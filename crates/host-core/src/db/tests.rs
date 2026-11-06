@@ -1659,6 +1659,324 @@ fn project_group_roundtrips_roots_and_shared_context() {
 }
 
 #[test]
+fn project_group_workspace_index_defaults_on_and_persists_off() {
+    let dir = tempfile::tempdir().unwrap();
+    let app = dir.path().join("app");
+    std::fs::create_dir_all(&app).unwrap();
+    let db = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    let group = db
+        .create_project_group("Indexed", &[app.to_string_lossy().into()])
+        .unwrap();
+    assert!(group.workspace_index);
+
+    // A record written before the switch existed keeps the historical default.
+    let mut before = serde_json::to_value(&group).unwrap();
+    assert!(before
+        .as_object_mut()
+        .unwrap()
+        .remove("workspaceIndex")
+        .is_some());
+    db.kv_set("projectGroups", &group.id, &before).unwrap();
+    assert!(db
+        .list_project_groups()
+        .unwrap()
+        .iter()
+        .any(|item| item.id == group.id && item.workspace_index));
+
+    let turned_off = db.set_workspace_index(&group.id, false).unwrap();
+    assert!(!turned_off.workspace_index);
+
+    // A remote project has no local index to gate, so its flag is refused
+    // rather than stored and silently ignored.
+    let remote = db
+        .create_remote_project_group(
+            "Remote",
+            RemoteWorkspace {
+                host_key: "prod".to_string(),
+                path: "/srv/app".to_string(),
+            },
+        )
+        .unwrap();
+    assert!(db.set_workspace_index(&remote.id, false).is_err());
+
+    drop(db);
+    let reopened = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    let stored = reopened
+        .list_project_groups()
+        .unwrap()
+        .into_iter()
+        .find(|item| item.id == group.id)
+        .unwrap();
+    assert!(!stored.workspace_index);
+    // Editing the group for another reason never re-enables indexing.
+    let edited = reopened
+        .update_project_group(&group.id, "Renamed", &[app.to_string_lossy().into()], None)
+        .unwrap();
+    assert!(!edited.workspace_index);
+}
+
+#[test]
+fn legacy_project_workspace_index_is_keyed_by_its_own_path() {
+    let dir = tempfile::tempdir().unwrap();
+    let solo = dir.path().join("solo");
+    let extra = dir.path().join("extra");
+    std::fs::create_dir_all(&solo).unwrap();
+    std::fs::create_dir_all(&extra).unwrap();
+    let db = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    db.ensure_project(&solo.to_string_lossy(), false).unwrap();
+
+    // Opening a folder without creating a group leaves a legacy projection,
+    // which has no record of its own to hold the switch.
+    let groups = db.list_project_groups().unwrap();
+    assert_eq!(groups.len(), 1);
+    assert!(groups[0].legacy);
+    assert!(groups[0].workspace_index);
+
+    let turned_off = db.set_workspace_index(&groups[0].id, false).unwrap();
+    assert!(!turned_off.workspace_index);
+    let reopened = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    assert!(!reopened.list_project_groups().unwrap()[0].workspace_index);
+    assert!(
+        reopened
+            .set_workspace_index(&groups[0].id, true)
+            .unwrap()
+            .workspace_index
+    );
+    assert!(reopened
+        .kv_get("projectGroupWorkspaceIndex", &groups[0].primary_path)
+        .unwrap()
+        .is_none());
+
+    // Promoting the project to a real group carries the choice into the record
+    // and leaves no path-keyed fallback behind that could resurface later.
+    reopened.set_workspace_index(&groups[0].id, false).unwrap();
+    let promoted = reopened
+        .update_project_group(
+            &groups[0].id,
+            "Promoted",
+            &[
+                solo.to_string_lossy().into(),
+                extra.to_string_lossy().into(),
+            ],
+            None,
+        )
+        .unwrap();
+    assert!(!promoted.legacy);
+    assert!(!promoted.workspace_index);
+    assert!(reopened
+        .kv_get("projectGroupWorkspaceIndex", &promoted.primary_path)
+        .unwrap()
+        .is_none());
+    assert!(!reopened.list_project_groups().unwrap()[0].workspace_index);
+
+    // A switched-off project that is later created as a real group starts
+    // indexed: the stale path-keyed fallback must not follow it into the record.
+    let stale = dir.path().join("stale");
+    std::fs::create_dir_all(&stale).unwrap();
+    reopened
+        .ensure_project(&stale.to_string_lossy(), false)
+        .unwrap();
+    let stale_group = reopened
+        .list_project_groups()
+        .unwrap()
+        .into_iter()
+        .find(|group| group.legacy && group.primary_path != promoted.primary_path)
+        .unwrap();
+    reopened
+        .set_workspace_index(&stale_group.id, false)
+        .unwrap();
+    let fresh = reopened
+        .create_project_group("Fresh", &[stale.to_string_lossy().into()])
+        .unwrap();
+    assert!(fresh.workspace_index);
+    assert!(reopened
+        .kv_get("projectGroupWorkspaceIndex", &stale_group.primary_path)
+        .unwrap()
+        .is_none());
+}
+
+#[test]
+fn project_group_appearance_defaults_empty_and_persists_the_pair() {
+    let dir = tempfile::tempdir().unwrap();
+    let app = dir.path().join("app");
+    std::fs::create_dir_all(&app).unwrap();
+    let db = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    let group = db
+        .create_project_group("Plain", &[app.to_string_lossy().into()])
+        .unwrap();
+    assert!(group.appearance.icon.is_none());
+    assert!(group.appearance.color.is_none());
+
+    // A record written before the pickers existed keeps the folder glyph.
+    let mut before = serde_json::to_value(&group).unwrap();
+    assert!(before
+        .as_object_mut()
+        .unwrap()
+        .remove("appearance")
+        .is_none());
+    db.kv_set("projectGroups", &group.id, &before).unwrap();
+    let listed = db
+        .list_project_groups()
+        .unwrap()
+        .into_iter()
+        .find(|item| item.id == group.id)
+        .unwrap();
+    assert!(listed.appearance.is_empty());
+
+    let picked = ProjectGroupAppearance {
+        icon: Some("moon".to_string()),
+        color: Some("#3b81e9".to_string()),
+    };
+    let stored = db.set_appearance(&group.id, picked.clone()).unwrap();
+    assert_eq!(stored.appearance, picked);
+
+    // Writing the same pair again must not rewrite the record.
+    let unchanged = db.set_appearance(&group.id, picked).unwrap();
+    assert_eq!(unchanged.updated_at, stored.updated_at);
+
+    // A remote project has no local glyph to personalize.
+    let remote = db
+        .create_remote_project_group(
+            "Remote",
+            RemoteWorkspace {
+                host_key: "prod".to_string(),
+                path: "/srv/app".to_string(),
+            },
+        )
+        .unwrap();
+    assert!(db
+        .set_appearance(
+            &remote.id,
+            ProjectGroupAppearance {
+                icon: Some("moon".to_string()),
+                color: None,
+            },
+        )
+        .is_err());
+
+    drop(db);
+    let reopened = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    let stored = reopened
+        .list_project_groups()
+        .unwrap()
+        .into_iter()
+        .find(|item| item.id == group.id)
+        .unwrap();
+    assert_eq!(stored.appearance.icon.as_deref(), Some("moon"));
+    assert_eq!(stored.appearance.color.as_deref(), Some("#3b81e9"));
+    // Editing the group for another reason never drops the picked appearance.
+    let edited = reopened
+        .update_project_group(&group.id, "Renamed", &[app.to_string_lossy().into()], None)
+        .unwrap();
+    assert_eq!(edited.appearance, stored.appearance);
+}
+
+#[test]
+fn legacy_project_appearance_is_keyed_by_its_own_path() {
+    let dir = tempfile::tempdir().unwrap();
+    let solo = dir.path().join("solo");
+    let extra = dir.path().join("extra");
+    std::fs::create_dir_all(&solo).unwrap();
+    std::fs::create_dir_all(&extra).unwrap();
+    let db = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    db.ensure_project(&solo.to_string_lossy(), false).unwrap();
+
+    // Opening a folder without creating a group leaves a legacy projection,
+    // which has no record of its own to hold the pair.
+    let groups = db.list_project_groups().unwrap();
+    assert!(groups[0].legacy);
+    assert!(groups[0].appearance.is_empty());
+
+    let decorated = db
+        .set_appearance(
+            &groups[0].id,
+            ProjectGroupAppearance {
+                icon: Some("rocket".to_string()),
+                color: Some("#579b6e".to_string()),
+            },
+        )
+        .unwrap();
+    assert_eq!(decorated.appearance.icon.as_deref(), Some("rocket"));
+    let reopened = Database::open(&dir.path().join("pi.sqlite")).unwrap();
+    assert_eq!(
+        reopened.list_project_groups().unwrap()[0]
+            .appearance
+            .color
+            .as_deref(),
+        Some("#579b6e")
+    );
+
+    // Choosing no icon and no tint removes the path-keyed row entirely.
+    reopened
+        .set_appearance(&groups[0].id, ProjectGroupAppearance::default())
+        .unwrap();
+    assert!(reopened
+        .kv_get("projectGroupAppearance", &groups[0].primary_path)
+        .unwrap()
+        .is_none());
+
+    // Promoting the project keeps the choice on the record and leaves no
+    // path-keyed fallback behind that could resurface later.
+    reopened
+        .set_appearance(
+            &groups[0].id,
+            ProjectGroupAppearance {
+                icon: Some("rocket".to_string()),
+                color: None,
+            },
+        )
+        .unwrap();
+    let promoted = reopened
+        .update_project_group(
+            &groups[0].id,
+            "Promoted",
+            &[
+                solo.to_string_lossy().into(),
+                extra.to_string_lossy().into(),
+            ],
+            None,
+        )
+        .unwrap();
+    assert!(!promoted.legacy);
+    assert_eq!(promoted.appearance.icon.as_deref(), Some("rocket"));
+    assert!(reopened
+        .kv_get("projectGroupAppearance", &promoted.primary_path)
+        .unwrap()
+        .is_none());
+
+    // A project that carried an icon as a legacy row starts clean when it is
+    // created as a real group: the stale fallback must not follow it in.
+    let stale = dir.path().join("stale");
+    std::fs::create_dir_all(&stale).unwrap();
+    reopened
+        .ensure_project(&stale.to_string_lossy(), false)
+        .unwrap();
+    let stale_group = reopened
+        .list_project_groups()
+        .unwrap()
+        .into_iter()
+        .find(|group| group.legacy && group.primary_path != promoted.primary_path)
+        .unwrap();
+    reopened
+        .set_appearance(
+            &stale_group.id,
+            ProjectGroupAppearance {
+                icon: Some("bug".to_string()),
+                color: None,
+            },
+        )
+        .unwrap();
+    let fresh = reopened
+        .create_project_group("Fresh", &[stale.to_string_lossy().into()])
+        .unwrap();
+    assert!(fresh.appearance.is_empty());
+    assert!(reopened
+        .kv_get("projectGroupAppearance", &stale_group.primary_path)
+        .unwrap()
+        .is_none());
+}
+
+#[test]
 fn project_group_update_detaches_roots_with_chats_without_orphaning_them() {
     let dir = tempfile::tempdir().unwrap();
     let primary = dir.path().join("primary");

@@ -141,7 +141,7 @@ test("updater gates delivery mode by platform and delivery policy", () => {
   assert.match(updaterSource, /autoUpdater\.on\("error"/);
   assert.match(
     updaterSource,
-    /github\.com\/vastsa\/PI-Desktop\/releases/,
+    /github\.com\/CharonZou\/trail\/releases/,
     "releases fallback URL",
   );
   assert.match(
@@ -257,8 +257,8 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
   const pkg = JSON.parse(pkgSource);
   assert.ok(pkg.dependencies["electron-updater"], "electron-updater dependency");
   assert.equal(pkg.build.publish[0].provider, "github");
-  assert.equal(pkg.build.publish[0].owner, "vastsa");
-  assert.equal(pkg.build.publish[0].repo, "PI-Desktop");
+  assert.equal(pkg.build.publish[0].owner, "CharonZou");
+  assert.equal(pkg.build.publish[0].repo, "trail");
   const windowsUpdateConfigResource = pkg.build.win.extraResources.find(
     ({ from }) => from === "resources/app-update.yml",
   );
@@ -282,7 +282,9 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     provider: pkg.build.publish[0].provider,
     owner: pkg.build.publish[0].owner,
     repo: pkg.build.publish[0].repo,
-    updaterCacheDirName: `${pkg.name.replaceAll("/", "")}-updater`,
+    // The packaged feed names its own download cache; electron-builder would
+    // otherwise derive `@traidesktop-updater` from the scoped package name.
+    updaterCacheDirName: "trail-updater",
   });
   const macTargets = pkg.build.mac.target.map((entry) => entry.target);
   assert.ok(macTargets.includes("zip"), "mac zip target (Squirrel.Mac feed)");
@@ -296,7 +298,7 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     );
   }
   assert.match(pkg.scripts.dist, /build-desktop-release\.mjs/);
-  assert.equal(pkg.build.linux.executableName, "pi-desktop");
+  assert.equal(pkg.build.linux.executableName, "trail");
   const linuxTargets = pkg.build.linux.target.map((entry) => entry.target);
   assert.deepEqual(
     linuxTargets,
@@ -304,12 +306,12 @@ test("packaging publishes an electron-updater feed for GitHub Releases", async (
     "Linux release targets",
   );
   // Scoped package name is not a valid deb/rpm package or file name.
-  assert.equal(pkg.build.deb.packageName, "pi-desktop");
-  assert.equal(pkg.build.rpm.packageName, "pi-desktop");
+  assert.equal(pkg.build.deb.packageName, "trail");
+  assert.equal(pkg.build.rpm.packageName, "trail");
   assert.ok(!pkg.build.deb.artifactName.includes("${name}"), "deb artifactName");
   assert.equal(
     pkg.build.rpm.artifactName,
-    "pi-desktop-${version}-${arch}.${ext}",
+    "trail-${version}-${arch}.${ext}",
     "rpm artifactName",
   );
   assert.deepEqual(
@@ -367,7 +369,7 @@ test("shared shipped-locale changelog is the in-app notes source of truth", () =
 test("update cache relocation and cleanup preserve the delta-update path", async () => {
   const updateCacheSource = await read("../electron/main/update-cache.ts");
   const maintenanceSource = await read("../electron/main/update-cache-maintenance.ts");
-  assert.match(updateCacheSource, /PI_DESKTOP_UPDATE_CACHE_DIR/);
+  assert.match(updateCacheSource, /TRAIL_UPDATE_CACHE_DIR/);
   assert.match(updaterSource, /new RelocatedNsisUpdater\(baseCachePath\)/);
   assert.match(updaterSource, /relocateUpdateCacheBasePath\(this\.app, baseCachePath\)/);
   assert.match(maintenanceSource, /readFileSync\([\s\S]*app-update\.yml/);

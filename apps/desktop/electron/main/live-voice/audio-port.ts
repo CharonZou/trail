@@ -1,7 +1,7 @@
 import { MessageChannelMain, type MessagePortMain, type WebFrameMain } from "electron";
 import { randomUUID } from "node:crypto";
-import type { LivePlaybackCursor } from "@pi-desktop/shared";
-import { IPC } from "@pi-desktop/shared";
+import type { LivePlaybackCursor } from "@trail/shared";
+import { IPC } from "@trail/shared";
 
 export type LivePcmBridge = {
   readonly portNonce: string;

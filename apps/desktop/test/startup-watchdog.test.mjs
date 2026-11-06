@@ -9,7 +9,7 @@ import { readAppSource } from "./helpers/source-contracts.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_RPC_TIMEOUT_MS } from "@pi-desktop/shared";
+import { DEFAULT_RPC_TIMEOUT_MS } from "@trail/shared";
 import {
   STARTUP_SLOW_HINT_MS,
   STARTUP_STALLED_MS,

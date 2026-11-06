@@ -2,7 +2,7 @@ import {
   fallbackBuiltinDefinitions,
   type SubagentDefinition,
   type UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { api } from "../../lib/api";
 
 /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { AgentEventEnvelope, UiMessage } from "@pi-desktop/shared";
-import { applyMessageUpdate } from "@pi-desktop/shared";
+import type { AgentEventEnvelope, UiMessage } from "@trail/shared";
+import { applyMessageUpdate } from "@trail/shared";
 import { createStreamCoalescer } from "./stream-coalescer.js";
 
 function assistant(content: string, thinking = ""): UiMessage {

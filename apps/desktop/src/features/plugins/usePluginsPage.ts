@@ -13,7 +13,7 @@ import type {
   PluginServiceStatus,
   PluginSummary,
   ProjectRecord,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   GROUP_ORDER,
   type GroupId,

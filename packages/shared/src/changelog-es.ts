@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const esEntries: ChangelogEntry[] = [
   {
+    version: "1.0.2",
+    date: "2026-11-06",
+    highlights: [
+      "Cada proyecto elige su propio icono y color de espacio de trabajo, y la barra lateral los muestra en lugar del mismo icono de carpeta para todo.",
+      "El índice del espacio de trabajo puede desactivarse por proyecto en los diálogos de crear y editar; al desactivarlo, las sugerencias @ no listan archivos, pero una ruta ya citada en una conversación sigue resolviéndose.",
+      "Uso de tokens en la barra lateral: un total de los últimos 12 meses, una franja diaria por intensidad y el mismo total repartido por modelo.",
+      "Minimiza la ventana o ponla a pantalla completa desde la nueva tarjeta Ventana en Ajustes, sin necesidad de la barra de menús.",
+      "Más proveedores muestran su marca oficial en las listas, incluidos Mistral, Kimi y Moonshot.",
+      "El icono de la aplicación es ahora una marca limpia en todas las superficies, incluida la barra de tareas de Windows y Alt+Tab.",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-11-04",
     highlights: [
@@ -132,7 +144,7 @@ export const esEntries: ChangelogEntry[] = [
       "Las tareas programadas pueden ejecutarse por intervalos: cada 5 minutos hasta 24 horas, contados desde que la tarea se activó.",
       "La página de tareas programadas empareja la lista de tareas con la tarea seleccionada: su último resultado, la próxima ejecución, la instrucción y el historial de ejecuciones.",
       "La conversación de una ejecución tiene una fila de vuelta a su tarea y a su ejecución, y cada tarea decide si una ejecución abre una conversación nueva o continúa una existente.",
-      "Pega un enlace pi-desktop://session/<id> en el Composer para pasar una conversación a otro turno.",
+      "Pega un enlace trail://session/<id> en el Composer para pasar una conversación a otro turno.",
       "Abre referencias de archivo path:line desde el chat, el panel de trabajo y el administrador de archivos incluido, y salta directamente a esa línea.",
       "El código en línea que apunta a una ruta de archivo real ahora es un enlace en el que puedes hacer clic; el resto del código en línea y los bloques de código siguen siendo texto simple.",
       "Cada servidor MCP puede definir su propio tiempo de espera de conexión (1–600 segundos), y borrarlo restaura el valor predeterminado.",
@@ -706,7 +718,7 @@ export const esEntries: ChangelogEntry[] = [
       "Inicie sesión en varias cuentas de proveedores y elija la cuenta utilizada para cada proveedor.",
       "Utilice las capacidades de cada modelo para decidir cuándo se admiten archivos adjuntos de imágenes.",
       "Elija el esfuerzo de razonamiento directamente del compositor para los modelos que lo exponen.",
-      "Mantenga una instancia de PI-Desktop por directorio de datos para evitar sesiones conflictivas.",
+      "Mantenga una instancia de Trail por directorio de datos para evitar sesiones conflictivas.",
       "Organice las configuraciones en grupos más claros y simplifique la administración de cuentas de proveedores.",
       "Mantenga los subagentes integrados alineados con el modo de permiso de la conversación principal."
     ]
@@ -750,7 +762,7 @@ export const esEntries: ChangelogEntry[] = [
       "Recuerde los complementos utilizados recientemente en el iniciador para un acceso más rápido.",
       "Agregue la ruta de la sesión de copia al menú contextual para el modo desarrollador.",
       "Solucionar problemas de recorte del selector de fuentes y restablecimiento predeterminado del sistema.",
-      "Mantenga macOS PI-Desktop en el Dock y presione Cmd+Tab después de cerrar la ventana.",
+      "Mantenga macOS Trail en el Dock y presione Cmd+Tab después de cerrar la ventana.",
       "Mantener fijada la transcripción del chat cuando el compositor colapsa después del envío.",
       "Dale al panel de trabajo un estado vacío real con una guía más clara."
     ]
@@ -790,7 +802,7 @@ export const esEntries: ChangelogEntry[] = [
     "date": "2026-08-12",
     "highlights": [
       "Restaura el iniciador global de complementos Alt+Espacio de Windows, incluso cuando otra aplicación está enfocada.",
-      "Mantenga PI-Desktop disponible en la bandeja del sistema cuando esté minimizado en macOS, Windows y Linux.",
+      "Mantenga Trail disponible en la bandeja del sistema cuando esté minimizado en macOS, Windows y Linux.",
       "Mejore la legibilidad del menú de selección nativo en temas claros y oscuros."
     ]
   },
@@ -866,8 +878,8 @@ export const esEntries: ChangelogEntry[] = [
     "version": "0.4.1",
     "date": "2026-08-02",
     "highlights": [
-      "Actualice las versiones de GitHub y actualice automáticamente los enlaces al repositorio canónico de PI-Desktop.",
-      "Actualice la documentación del proyecto, el complemento y la versión para usar el nombre del repositorio de PI-Desktop."
+      "Actualice las versiones de GitHub y actualice automáticamente los enlaces al repositorio canónico de Trail.",
+      "Actualice la documentación del proyecto, el complemento y la versión para usar el nombre del repositorio de Trail."
     ]
   },
   {

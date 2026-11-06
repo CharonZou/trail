@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Browser Dev Mode (dev:web): run the same desktop dev stack as `pnpm dev`,
-// but with PI_DESKTOP_WEB=1 so the main process starts its loopback Web bridge
+// but with TRAIL_WEB=1 so the main process starts its loopback Web bridge
 // and keeps the Electron window hidden. The app is then driven from a browser
 // at http://localhost:5173 instead of the desktop window, which is the
 // intended development surface for renderer work.
@@ -16,7 +16,7 @@ console.log("[dev:web] Browser Dev Mode: starting backend + Vite dev server…")
 console.log("[dev:web] open http://localhost:5173 in your browser (Electron window stays hidden)");
 
 const child = spawn(process.execPath, [devElectron], {
-  env: { ...process.env, PI_DESKTOP_WEB: "1" },
+  env: { ...process.env, TRAIL_WEB: "1" },
   stdio: "inherit",
 });
 for (const signal of ["SIGINT", "SIGTERM"]) {

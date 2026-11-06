@@ -349,9 +349,11 @@ function isCandidateBoundary(text: string, index: number): boolean {
   return !pathWordAt(text, previous) && text[previous] !== "/" && text[previous] !== "\\";
 }
 
+const SESSION_LINK_PREFIXES = ["trail://session/", "pi-desktop://session/"];
+
 function sessionLinkEnd(text: string, start: number): number {
-  const prefix = "pi-desktop://session/";
-  if (!text.startsWith(prefix, start)) return start;
+  const prefix = SESSION_LINK_PREFIXES.find((candidate) => text.startsWith(candidate, start));
+  if (!prefix) return start;
   let end = start + prefix.length;
   const idStart = end;
   while (end < text.length && end - idStart < 65) {

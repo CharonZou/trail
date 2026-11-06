@@ -3,12 +3,12 @@ import type {
   AppSettings,
   ModelInfo,
   PlanningState,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   migrateKeybindingOverrides,
   normalizeMode,
   PROTOCOL_VERSION,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import { api } from "../lib/api";
 import { rememberProject } from "../lib/recent-projects";
 import {
@@ -390,6 +390,9 @@ export const useAppStore = create<AppState>((set, get) => {
         sessionOutcomes: latestSessionOutcomes(notifications.notifications),
       }));
 
+      // Sidebar rows draw the host's icon and tint, so warm that lookup before
+      // the first paint instead of waiting for the next project mutation.
+      void get().refreshProjectGroups();
       // The artifact's surface depends on which plugin views are launchable, and
       // the launcher list is only read after `ready`. Resolve it before the
       // restore, so the approval artifact does not fall back to the host file tab

@@ -49,6 +49,8 @@ coverage/
 .turbo/
 
 # Local runtime data
+.trail/
+.trail-test/
 .pi-desktop/
 .pi-desktop-test/
 .pi/

@@ -236,7 +236,7 @@ test("the install dialog is mounted above the route and sidebar stacking context
   );
   assert.match(
     pluginsCss,
-    /#pi-desktop-overlays > \.plugins-modal-backdrop\s*\{[^}]*pointer-events:\s*auto;/,
+    /#trail-overlays > \.plugins-modal-backdrop\s*\{[^}]*pointer-events:\s*auto;/,
   );
 });
 

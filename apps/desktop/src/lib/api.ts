@@ -77,6 +77,7 @@ import type {
   PluginReviewSummary,
   PluginReviewTicker,
   ProjectRecord,
+  ProjectGroupAppearance,
   ProjectGroupRecord,
   ProjectMemory,
   ProjectMemoryEntry,
@@ -155,7 +156,7 @@ import type {
   TrustedExtensionUiPromptResponse,
   SessionTodoSnapshot,
   StorageInfo,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   defaultCommandShellForPlatform,
   IPC,
@@ -172,7 +173,7 @@ import {
   validateNetworkProxy,
   validateSpeechSettings,
   JEV_API_KEY_SECRET_REF,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 // One definition, owned by the shared package (the host and sidecar use the
@@ -180,7 +181,7 @@ export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 import type {
   ModelConfigImportCandidate,
   ModelConfigImportSource,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 export type { ModelConfigImportCandidate, ModelConfigImportSource };
 
 export interface ImportCandidate {
@@ -680,6 +681,12 @@ function normalizePlansChangedEvent(value: unknown): PlanningStateEvent {
   };
 }
 
+/** Choices the project dialogs configure next to the folder list. Every field
+ * is optional: omitting one leaves what the host already stored untouched. */
+export type ProjectGroupChoices = ProjectGroupAppearance & {
+  workspaceIndex?: boolean;
+};
+
 export const api = {
   getVersion: () => invoke<AppVersionInfo>(IPC.invoke.appGetVersion),
   health: () => invoke<HostHealth>(IPC.invoke.appHealth),
@@ -1006,8 +1013,16 @@ export const api = {
     invoke<{ groups: ProjectGroupRecord[] }>(IPC.invoke.projectGroupList),
   createRemoteProjectGroup: (name: string, hostKey: string, path: string) =>
     invoke<{ group: ProjectGroupRecord }>(IPC.invoke.projectGroupCreateRemote, { name, hostKey, path }),
-  createProjectGroup: (name: string, folders: string[]) =>
-    invoke<{ group: ProjectGroupRecord }>(IPC.invoke.projectGroupCreate, { name, folders }),
+  createProjectGroup: (
+    name: string,
+    folders: string[],
+    choices: ProjectGroupChoices = {},
+  ) =>
+    invoke<{ group: ProjectGroupRecord }>(IPC.invoke.projectGroupCreate, {
+      name,
+      folders,
+      ...choices,
+    }),
   renameProjectGroup: (groupId: string, name: string) =>
     invoke<{ group: ProjectGroupRecord }>(IPC.invoke.projectGroupRename, { groupId, name }),
   // `primary` names the folder that becomes the group's primary root; the host
@@ -1017,12 +1032,14 @@ export const api = {
     name: string,
     folders: string[],
     primary?: string,
+    choices: ProjectGroupChoices = {},
   ) =>
     invoke<{ group: ProjectGroupRecord }>(IPC.invoke.projectGroupUpdate, {
       groupId,
       name,
       folders,
       ...(primary ? { primary } : {}),
+      ...choices,
     }),
   getProjectGroupMemory: (groupId: string) =>
     invoke<{ memory: ProjectMemory }>(IPC.invoke.projectGroupMemoryGet, { groupId }),
@@ -1716,7 +1733,7 @@ export const api = {
     });
   },
   getTokenUsageHistory: (query?: { startDate?: number; endDate?: number; bucket?: "day" | "week" | "month" }) =>
-    invoke<import("@pi-desktop/shared").TokenUsageHistoryResult>(
+    invoke<import("@trail/shared").TokenUsageHistoryResult>(
       IPC.invoke.statsGetTokenUsageHistory,
       query,
     ),

@@ -44,7 +44,7 @@ Plugins → Marketplace always uses the official plugin center catalog at
 `https://plugins.aiuo.net/catalog.json`. The page has no source selector.
 Persisted `pluginMarketSource` and `pluginMarketCustomUrl` values from older
 versions are retained for settings compatibility but ignored; no data migration
-is needed. `PI_DESKTOP_PLUGIN_MARKET_URL` remains available to development and
+is needed. `TRAIL_PLUGIN_MARKET_URL` remains available to development and
 test runs without making the catalog configurable in the shipped interface.
 
 Marketplace catalog and package downloads follow Settings → General → Network.
@@ -218,7 +218,7 @@ interface MarketProvider {
 ```
 
 The shipped client currently exposes the `official` provider only. The
-development-only `PI_DESKTOP_PLUGIN_MARKET_URL` override supports local test
+development-only `TRAIL_PLUGIN_MARKET_URL` override supports local test
 catalogs without adding a source control to the product UI.
 
 ## 4. Data model
@@ -610,7 +610,7 @@ maintainers.
 ## 9. Private sources (future enterprise support)
 
 The shipped client does not expose or persist a private catalog source. The
-`PI_DESKTOP_PLUGIN_MARKET_URL` override is limited to local development and
+`TRAIL_PLUGIN_MARKET_URL` override is limited to local development and
 tests; it is not a product setting. Enterprise source support requires a
 future product decision and explicit security and authorization design.
 
@@ -707,7 +707,7 @@ header refresh action remains the explicit remote-refresh path.
 Override catalog URL with env:
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+TRAIL_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 

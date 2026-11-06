@@ -39,6 +39,7 @@ export function createInitialState(): AppStateData {
     createProjectDialogRemoteHostKey: undefined,
     activeProjectPath: undefined,
     projectMeta: initialSidebarPreferences.projectMeta,
+    projectAppearance: {},
     projectCollapsed: Object.fromEntries(
       Object.entries(initialSidebarPreferences.projectMeta)
         .filter(([, meta]) => meta.collapsed === true)

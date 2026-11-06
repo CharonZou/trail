@@ -8,7 +8,7 @@ import {
   findSubagentPreset,
   subagentCanMutate,
   type SubagentDefinition,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 import {
   BUILTIN_SUBAGENT_DOCUMENTS,
   findSubagentProviderSource,

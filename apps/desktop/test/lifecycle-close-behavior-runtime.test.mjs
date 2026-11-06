@@ -30,8 +30,8 @@ await build({
   format: "esm",
   alias: {
     electron: electronStub,
-    "@pi-desktop/i18n": join(root, "packages/i18n/src"),
-    "@pi-desktop/shared": join(root, "packages/shared/src"),
+    "@trail/i18n": join(root, "packages/i18n/src"),
+    "@trail/shared": join(root, "packages/shared/src"),
   },
   nodePaths: [join(root, "apps/desktop/node_modules")],
 });

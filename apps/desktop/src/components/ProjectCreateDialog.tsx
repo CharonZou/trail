@@ -5,14 +5,18 @@ import { useBlockingOverlay } from "../lib/blocking-overlay";
 import { MAX_PROJECT_NAME_CHARS } from "../lib/sidebar-preferences";
 import { api } from "../lib/api";
 import { parseGitCloneUrl } from "../lib/git-clone-url";
-import { allowInsecureUserEndpoints } from "@pi-desktop/shared";
+import {
+  allowInsecureUserEndpoints,
+  type ProjectGroupAppearance,
+} from "@trail/shared";
 import {
   defaultProjectName,
   folderNameFromPath,
   resolveProjectName,
 } from "../lib/project-name";
 import { useAppStore } from "../stores/app-store";
-import { OverlayBackdrop, Button, Input, TooltipButton } from "./ui";
+import { OverlayBackdrop, Button, Input, SettingsToggle, TooltipButton } from "./ui";
+import { ProjectAppearancePicker } from "./ProjectAppearance";
 import { ProjectFolderPicker } from "./ProjectFolderPicker";
 import { RemoteProjectPicker, type RemoteProjectSelection } from "./remote/RemoteProjectPicker";
 import {
@@ -70,6 +74,11 @@ function ProjectCreateDialogContent({ initialRemoteHostKey }: { initialRemoteHos
   const [cloneParent, setCloneParent] = useState("");
   const [busy, setBusy] = useState(false);
   const [folderPickerBusy, setFolderPickerBusy] = useState(false);
+  // Indexing is the historical behaviour, so a fresh dialog starts switched on.
+  const [workspaceIndex, setWorkspaceIndex] = useState(true);
+  // An empty pair means "no decoration": the project keeps the folder glyph in
+  // the theme's own colour, and nothing new is written to the host record.
+  const [appearance, setAppearance] = useState<ProjectGroupAppearance>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const busyRef = useRef(false);
@@ -93,6 +102,8 @@ function ProjectCreateDialogContent({ initialRemoteHostKey }: { initialRemoteHos
     setFolders([]);
     setGitUrl("");
     setCloneParent("");
+    setWorkspaceIndex(true);
+    setAppearance({});
     busyRef.current = false;
     folderPickerInFlightRef.current = false;
     nameTouchedRef.current = false;
@@ -200,12 +211,14 @@ function ProjectCreateDialogContent({ initialRemoteHostKey }: { initialRemoteHos
           name: projectName,
           url: cloneTarget.url,
           parentPath: cloneParent,
+          choices: { workspaceIndex, ...appearance },
         });
       } else {
         await createProject({
           name: projectName,
           folders,
           primaryPath: folders[0],
+          choices: { workspaceIndex, ...appearance },
         });
       }
     } catch (error) {
@@ -414,6 +427,41 @@ function ProjectCreateDialogContent({ initialRemoteHostKey }: { initialRemoteHos
                     : t("project.cloneUrlHint")}
                 </p>
               </section>
+            )}
+
+            {source === "remote" ? null : (
+              <>
+                <ProjectAppearancePicker
+                  appearance={appearance}
+                  idPrefix="project-create"
+                  disabled={busy}
+                  onChange={setAppearance}
+                />
+
+                <section
+                  className="project-create-dialog-section project-create-dialog-index"
+                  aria-labelledby="project-create-index-heading"
+                >
+                  <div className="project-create-dialog-section-head">
+                    <h3
+                      id="project-create-index-heading"
+                      className="project-create-dialog-section-title"
+                    >
+                      {t("project.createWorkspaceIndexLabel")}
+                    </h3>
+                    <SettingsToggle
+                      checked={workspaceIndex}
+                      label={t("project.createWorkspaceIndexLabel")}
+                      className="project-create-dialog-index-toggle"
+                      disabled={busy}
+                      onChange={() => setWorkspaceIndex((current) => !current)}
+                    />
+                  </div>
+                  <p className="project-create-dialog-index-hint">
+                    {t("project.createWorkspaceIndexHint")}
+                  </p>
+                </section>
+              </>
             )}
           </div>
 

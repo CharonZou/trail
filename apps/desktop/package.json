@@ -1,18 +1,18 @@
 {
-  "name": "@pi-desktop/desktop",
-  "version": "1.0.1",
-  "desktopName": "pi-desktop.desktop",
+  "name": "@trail/desktop",
+  "version": "1.0.2",
+  "desktopName": "trail.desktop",
   "private": true,
   "description": "Trail Electron application",
-  "homepage": "https://github.com/vastsa/PI-Desktop",
+  "homepage": "https://github.com/CharonZou/trail",
   "author": {
-    "name": "vastsa",
-    "email": "hhxk666@gmail.com"
+    "name": "CharonZou",
+    "email": "2085723867@qq.com"
   },
   "main": "./out/main/index.js",
   "type": "module",
   "scripts": {
-    "build:deps": "pnpm --filter '@pi-desktop/desktop^...' build",
+    "build:deps": "pnpm --filter '@trail/desktop^...' build",
     "predev": "pnpm run build:deps && cargo build --manifest-path ../../Cargo.toml -p host-core",
     "dev": "node ../../scripts/dev-electron.mjs",
     "build": "electron-vite build",
@@ -38,15 +38,15 @@
   "devDependencies": {
     "@earendil-works/pi-ai": "1.4.0",
     "@earendil-works/pi-mcp": "1.4.0",
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/host-runtime": "workspace:*",
-    "@pi-desktop/i18n": "workspace:*",
-    "@pi-desktop/plugin-devkit": "workspace:*",
-    "@pi-desktop/plugin-sdk": "workspace:*",
-    "@pi-desktop/racp": "workspace:*",
-    "@pi-desktop/shared": "workspace:*",
-    "@pi-desktop/voice-runtime": "workspace:*",
+    "@trail/agent-host": "workspace:*",
+    "@trail/agent-runtime": "workspace:*",
+    "@trail/host-runtime": "workspace:*",
+    "@trail/i18n": "workspace:*",
+    "@trail/plugin-devkit": "workspace:*",
+    "@trail/plugin-sdk": "workspace:*",
+    "@trail/racp": "workspace:*",
+    "@trail/shared": "workspace:*",
+    "@trail/voice-runtime": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -88,8 +88,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "vastsa",
-        "repo": "PI-Desktop"
+        "owner": "CharonZou",
+        "repo": "trail"
       }
     ],
     "extraMetadata": {
@@ -171,8 +171,8 @@
       },
       "extraResources": [
         {
-          "from": "../../target/release/pi-desktop-host-core",
-          "to": "bin/pi-desktop-host-core"
+          "from": "../../target/release/trail-host-core",
+          "to": "bin/trail-host-core"
         },
         {
           "from": "build/tray-icon-mac.png",
@@ -233,8 +233,8 @@
           "to": "app-update.yml"
         },
         {
-          "from": "../../target/release/pi-desktop-host-core.exe",
-          "to": "bin/pi-desktop-host-core.exe"
+          "from": "../../target/release/trail-host-core.exe",
+          "to": "bin/trail-host-core.exe"
         },
         {
           "from": "build/icon.ico",
@@ -252,19 +252,19 @@
       "artifactName": "Trail-Portable-${version}.${ext}"
     },
     "deb": {
-      "packageName": "pi-desktop",
-      "artifactName": "pi-desktop_${version}_${arch}.${ext}"
+      "packageName": "trail",
+      "artifactName": "trail_${version}_${arch}.${ext}"
     },
     "rpm": {
-      "packageName": "pi-desktop",
-      "artifactName": "pi-desktop-${version}-${arch}.${ext}",
+      "packageName": "trail",
+      "artifactName": "trail-${version}-${arch}.${ext}",
       "fpm": [
         "--rpm-rpmbuild-define",
         "_build_id_links none"
       ]
     },
     "linux": {
-      "executableName": "pi-desktop",
+      "executableName": "trail",
       "syncDesktopName": true,
       "artifactName": "Trail-${version}-linux-${arch}.${ext}",
       "target": [
@@ -282,8 +282,8 @@
       "icon": "build/icon.png",
       "extraResources": [
         {
-          "from": "../../target/release/pi-desktop-host-core",
-          "to": "bin/pi-desktop-host-core"
+          "from": "../../target/release/trail-host-core",
+          "to": "bin/trail-host-core"
         }
       ]
     },

@@ -13,7 +13,7 @@ import {
   imageExceedsInlineDimensions,
   omittedImageNotice,
   probeBase64ImageDimensions,
-} from "@pi-desktop/shared";
+} from "@trail/shared";
 
 type ContentBlock = Exclude<Message["content"], string>[number];
 

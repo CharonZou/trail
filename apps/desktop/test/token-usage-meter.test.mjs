@@ -12,6 +12,7 @@ const read = (relative) =>
   readFile(new URL(relative, import.meta.url), "utf8");
 
 const cardSource = await read("../src/components/TokenUsageCard.tsx");
+const homeSource = await read("../src/components/ChatSurface.tsx");
 const sidebarSource = await read("../src/components/Sidebar.tsx");
 const settingsSource = await read("../src/features/settings/SettingsPage.tsx");
 const windowActionsSource = await read("../src/features/settings/window-actions.tsx");
@@ -162,26 +163,29 @@ test("zero usage cannot divide by zero in the shares", () => {
   assert.equal(breakdown.scale, 0);
 });
 
-test("the meter reads one host query and lives under the project list", () => {
+test("the meter reads one host query and lives under the empty-home hero", () => {
   assert.match(cardSource, /getTokenUsageHistory\(\{ bucket: "day" \}\)/);
   assert.doesNotMatch(
     cardSource,
     /startDate|endDate/,
     "the window belongs to the host default, not a second local rule",
   );
-  // Inserted after the scrolling project list, before the footer, so the list
-  // keeps the flexible height.
-  const listEnd = sidebarSource.indexOf("<TokenUsageCard />");
-  assert.ok(listEnd > 0);
+  // Inside the home stack, after the hero and the first-run checklist, so the
+  // glance sits where the user already reads the project name.
+  const hero = homeSource.indexOf('<div className="empty-hero">');
+  const checklist = homeSource.indexOf("<OnboardingChecklist />");
+  const meter = homeSource.indexOf("<TokenUsageCard />");
+  assert.ok(hero > 0 && checklist > 0 && meter > 0, "the home stack lost a member");
+  assert.ok(hero < meter, "the meter belongs below the hero");
+  assert.ok(checklist < meter, "the first-run list keeps priority over the meter");
   assert.ok(
-    listEnd < sidebarSource.indexOf('<div className="sidebar-footer no-drag">'),
-    "the meter sits above the footer",
+    meter < homeSource.indexOf('<div className="home-composer-wrap">'),
+    "the meter belongs above the composer",
   );
-  assert.ok(
-    sidebarSource.indexOf("sidebar-session-groups") < listEnd,
-    "the meter sits below the project list",
-  );
-  assert.match(cardStyles, /\.token-usage-card\s*\{[^}]*flex:\s*0 0 auto/);
+  // The sidebar no longer carries it: one surface, one meter.
+  assert.doesNotMatch(sidebarSource, /TokenUsageCard/);
+  assert.match(cardStyles, /\.token-usage-card\s*\{[^}]*width:\s*100%/);
+  assert.match(cardStyles, /\.token-usage-card\s*\{[^}]*max-width:\s*880px/);
 });
 
 // A dev profile can reach a host binary built before D682, which answers with
@@ -195,11 +199,12 @@ test("an older host without the model dimension degrades instead of crashing", (
   assert.match(cardSource, /view === "calendar" \|\| !hasModelView/);
 });
 
-test("a year of cells stays legible at the narrow sidebar bound", () => {
-  // 53 week columns inside a 240px sidebar: allowed to shrink, each column
-  // lands under 2px — narrower than its own gutter — and the strip reads as a
-  // dot field. So a column has a px floor and the older weeks scroll sideways,
-  // with the shell's own quiet scrollbar rather than a per-surface hack.
+test("a year of cells stays legible at the narrow chat band bound", () => {
+  // 53 week columns across the 560px floor of the chat band: allowed to shrink,
+  // each column lands under 2px — narrower than its own gutter — and the strip
+  // reads as a dot field. So a column has a px floor and the older weeks scroll
+  // sideways, with the shell's own quiet scrollbar rather than a per-surface
+  // hack.
   assert.match(cardStyles, /\.token-usage-heat\s*\{[^}]*display:\s*flex/);
   assert.match(cardStyles, /\.token-usage-heat\s*\{[^}]*overflow-x:\s*auto/);
   assert.doesNotMatch(

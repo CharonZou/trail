@@ -5519,14 +5519,15 @@ eleven-tool-round desktop paths are verified by
   `apps/desktop/test/sidebar-navigation.test.mjs` 覆盖。完整桌面旅程为草稿（该表面变更时
   在具备条件的环境中运行）。
 
-#### E2E-UI-sidebar-token-meter：侧栏一年 token 与产生它的模型
+#### E2E-UI-home-token-meter：空状态主页的一年 token 与产生它的模型
 
 - **前置条件**：一份配置文件的已完成回合至少跨两个不同模型、且最近十二个月内
-  至少有一天没有任何用量；另一份配置文件在窗口内有超过五个模型。侧栏可在 240 px
-  下限与 520 px 上限之间拖动。
-- **步骤**：1) 打开应用，读项目列表之上、底部栏之下的这张卡。2) 切到按模型排行再切回
+  至少有一天没有任何用量；另一份配置文件在窗口内有超过五个模型。居中的内容带可以
+  拖到比这张卡自己的 880 px 上限更宽，窗格被压窄时内容带也能窄于 560 px 的偏好下限。
+- **步骤**：1) 打开应用，分别在项目空状态主页和临时会话主页读英雄标题之下、输入框
+  之上的这张卡。2) 切到按模型排行再切回
   按日方格。3) 用另一个模型完成一个回合，等最后一个运行中的会话结束后不重载直接再读两个
-  视图，然后重启再读一次。4) 在模型视图下把侧栏从最窄拖到最宽，并选择最大字号预设。
+  视图，然后重启再读一次。4) 在模型视图下把内容带从最窄拖到最宽，并选择最大字号预设。
   5) 悬停一个有用量的一天和一个没有用量的一天。
   6) 模型多于五个时读最后一行。7) 让宿主查询失败（宿主停止）并重载。8) 在没有任何已完成
   回合的配置文件中重复步骤 1–2。
@@ -5539,11 +5540,14 @@ eleven-tool-round desktop paths are verified by
     一年不会把整张网格横向错位。首尾补齐格是不可见，而不是零。
   - 墨色层级按四分位在有用量的日子里切分；没有用量的天保持淡底；整个范围都没有用量时
     一点不亮。
-  - 加宽侧栏会放大每一列。在 240 px 下限时每一列停在自己的可读下限，更早的周向侧面滚动
+  - 加宽内容带会放大每一列，而这张卡最宽只到 880 px，所以最大化窗口不会把一整年画成
+    14 px 的大块方块。窄过 560 px 的偏好下限（窗格被压到那个宽度以下）时，每一列停在
+    自己的可读下限，更早的周向侧面滚动
     出视野，用的是壳层统一的那套安静滚动条——6px、无轨道、静止时透明，只有悬停、聚焦或
     滚动才现形——因此格子永远不会窄过旁边的间隔；方格区打开时停在包含今天的那一周。既然它
     会滚动，它也就是一个可聚焦的区域——Tab 能到达它，方向键能到达更早的周。任何内容都不被
-    裁切，且因为每格保持正方，网格在侧栏每个边界上高度一致。
+    裁切，卡片始终居中在内容带里也不会撑出自己的外壳，且因为每格保持正方，网格的高度只随
+    卡片的宽度变化。
   - 卡打开时完成的回合无需重载就会出现：等没有会话在运行后这张卡会重新读取一次，而更早的
     回答永远不会覆盖更新的回答。
   - 未存储模型的回合仍是一条「未知模型」行，不会从排行里消失；中止的回合两个视图都不计。
@@ -5553,7 +5557,7 @@ eleven-tool-round desktop paths are verified by
   - 读取失败说明用量不可用，空范围说明窗口内没有用量；两者都不会画出编造的图。
   - 所有文案、视图开关的 `aria-pressed` 状态与方格区的 `aria-label` 摘要在九个已发布
     语言中都被本地化。
-- **关联规格**：`04-ux/01-ui-ia.md` §3.2、`04-ux/06-settings-ia.md`、
+- **关联规格**：`04-ux/01-ui-ia.md` §3.1、`04-ux/06-settings-ia.md`、
   `03-runtime/01-ipc-protocol.md` §8 stats、`03-runtime/06-host-rpc-protocol.md`、
   `04-ux/07-ui-design-system.md`、`08-meta/decisions-log.md`（D682）、ADR 0171、ADR 0173
 - **验收**：F（持久化）、品质
@@ -5562,8 +5566,9 @@ eleven-tool-round desktop paths are verified by
   等于 `totals`、无模型的回合保留一行、中止的回合不计费，以及连续 400 天各自保住自己的桶、
   仍能加回 `totals`）；网格、阈值、折叠、可读下限与卡的接线由
   `apps/desktop/test/token-usage-meter.test.mjs` 覆盖。渲染后的布局由
-  `pnpm test:e2e:sidebar-token-meter`（`scripts/e2e-sidebar-token-meter.mjs`）在 240 / 275 / 520 px
-  三个侧栏边界上把关：它用真实构建出来的样式表测量，一旦格子低于 5 px、不再正方，或滚动条槽宽过
+  `pnpm test:e2e:home-token-meter`（`scripts/e2e-home-token-meter.mjs`）在 402 / 560 / 760 / 1160 px
+  四个内容带宽度上、两种英雄标题与两个视图分别把关：它用真实构建出来的样式表测量，一旦格子低于
+  5 px、不再正方、逃出卡片的 880 px 上限或居中位置、没有落在英雄标题之下、压到输入框，或滚动条槽宽过
   统一的 6px 就失败。这张卡读的是真实
   配置文件的数据；完整桌面旅程为草稿（该表面变更时在具备条件的环境中运行）。
 
@@ -6121,8 +6126,8 @@ eleven-tool-round desktop paths are verified by
 | D — 工作区（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
 | F — 持久化（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
 | 品质（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
-| F — 持久化（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
-| 品质（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
+| F — 持久化（空状态主页 token 计量卡） | E2E-UI-home-token-meter |
+| 品质（空状态主页 token 计量卡） | E2E-UI-home-token-meter |
 | 品质（设置窗口操作） | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | G——插件（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
 | 安全性（项目文件夹根） | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -6181,7 +6186,7 @@ eleven-tool-round desktop paths are verified by
 | M5（Composer 深层文件引用） | E2E-COMPOSER-deep-file-mentions |
 | M5（工作区索引开关） | E2E-PROJECT-workspace-index-switch |
 | M5（工作区图标与颜色） | E2E-PROJECT-workspace-icon-and-colour |
-| M5（侧栏 token 计量卡） | E2E-UI-sidebar-token-meter |
+| M5（空状态主页 token 计量卡） | E2E-UI-home-token-meter |
 | M5（设置窗口操作） | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | M5（对话 MP4 附件） | E2E-CHAT-mp4-attachment-opens-in-system-player |
 | M6+（聊天文件引用） | E2E-PLUGIN-file-view-collapse-persists |

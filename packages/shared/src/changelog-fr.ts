@@ -7,7 +7,7 @@ export const frEntries: ChangelogEntry[] = [
     highlights: [
       "Chaque projet choisit son icône et sa couleur d'espace de travail, affichés sur sa ligne dans la barre latérale au lieu du même icône de dossier partout.",
       "L'index d'espace de travail se désactive par projet dans les fenêtres de création et d'édition ; désactivé, les suggestions @ ne listent aucun fichier, mais un chemin déjà cité dans une conversation reste résolvable.",
-      "Suivi des tokens dans la barre latérale : un total sur 12 mois, une frise quotidienne par intensité, et ce même total réparti par modèle.",
+      "Suivi des tokens sous la question d'accueil : un total sur 12 mois, une frise quotidienne par intensité, et ce même total réparti par modèle.",
       "Réduisez la fenêtre ou passez en plein écran depuis la nouvelle carte Fenêtre des paramètres, sans la barre de menus.",
       "Davantage de fournisseurs affichent leur marque officielle dans les listes, dont Mistral, Kimi et Moonshot.",
       "L'icône de l'application est désormais une marque propre sur toutes les surfaces, y compris la barre des tâches Windows et Alt+Tab.",

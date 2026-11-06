@@ -7,7 +7,7 @@ export const ptBREntries: ChangelogEntry[] = [
     highlights: [
       "Cada projeto escolhe seu próprio ícone e cor de espaço de trabalho, e a barra lateral os mostra em vez de um único ícone de pasta para tudo.",
       "O índice do espaço de trabalho pode ser desativado por projeto nos diálogos de criar e editar; desativado, as sugestões @ não listam arquivos, mas um caminho já citado em uma conversa continua resolvendo.",
-      "Uso de tokens na barra lateral: um total dos últimos 12 meses, uma faixa diária por intensidade e o mesmo total dividido por modelo.",
+      "Uso de tokens abaixo da pergunta inicial da tela inicial: um total dos últimos 12 meses, uma faixa diária por intensidade e o mesmo total dividido por modelo.",
       "Minimize a janela ou abra em tela cheia no novo cartão Janela em Configurações, sem depender da barra de menus.",
       "Mais provedores exibem sua marca oficial nas listas, incluindo Mistral, Kimi e Moonshot.",
       "O ícone do aplicativo agora é uma marca limpa em todas as superfícies, inclusive na barra de tarefas do Windows e no Alt+Tab.",

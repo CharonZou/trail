@@ -7,6 +7,7 @@ import {
 import { Composer } from "./Composer";
 import { HomeMascotLogo } from "./HomeMascotLogo";
 import { HomeProjectSwitcher } from "./HomeProjectSwitcher";
+import { TokenUsageCard } from "./TokenUsageCard";
 import { IconX } from "./icons";
 import { TooltipButton } from "./ui";
 import { OnboardingChecklist } from "./OnboardingChecklist";
@@ -192,6 +193,7 @@ export const ChatSurface = memo(function ChatSurface({
                 </h1>
               </div>
               {!isRemoteSession(activeSession) ? <OnboardingChecklist /> : null}
+              <TokenUsageCard />
             </div>
           </div>
           <div className="home-composer-wrap">

@@ -16,7 +16,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { TooltipButton, cx } from "./ui";
-import { TokenUsageCard } from "./TokenUsageCard";
 
 import { portalToBody } from "../lib/portal-visibility";
 import {
@@ -2771,8 +2770,6 @@ export function Sidebar({
               showLastReplyDate: settings?.sidebarSessionTime === true,
             })} />
         </div>
-
-        <TokenUsageCard />
 
         <div className="sidebar-footer no-drag">
           <div className="footer-actions">

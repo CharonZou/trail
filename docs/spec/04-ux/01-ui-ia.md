@@ -179,6 +179,25 @@ destination, chat as the home surface, tools and permissions inline.
   checklist, and a bottom-reserved composer. Task entry starts directly in the composer; no
   redundant supporting paragraph, developer starter cards, or contextual
   quick-action row is rendered (D204/D206).
+- **Token meter**: one card under that hero, above the composer, inside the
+  same centered band. It reads `stats.getTokenUsageHistory` with bucket `day`
+  and no dates, so the total is the host's own default window, and labels the
+  range it actually covers. A two-option switch changes what the same numbers
+  are drawn as: a daily strip (one square per day in week columns, quartile
+  thresholds computed over the active days, four ink levels above a faint base
+  for days with no usage, and the leading/trailing padding cells invisible
+  rather than zero) or a per-model ranking (bars for the largest models plus one
+  honest "N other models" row, each with its compact total and share). The two
+  views cannot disagree because the host folds both from one pass (D682).
+  Columns grow with the band but never below a legibility floor, cells stay
+  square, and the card stops growing at 880 px so a maximized window does not
+  turn a year into tiles. A squeezed pane can still draw the band narrower than
+  its 560 px preference floor; there the older weeks scroll sideways out of view
+  on the shell's own quiet scrollbar, because 53 columns below roughly 7 px each
+  would leave a column narrower than the gutter beside it. The strip opens on
+  the week that contains today and is focusable, so the older weeks stay
+  reachable from the keyboard, and a failed read states that usage is
+  unavailable rather than painting an empty year.
 - Create project uses one dialog with local folder, Git, and remote host sources.
   The project name is editable for every source and remains locally managed.
   Remote selection chooses a connected host and an absolute directory, without
@@ -301,23 +320,6 @@ destination, chat as the home surface, tools and permissions inline.
   cancel a background turn. Background events update only their originating
   session and never change the active session, page, project, or keyboard
   focus.
-- **Token meter**: one card that does not scroll, between the project list and
-  the footer. It reads `stats.getTokenUsageHistory` with bucket `day` and no
-  dates, so the total is the host's own default window, and labels the range it
-  actually covers. A two-option switch changes what the same numbers are drawn
-  as: a daily strip (one square per day in week columns, quartile thresholds
-  computed over the active days, four ink levels above a faint base for days
-  with no usage, and the leading/trailing padding cells invisible rather than
-  zero) or a per-model ranking (bars for the largest models plus one honest
-  "N other models" row, each with its compact total and share). The two views
-  cannot disagree because the host folds both from one pass (D682). Columns grow
-  with the sidebar but never below a legibility floor, cells stay square, and at
-  the narrow bound the older weeks scroll sideways out of view on the shell's own
-  quiet scrollbar — squeezing 53 columns into 240 px would leave each one
-  narrower than the gutter beside it. The strip opens on the week that contains
-  today and is focusable, so the older weeks stay reachable from the keyboard, and a
-  failed read states that usage is unavailable rather than painting an empty
-  year.
 
 ### 3.3 Scheduled
 A task column beside the selected task's page, with an explicit create/edit form, a cadence dropdown, time,

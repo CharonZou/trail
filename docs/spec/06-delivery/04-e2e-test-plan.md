@@ -9472,17 +9472,19 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   `apps/desktop/test/sidebar-navigation.test.mjs`. The full desktop journey is
   Draft (run only in a capable environment when this surface changes).
 
-#### E2E-UI-sidebar-token-meter: a year of tokens and the models behind them
+#### E2E-UI-home-token-meter: a year of tokens and the models behind them
 
 - **Preconditions**: A profile whose completed turns span at least two
   different models and at least one idle day inside the last twelve months, and
-  a profile with more than five models in range. The sidebar can be dragged
-  between its 240 px floor and its 520 px ceiling.
-- **Steps**: 1) Open the app and read the card under the project list, above
-  the footer. 2) Switch to the model ranking and back to the daily strip.
+  a profile with more than five models in range. The centered chat band can be
+  dragged wider than the card's own 880 px cap, and a squeezed pane can draw the
+  band below its 560 px preference floor.
+- **Steps**: 1) Open the app on an empty project home and on a temporary
+  session, and read the card under the hero title, above the composer.
+  2) Switch to the model ranking and back to the daily strip.
   3) Complete a turn on another model, wait for the last running session to
   end, and read both views again without reloading; then restart and read once
-  more. 4) Drag the sidebar from its narrowest to its widest while the model
+  more. 4) Drag the chat band from its narrowest to its widest while the model
   view is open, with the largest font preset selected. 5) Hover one active day
   and one day with no usage. 6) With more than five models, read the last row.
   7) Make the host query fail (stopped host) and reload. 8) Repeat steps 1–2 in
@@ -9500,15 +9502,18 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
     not zero.
   - Ink levels split the active days by quartile; a day with no usage keeps the
     base tone, and a range with no usage at all lights nothing up.
-  - Widening the sidebar grows the columns. At the 240 px floor a column stops
-    at its legibility floor and the older weeks scroll sideways out of view on
-    the shell's own quiet scrollbar — 6px, trackless, transparent at rest and
+  - Widening the band grows the columns, and the card stops growing at 880 px so
+    a maximized window does not turn a year into tiles. Below the band's 560 px
+    preference floor — a pane squeezed past it — a column stops at its legibility
+    floor and the older weeks scroll sideways out of view on the shell's own
+    quiet scrollbar — 6px, trackless, transparent at rest and
     revealed only by hover, focus or scrolling — so a cell is never narrower
     than the gutter beside it;
     the strip opens on the week that contains today, and because it scrolls it is
     also a focus target — Tab reaches it and the arrow keys reach the older
-    weeks. Nothing is clipped, and the grid keeps the same height at every
-    sidebar bound because each cell stays square.
+    weeks. Nothing is clipped, the card stays centered in the band and never
+    overflows it, and every cell stays square, so the grid's height follows only
+    the card's width.
   - A turn that finishes while the card is open shows up without a reload: the
     meter re-reads once no session is running any more, and an older answer
     never overwrites a newer one.
@@ -9522,7 +9527,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
     that; neither paints a chart with invented values.
   - Every label, the view switch's `aria-pressed` state and the strip's
     `aria-label` summary are localized in all nine shipped locales.
-- **Specs linked**: `04-ux/01-ui-ia.md` §3.2, `04-ux/06-settings-ia.md`,
+- **Specs linked**: `04-ux/01-ui-ia.md` §3.1, `04-ux/06-settings-ia.md`,
   `03-runtime/01-ipc-protocol.md` §8 stats,
   `03-runtime/06-host-rpc-protocol.md`, `04-ux/07-ui-design-system.md`,
   `08-meta/decisions-log.md` (D682), ADR 0171, ADR 0173
@@ -9534,10 +9539,13 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   nowhere, and 400 consecutive days each keeping a bucket that adds back to
   `totals`) and for the grid, thresholds, folding, legibility floor and card
   wiring (`apps/desktop/test/token-usage-meter.test.mjs`). The rendered layout is
-  gated at the 240 / 275 / 520 px sidebar bounds by
-  `pnpm test:e2e:sidebar-token-meter` (`scripts/e2e-sidebar-token-meter.mjs`),
+  gated at 402 / 560 / 760 / 1160 px band widths, on both hero variants and both
+  views, by
+  `pnpm test:e2e:home-token-meter` (`scripts/e2e-home-token-meter.mjs`),
   which measures the real built sheet and fails when a cell drops under 5 px,
-  stops being square, or reserves a scrollbar lane wider than the shared 6px. The card is read from a real
+  stops being square, escapes the card's 880 px cap or its centered band, leaves
+  the hero above it, overlaps the composer, or reserves a scrollbar lane wider
+  than the shared 6px. The card is read from a real
   profile; the full desktop journey is Draft (run only in a capable environment
   when this surface changes).
 
@@ -11056,8 +11064,8 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 | D — Workspace (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
 | F — Persistence (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
 | Quality (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
-| F — Persistence (sidebar token meter) | E2E-UI-sidebar-token-meter |
-| Quality (sidebar token meter) | E2E-UI-sidebar-token-meter |
+| F — Persistence (home token meter) | E2E-UI-home-token-meter |
+| Quality (home token meter) | E2E-UI-home-token-meter |
 | Quality (settings window actions) | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | G — Plugins (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
 | Security (project folder roots) | E2E-PLUGIN-file-view-switches-folder-per-project |
@@ -11099,7 +11107,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 | M5 (Composer deep file mentions) | E2E-COMPOSER-deep-file-mentions |
 | M5 (workspace index switch) | E2E-PROJECT-workspace-index-switch |
 | M5 (workspace icon and colour) | E2E-PROJECT-workspace-icon-and-colour |
-| M5 (sidebar token meter) | E2E-UI-sidebar-token-meter |
+| M5 (home token meter) | E2E-UI-home-token-meter |
 | M5 (settings window actions) | E2E-SETTINGS-window-actions-minimize-and-fullscreen |
 | M5 (Conversation MP4 attachments) | E2E-CHAT-mp4-attachment-opens-in-system-player |
 | M6+ (Chat file references) | E2E-PLUGIN-file-view-collapse-persists |
@@ -14593,8 +14601,8 @@ are withdrawn with ADR 0165.
   - Token Insights is the heatmap / KPI dashboard. When the plugin is
     installed, Trail remainders from the host turns table appear there
     without rewriting `message.usage`.
-  - The compact sidebar meter (D682,
-    `E2E-UI-sidebar-token-meter`) is not a Settings destination either; it
+  - The compact empty-home meter (D682,
+    `E2E-UI-home-token-meter`) is not a Settings destination either; it
     reads this same RPC and does not replace the plugin dashboard.
 - **Specs linked**: `04-ux/06-settings-ia.md`,
   `03-runtime/01-ipc-protocol.md`, `03-runtime/06-host-rpc-protocol.md`,

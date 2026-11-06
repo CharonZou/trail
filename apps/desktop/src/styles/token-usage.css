@@ -1,17 +1,19 @@
 /*
- * Sidebar token meter (near a year of usage, daily strip and per-model bars).
+ * Empty-home token meter (near a year of usage, daily strip and per-model bars).
  *
- * A year is ~53 week columns, and the 240px sidebar floor leaves each of them
- * under 2px if they are allowed to shrink — narrower than the gutter between
- * them, which turns the grid into unreadable noise. So a column keeps a
- * readable floor and the strip scrolls the older weeks sideways instead; the
- * scrollbar stays hidden, matching the rest of the shell. `aspect-ratio` keeps
- * every cell square, so the grid's height no longer depends on sidebar width.
+ * The card shares the chat band, whose floor is 560px: 53 week columns there
+ * are ~8px each, but a squeezed window can still draw the band narrower. So a
+ * column keeps a 7px readable floor and the strip scrolls the older weeks
+ * sideways rather than collapsing into noise, and the card stops growing at
+ * 880px so a maximized window does not turn a year into 20px squares.
+ * `aspect-ratio` keeps every cell square, so the grid's height follows only the
+ * card's width.
  */
 
 .token-usage-card {
   flex: 0 0 auto;
-  margin: 6px 8px 8px;
+  width: 100%;
+  max-width: 880px;
   padding: 9px 10px 10px;
   border: 1px solid var(--ds-border-subtle);
   border-radius: var(--radius-sm);
@@ -108,7 +110,7 @@
 }
 
 .token-usage-heat-week {
-  /* Grows to fill a wide sidebar, never below the legibility floor. */
+  /* Grows to fill a wide chat band, never below the legibility floor. */
   flex: 1 0 7px;
   display: flex;
   flex-direction: column;

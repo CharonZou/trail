@@ -8205,11 +8205,11 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   assertions of `apps/desktop/test/project-create-dialog.test.mjs`. See
   E2E-PROJECT-workspace-icon-and-colour.
 
-## 2026-11-06 — Sidebar token meter and per-model totals (D682)
+## 2026-11-06 — Empty-home token meter and per-model totals (D682)
 
 - D682 narrows D335 / ADR 0173 by exactly one surface: the app now ships **its
-  own compact token meter**, pinned in the sidebar between the project list and
-  the footer. What D335 rejected was a second, weaker *dashboard inside
+  own compact token meter**, in the empty home under the hero title and above
+  the composer. What D335 rejected was a second, weaker *dashboard inside
   Settings*, and that rejection stands — Settings still has no Usage
   destination, settings search still indexes no usage tab, and
   `pi.token-insights` remains the full dashboard with KPIs, filtering and cost.
@@ -8221,15 +8221,15 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   headline number and the range label would eventually disagree.
 - **Chart type**: two views of one set of numbers, switched in place — a daily
   heatmap answers total × time, a horizontal bar ranking answers model × volume.
-  A stacked area was rejected on purpose: five or more models inside a 240 px
-  column makes the layers unreadable and flattens the small deltas that are the
-  whole point, and small multiples cost a height the sidebar does not have. A
+  A stacked area was rejected on purpose: five or more models in a narrow column
+  makes the layers unreadable and flattens the small deltas that are the whole
+  point, and small multiples cost a height this surface does not have. A
   donut only answers share, never volume. The calendar strip also carries
   information the ranking cannot — whether the spend is a habit or a spike.
 - The model rows are new host output, not a renderer-side guess. The history
   query already read `provider_id` / `model_id` on the same rows
   `plugin_usage.rs` reads, so `models` folds from **the same single pass**: the
-  two views are one scan, and `E2E-UI-sidebar-token-meter` can promise the
+  two views are one scan, and `E2E-UI-home-token-meter` can promise the
   ranking adds up to the bucketed total instead of hoping two queries agree.
   Ranking arrives pre-sorted by `totalTokens` so re-reading unchanged data
   cannot reshuffle the bars.
@@ -8247,7 +8247,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   RPC / IPC, `SCHEMA_VERSION` stays 27, and no protocol version bumps. All
   copy is in the nine shipped locales.
 - Amended the same day, on the first real render. The plan was to fit all 53
-  week columns by letting them flex, and at the 240 px sidebar floor that leaves
+  week columns by letting them flex, and in a 240 px sidebar that leaves
   each column 1.8 px wide — narrower than the 2 px gutter beside it, which is a
   dot field, not a calendar. So a column keeps a legibility floor and the older
   weeks scroll sideways on the shell's own quiet scrollbar. The first cut hid
@@ -8255,10 +8255,21 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   `apps/desktop/test/interaction-polish.test.mjs` rejects it: the standard
   property makes Chromium ignore the `::-webkit-scrollbar` pseudo-elements that
   carry the one reveal contract for every renderer surface (D396). The strip
-  opens on the week that contains today, and `aspect-ratio: 1` still fixes the
-  grid height at every sidebar bound.
-  `scripts/e2e-sidebar-token-meter.mjs` measures the built sheet at 240 / 275 /
-  520 px and fails under a 5 px cell.
+  opens on the week that contains today, and `aspect-ratio: 1` keeps every cell
+  square, so the grid's height follows only the card's width.
+- Amended again when the card changed surfaces. Read back in the running app it
+  was in the wrong place: a year of tokens answers "what have I been doing", so
+  it belongs under the empty-home hero — beside the question it answers — not
+  pinned in the navigation column. The move changed the layout envelope, so the
+  numbers were re-derived for the centered chat band: its 560 px preference
+  floor leaves ~8 px columns, a pane squeezed past that floor is where the column
+  floor and the sideways scroll actually earn their place, and the card stops
+  growing at 880 px so a maximized window does not turn a year into 14 px tiles.
+  `scripts/e2e-home-token-meter.mjs` — renamed from
+  `e2e-sidebar-token-meter.mjs`, which measured the sidebar bounds of the first
+  cut — gates the built sheet at 402 / 560 / 760 / 1160 px on both hero variants
+  and fails on an illegible cell, a card off the centered band, or a meter that
+  is not under the hero.
 - The same pass fixed what this entry's central promise rests on. The range fill
   keyed each bucket through local midnight, and a zone whose spring-forward
   starts at 00:00 has no such instant: that day lost its bucket from `items`
@@ -8269,8 +8280,8 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   summing to `totals`, a no-model turn keeping its row, an aborted turn billing
   nowhere, and 400 consecutive days each keeping a bucket that adds back to
   `totals`) and `apps/desktop/test/token-usage-meter.test.mjs` (Monday-aligned
-  grid, quartile levels, tail folding, one host query, sidebar placement,
-  catalog keys per locale). See E2E-UI-sidebar-token-meter and the amendment to
+  grid, quartile levels, tail folding, one host query, empty-home placement,
+  catalog keys per locale). See E2E-UI-home-token-meter and the amendment to
   E2E-186.
 
 ## 2026-11-06 — Minimize and Full screen buttons in Settings (D683)

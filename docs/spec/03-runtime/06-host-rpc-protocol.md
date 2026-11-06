@@ -616,7 +616,7 @@ deletes per 60 seconds. P2/P3 methods are not present in protocol v11.
   assistant messages plus settled subagent usage, not a rewrite of
   `message.usage`. The full dashboard is plugin `pi.token-insights`
   (D335 / ADR 0173), not a Settings destination; the app's own compact surface
-  is the sidebar token meter (D682).
+  is the empty-home token meter (D682).
 
 ### Plan and Goal state and approvals
 

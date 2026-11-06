@@ -16,8 +16,8 @@ import { cx } from "./ui";
 type UsageView = "calendar" | "model";
 
 /**
- * Token meter pinned under the sidebar project list: one number for the last
- * year, a daily heatmap, and the same total cut by model.
+ * Token meter under the empty-home hero: one number for the last year, a daily
+ * heatmap, and the same total cut by model.
  *
  * Both views come from one host query, so the bars always add up to the strip.
  */
@@ -84,10 +84,11 @@ export function TokenUsageCard() {
     return usageModelBreakdown(history.models ?? [], history.totals.totalTokens);
   }, [history]);
 
-  // Columns run oldest to newest, and a narrow sidebar clips the oldest half
-  // out of view, so the strip opens on the week that contains today. Attaching
-  // it as a stable ref callback means exactly one jump — when the strip appears
-  // — and a later refresh never drags an older year back out of sight.
+  // Columns run oldest to newest, so when the chat band is squeezed past the
+  // legibility floor it is the oldest weeks that get clipped, and the strip
+  // opens on the week that contains today. A stable ref callback means exactly
+  // one jump — when the strip appears — and a later refresh never drags an
+  // older year back out of sight.
   const attachHeat = useCallback((node: HTMLDivElement | null) => {
     if (node) node.scrollLeft = node.scrollWidth - node.clientWidth;
   }, []);
@@ -111,7 +112,7 @@ export function TokenUsageCard() {
   const widest = breakdown?.scale ?? 0;
 
   return (
-    <section className="token-usage-card no-drag" aria-label={t("tokenUsage.title")}>
+    <section className="token-usage-card" aria-label={t("tokenUsage.title")}>
       <div className="token-usage-head">
         <span className="token-usage-title">{t("tokenUsage.title")}</span>
         {hasModelView ? (

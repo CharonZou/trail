@@ -1264,7 +1264,7 @@ row. The field is additive (D682): an older renderer ignores it and reads only
 `items` and `totals`.
 
 This channel is not a Settings page. The compact first-party surface is the
-sidebar token meter (D682); the full dashboard stays plugin
+empty-home token meter (D682); the full dashboard stays plugin
 `pi.token-insights` (D335 / ADR 0173).
 
 ## 8. Settings / Secrets API

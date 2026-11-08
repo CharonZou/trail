@@ -25,11 +25,17 @@ test("one tray owns both minimize-to-tray and close-to-tray", () => {
 test("the tray icon resolves through the packaged resource path", () => {
   // A hardcoded `app.getAppPath()/build/icon.png` exists only in development;
   // packaged builds ship it as `tray-icon.png` under `process.resourcesPath`.
+  // Build mode picks the root, never `app.isPackaged` on its own: a dev launch
+  // flagged packaged by ELECTRON_FORCE_IS_PACKAGED must keep `build/icon.png`.
   assert.doesNotMatch(
     mainSource,
     /join\(app\.getAppPath\(\), "build", "icon\.png"\)/,
   );
-  assert.match(mainSource, /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/);
+  assert.match(mainSource, /resolveTrayIconPath\(/);
+  assert.doesNotMatch(
+    mainSource,
+    /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/,
+  );
 });
 
 test("choosing quit never destroys the resident tray", () => {

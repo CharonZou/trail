@@ -23,6 +23,7 @@ import { isWindowFullScreen, setWindowFullScreen } from "../window-fullscreen";
 import { createTraySessions } from "../tray-sessions";
 import { createTaskbarUnreadBadge } from "../taskbar-unread-badge";
 import { createWindow, type WindowLifecycleState } from "./window";
+import { resolveTrayIconPath } from "./icon-paths";
 import { windowToggleAction } from "./window-visibility";
 import type { BrowserHost } from "../browser-host";
 import type { Logger } from "../logger";
@@ -143,17 +144,13 @@ export function createApplicationLifecycle({
   }
 
   function trayIconPath() {
-    const resourceRoot = app.isPackaged
-      ? process.resourcesPath
-      : join(app.getAppPath(), "build");
-    const candidates =
-      process.platform === "darwin"
-        ? [
-          join(resourceRoot, "tray-icon-mac.png"),
-          join(resourceRoot, app.isPackaged ? "tray-icon.png" : "icon.png"),
-          ]
-        : [join(resourceRoot, app.isPackaged ? "tray-icon.png" : "icon.png")];
-    return candidates.find((candidate) => existsSync(candidate)) ?? null;
+    return resolveTrayIconPath({
+      isDevelopmentBuild,
+      platform: process.platform,
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      exists: existsSync,
+    });
   }
 
   function hasVisibleWindow(): boolean {
@@ -331,6 +328,7 @@ export function createApplicationLifecycle({
     return createWindow({
       state: state,
       dataDir,
+      isDevelopmentBuild,
       windowMinWidth,
       windowMinHeight,
       windowBoundsSettleMs,

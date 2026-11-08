@@ -76,10 +76,16 @@ test("Windows packages and windows use the canonical Trail icon", () => {
   assert.ok(windowsIcon.readUInt16LE(4) >= 4, "ICO must contain multiple sizes");
   assert.match(iconScriptSource, /windows_icon = BUILD \/ "icon\.ico"/);
   assert.match(iconScriptSource, /format="ICO"/);
-  assert.match(windowSource, /function windowsIconPath\(\)/);
-  assert.match(windowSource, /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/);
-  assert.match(windowSource, /app-icon\.ico/);
-  assert.match(windowSource, /icon: windowsIconPath\(\)/);
+  assert.match(windowSource, /function windowsIconPath\(isDevelopmentBuild: boolean\)/);
+  // Build mode decides the asset root: a development launch that reports
+  // `app.isPackaged === true` (ELECTRON_FORCE_IS_PACKAGED) must still resolve
+  // the checkout's `build/icon.ico`, not `process.resourcesPath`.
+  assert.match(windowSource, /resolveWindowIconPath\(/);
+  assert.doesNotMatch(
+    windowSource,
+    /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/,
+  );
+  assert.match(windowSource, /icon: windowsIconPath\(isDevelopmentBuild\)/);
 });
 
 /** The alpha split of a decoded image: the brand mark is flat, so only

@@ -48,15 +48,18 @@ import {
   mainWindowBackgroundOptions,
 } from "../window-background";
 import { recoverRendererAfterGone } from "../renderer-recovery";
+import { resolveWindowIconPath } from "./icon-paths";
 
-function windowsIconPath(): string | undefined {
-  if (process.platform !== "win32") return undefined;
-
-  const resourceRoot = app.isPackaged
-    ? process.resourcesPath
-    : join(app.getAppPath(), "build");
-  const iconPath = join(resourceRoot, app.isPackaged ? "app-icon.ico" : "icon.ico");
-  return existsSync(iconPath) ? iconPath : undefined;
+function windowsIconPath(isDevelopmentBuild: boolean): string | undefined {
+  return (
+    resolveWindowIconPath({
+      isDevelopmentBuild,
+      platform: process.platform,
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      exists: existsSync,
+    }) ?? undefined
+  );
 }
 
 export type WindowLifecycleState = {
@@ -102,6 +105,7 @@ export type WindowMenuRendererReadyGate = {
 export type WindowLifecycleDependencies = {
   state: WindowLifecycleState;
   dataDir: string;
+  isDevelopmentBuild: boolean;
   windowMinWidth: number;
   windowMinHeight: number;
   windowBoundsSettleMs: number;
@@ -126,6 +130,7 @@ export type WindowLifecycleDependencies = {
 export async function createWindow({
   state: windowState,
   dataDir,
+  isDevelopmentBuild,
   windowMinWidth,
   windowMinHeight,
   windowBoundsSettleMs,
@@ -230,7 +235,7 @@ export async function createWindow({
         }),
     ...(process.platform === "win32"
       ? {
-          icon: windowsIconPath(),
+          icon: windowsIconPath(isDevelopmentBuild),
         }
       : {}),
     webPreferences: {

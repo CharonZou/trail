@@ -1,4 +1,5 @@
 import { BrowserWindow, dialog, shell, type OpenDialogOptions } from "electron";
+import { spawn as spawnExternalApp } from "node:child_process";
 import { dirname } from "node:path";
 import { homedir } from "node:os";
 import { existsSync, statSync } from "node:fs";
@@ -7,6 +8,7 @@ import { isAbsolute, join, resolve } from "node:path";
 import {
   ErrorCodes,
   IPC,
+  isOpenWithEditorApp,
   type ComposerPasteFile,
   type FsChatRefProjectRoot,
   type FsChatRefResolveResult,
@@ -21,6 +23,10 @@ import {
 import { remoteWorkspaceForFiles } from "../remote/workspace-file-scope";
 import { getActiveRemoteHostsBoot } from "../bootstrap/remote-hosts";
 import { cloneGitRepository } from "../git-clone";
+import {
+  createExternalAppLauncher,
+  createExternalAppProbe,
+} from "../external-apps";
 import {
   importComposerFiles,
   saveComposerPasteFiles,
@@ -114,6 +120,7 @@ export type WorkspaceIpcDependencies = {
   setCurrentWorkspacePath: (path: string | null) => void;
   withGitBranch: (workspace: WorkspaceRecord | null) => Promise<unknown>;
   stripWinLongPrefix: (path: string) => string;
+  logger: Pick<Logger, "app">;
 };
 
 export function registerWorkspaceIpc({
@@ -131,6 +138,7 @@ export function registerWorkspaceIpc({
   setCurrentWorkspacePath,
   withGitBranch,
   stripWinLongPrefix,
+  logger,
 }: WorkspaceIpcDependencies): void {
   let host: HostProcess | null = null;
   const handle = (channel: string, fn: (...args: any[]) => Promise<any>) => {
@@ -443,20 +451,27 @@ export function registerWorkspaceIpc({
       return host.call("project.group.instructions.set", { groupId, content });
     },
   );
-  handle(IPC.invoke.projectOpenFolder, async (path: string) => {
+  /*
+   * The path gate both open channels share. The renderer names a project by
+   * path, so the only folder that may be opened in the file manager or handed
+   * to an external program is one the host already knows and that still exists.
+   */
+  async function knownProjectPath(requested: unknown): Promise<string> {
     if (!host) throw new Error("host unavailable");
-    const requestedPath = String(path ?? "").trim();
+    const requestedPath = String(requested ?? "").trim();
     if (!requestedPath) {
       throw Object.assign(new Error("project path required"), {
         errorCode: ErrorCodes.INVALID_ARGUMENT,
       });
     }
     // Open only known project records so the renderer cannot probe arbitrary
-    // filesystem paths through this channel.
+    // filesystem paths through either channel.
     const listed = (await host.call("projects.list")) as {
       projects?: Array<{ path?: string }>;
     };
-    const projectPath = requestedPath.startsWith("remote-project:") ? requestedPath : resolve(requestedPath);
+    const projectPath = requestedPath.startsWith("remote-project:")
+      ? requestedPath
+      : resolve(requestedPath);
     const known = (listed.projects ?? []).some((project) => {
       const candidate = String(project?.path ?? "").trim();
       return candidate && resolve(candidate) === projectPath;
@@ -471,10 +486,42 @@ export function registerWorkspaceIpc({
         errorCode: ErrorCodes.NOT_FOUND,
       });
     }
+    return projectPath;
+  }
+
+  handle(IPC.invoke.projectOpenFolder, async (path: string) => {
+    const projectPath = await knownProjectPath(path);
     const openError = await shell.openPath(stripWinLongPrefix(projectPath));
     if (openError) throw new Error(openError);
     return { ok: true, path: projectPath };
   });
+
+  // One launcher for the process: the candidate table is read per press, so an
+  // editor installed after boot is found without a restart.
+  const openWithLauncher = createExternalAppLauncher({
+    probe: createExternalAppProbe(),
+    spawn: (command, args, options) =>
+      spawnExternalApp(command, args, { ...options, windowsHide: false }),
+    stripWinLongPrefix,
+    log: (event, detail) =>
+      logger.app("runtime", "warn", event, { data: detail ?? {} }),
+  });
+
+  handle(
+    IPC.invoke.projectOpenWith,
+    async (input: { app?: unknown; path?: unknown } = {}) => {
+      const { app, path } = input;
+      // The id is validated against the closed list, and it is the only thing
+      // that selects a program: this channel cannot name an executable.
+      if (!isOpenWithEditorApp(app)) {
+        throw Object.assign(new Error("app is invalid"), {
+          errorCode: ErrorCodes.INVALID_ARGUMENT,
+        });
+      }
+      const projectPath = await knownProjectPath(path);
+      return openWithLauncher.open(app, projectPath);
+    },
+  );
   handle(IPC.invoke.projectOpen, async () => {
     if (!host) throw new Error("host unavailable");
     const result = await openProjectPicker({

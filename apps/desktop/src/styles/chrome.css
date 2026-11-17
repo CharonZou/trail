@@ -730,17 +730,18 @@
 
 /* One geometry and one seat for every chrome icon control: the topbar's dock
    toggle, the viewport-fixed work-panel toggle, the preview/route-band lane
-   actions, and the work-panel header's create and maximize controls. The seat is
-   transparent at rest, so the icon alone carries the control and only the pointer
-   hover wash paints a surface under it; keyboard focus keeps the global outline.
-   `flex: 0 0` keeps them square when a crowded band would otherwise squeeze
-   them. */
+   actions, the work-panel header's create and maximize controls, and the
+   Settings size-tier swap. The seat is transparent at rest, so the icon alone
+   carries the control and only the pointer hover wash paints a surface under
+   it; keyboard focus keeps the global outline. `flex: 0 0` keeps them square
+   when a crowded band would otherwise squeeze them. */
 .conversation-topbar .ct-icon-btn,
 .app-work-panel-toggle,
 .main-titlebar .title-nav-btn,
 .window-chrome-row .title-nav-btn,
 .work-panel-new-tab,
-.work-panel-maximize {
+.work-panel-maximize,
+.settings-tier-swap {
   display: inline-flex;
   height: var(--ds-work-panel-toggle-size);
   width: var(--ds-work-panel-toggle-size);
@@ -791,6 +792,128 @@
   padding: 2px;
   border-radius: var(--radius-md);
   background: var(--ds-tile);
+}
+
+/*
+ * The project open-with split button. It takes the action lane's tile and the
+ * same 28px seat as every other chrome control, but it is a text control, so
+ * the two halves share one pill: the label half opens, the caret half chooses.
+ * The lane already opts out of the drag band, and the rule is repeated here so
+ * the control stays clickable if it ever moves.
+ */
+.conversation-topbar .ct-open-with {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: var(--ds-tile);
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.conversation-topbar .ct-open-with-main,
+.conversation-topbar .ct-open-with-caret {
+  display: inline-flex;
+  height: var(--ds-work-panel-toggle-size);
+  align-items: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ds-text-secondary);
+  cursor: pointer;
+  transition: background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.conversation-topbar .ct-open-with-main {
+  gap: 6px;
+  padding: 0 4px 0 8px;
+}
+
+.conversation-topbar .ct-open-with-caret {
+  justify-content: center;
+  width: 20px;
+  padding: 0;
+}
+
+.conversation-topbar .ct-open-with-main:hover:not(:disabled),
+.conversation-topbar .ct-open-with-caret:hover:not(:disabled) {
+  background: var(--ds-bg-hover);
+  color: var(--ds-text-primary);
+}
+
+.conversation-topbar .ct-open-with-label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+  white-space: nowrap;
+}
+
+/* The portaled choice list, anchored to the caret's right edge. */
+.project-open-with-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: auto;
+  bottom: auto;
+  z-index: 40;
+  width: min(208px, calc(100vw - 24px));
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  background: var(--ds-bg-elevated-opaque);
+  box-shadow: var(--ds-shadow-dialog);
+  border: 1px solid var(--ds-border-subtle);
+  color: var(--ds-text-primary);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.project-open-with-menu.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.project-open-with-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.project-open-with-item:hover {
+  background: var(--ds-bg-hover);
+}
+
+/* The vendor mark is a raster asset, so it must not stretch or shrink with the
+ * row's flex layout; the row's text owns the remaining width. */
+.project-open-with-icon {
+  display: block;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.project-open-with-name {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+}
+
+.project-open-with-check {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ds-text-secondary);
 }
 
 /* Keep the sole work-panel toggle anchored to the viewport while the in-flow
@@ -1241,6 +1364,13 @@
   background: var(--ds-bg-dock-raised);
 }
 
+/* Settings' compact tier floats a panel over the app veil. The controls stay
+ * clickable above the panel, but their opaque fill would cut a solid rectangle
+ * out of the scrim, so only the buttons paint. */
+.app-shell:has(.settings-shell-compact) > .window-controls {
+  background: transparent;
+}
+
 .window-control-btn {
   -webkit-app-region: no-drag;
   app-region: no-drag;
@@ -1274,6 +1404,21 @@
 :root[data-platform="win32"] .settings-titlebar,
 :root[data-platform="linux"] .settings-titlebar {
   right: var(--ds-window-controls-width);
+}
+
+/* Same clearance for the Settings size-tier swap: the full tier reaches the
+ * window edge, so the caption buttons always sit over its corner. */
+:root[data-platform="win32"] .settings-shell-full .settings-tier-swap,
+:root[data-platform="linux"] .settings-shell-full .settings-tier-swap {
+  right: calc(var(--ds-window-controls-width) + 12px);
+}
+
+/* The centered panel only overlaps that band once the window is narrow enough
+ * for the buttons to reach inside it, so it clears exactly the overlap — no
+ * corner jump at the widths where nothing is in the way. */
+:root[data-platform="win32"] .settings-shell-compact .settings-tier-swap,
+:root[data-platform="linux"] .settings-shell-compact .settings-tier-swap {
+  right: calc(12px + max(0px, var(--ds-window-controls-width) - (100vw - var(--settings-panel-width)) / 2));
 }
 
 :root[data-platform="win32"] .main-titlebar.work-panel-open,
@@ -1418,4 +1563,74 @@
 .window-chrome-drag {
   flex: 1 1 auto;
   align-self: stretch;
+}
+
+/*
+  Main-window frame (Settings ▸ General ▸ Appearance ▸ 界面排版).
+
+  `window` is the shipped surface: the sidebar and the work area share one
+  ground and a hairline divides them. `floating` takes the reference shape — the
+  shell ground becomes the rail's own colour, so the rail and the chrome band
+  read as one plate, and the work area becomes a rounded sheet inset from the
+  rail, the right edge and the bottom.
+
+  Only the ground and the sheet change: no portal, dialog, toast anchor, resize
+  handle, or drag region moves, and the sidebar keeps its stored width because
+  the inset is taken from the sheet's own margin. Settings steps this class
+  aside (`AppShell` drops it while that page is open) because the Settings page
+  carries its own size tier, `settingsLayout`.
+*/
+.app-shell.app-frame-floating {
+  --app-frame-gap: 10px;
+  --app-frame-radius: 16px;
+  padding-bottom: var(--app-frame-gap);
+  background: var(--ds-bg-sidebar);
+}
+
+/* The chrome band belongs to the shell, not to the sheet: the window buttons
+   and the breadcrumb read on the shell ground, as the reference does. */
+.app-shell.app-frame-floating .main-pane,
+.app-shell.app-frame-floating .conversation-topbar {
+  background: transparent;
+}
+
+/* The caption lane keeps its full hit band but paints on the ground instead of
+   cutting a second band in the work area's colour, which would read as one grey
+   strip laid over the sheet. Same reason the compact Settings tier drops its
+   fill. */
+.app-shell.app-frame-floating > .window-controls {
+  background: transparent;
+}
+
+.app-shell.app-frame-floating .main-pane > :where(.chat-surface, .route-surface) {
+  margin: var(--ds-toolbar-height) var(--app-frame-gap) var(--app-frame-gap)
+    var(--app-frame-gap);
+  border-radius: var(--app-frame-radius);
+  background: var(--ds-bg-primary);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--ds-text-primary) 8%, transparent),
+    0 12px 32px -20px color-mix(in oklab, #000 65%, transparent);
+}
+
+/* The sheet starts below the chrome band, so the transcript's own titlebar
+   reserve would double the gap inside it. */
+.app-shell.app-frame-floating .thread-content {
+  padding-top: 0;
+}
+
+/* With the dock open, the dock closes the sheet's right edge instead of
+   standing outside it as a second column: the two halves read as one card,
+   and the dock's own tone step stays its only division (D297). */
+.app-shell.app-frame-floating:has(.work-panel) .main-pane > :where(.chat-surface, .route-surface) {
+  margin-right: 0;
+  border-radius: var(--app-frame-radius) 0 0 var(--app-frame-radius);
+}
+
+.app-shell.app-frame-floating .work-panel {
+  /* The dock is a flex item and its own width, so it takes the same band and
+     seam the sheet takes instead of sitting flush with the window edge. */
+  height: calc(100% - var(--ds-toolbar-height) - var(--app-frame-gap));
+  margin: var(--ds-toolbar-height) var(--app-frame-gap) var(--app-frame-gap) 0;
+  border-radius: 0 var(--app-frame-radius) var(--app-frame-radius) 0;
+  background: var(--ds-bg-dock);
 }

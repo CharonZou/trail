@@ -153,7 +153,7 @@
   name already says what the control is, so the icon only added noise.
 */
 .composer-model-thinking-icon {
-  display: none;
+  display: flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -295,27 +295,54 @@
    grids instead — so the thumb glides over the dots. The thumb radius lives
    in --thinking-thumb-radius so the formula stays correct if it changes. */
 .composer-thinking-slider {
-  --thinking-thumb-radius: 7px;
-  --thinking-dot-radius: 2px;
-  --thinking-track-height: 4px;
-  --thinking-track-center: 7px; /* (18 - 4) / 2 inside the 18px input */
+  --thinking-thumb-radius: 14px;
+  --thinking-dot-radius: 3px;
+  --thinking-track-height: 14px;
+  --thinking-track-center: 15px; /* (44 - 14) / 2 inside the 44px rail */
   --thinking-inset: calc(100% / (2 * var(--stop-count, 1)) - var(--thinking-thumb-radius));
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 6px 4px;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+/* Header row: title + current level on the left, shortcut hint on the right. */
+.composer-thinking-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--text-xs);
+}
+
+.composer-thinking-header-title {
+  color: var(--ds-text-muted);
+}
+
+.composer-thinking-header-level {
+  color: var(--ds-text-primary);
+  font-weight: var(--font-weight-strong);
+}
+
+.composer-thinking-header-shortcut {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--ds-bg-hover, rgba(128, 128, 128, 0.15));
+  color: var(--ds-text-muted);
+  font-size: var(--text-2xs);
+  font-family: var(--font-mono, inherit);
+  line-height: var(--leading-tight);
 }
 
 /* Rail: full-width positioning context for the dots row and the input. */
 .composer-thinking-rail {
   position: relative;
-  height: 18px;
+  height: 44px;
 }
 
 /* The rail line spans the stop-to-stop distance: it starts and ends half a
    column in from the edges so its tips land on the first/last dot centers.
-   The muted base rail is ::before and the accent fill is ::after, a separate
-   layer whose width transitions smoothly between stops. */
+   The muted base rail is ::before and the gradient fill is ::after. */
 .composer-thinking-rail::before,
 .composer-thinking-rail::after {
   content: "";
@@ -329,15 +356,61 @@
 
 .composer-thinking-rail::before {
   right: calc(100% / (2 * var(--stop-count, 1)));
-  background: var(--ds-border-subtle);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .composer-thinking-rail::after {
   /* Cover the first dot's full rounded cap without moving the target end. */
   left: calc(100% / (2 * var(--stop-count, 1)) - var(--thinking-dot-radius));
   width: calc(var(--composer-thinking-progress, 0%) + var(--thinking-dot-radius));
-  background: var(--ds-accent);
+  background: linear-gradient(90deg, #22c55e 0%, #10b981 30%, #06b6d4 62%, #3b82f6 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), inset 0 -1px 3px rgba(0, 0, 0, 0.12);
   transition: width var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+/* Max level: flowing sparks layer, particles drift right-to-left. */
+.composer-thinking-sparks {
+  position: absolute;
+  top: var(--thinking-track-center);
+  bottom: var(--thinking-track-center);
+  left: calc(100% / (2 * var(--stop-count, 1)));
+  right: calc(100% / (2 * var(--stop-count, 1)));
+  height: var(--thinking-track-height);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.composer-thinking-sparks i {
+  position: absolute;
+  left: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.95), 0 0 8px rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  animation-name: thinking-spark-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes thinking-spark-flow {
+  0% {
+    left: 100%;
+    opacity: 0;
+    transform: translateX(4px);
+  }
+  8% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  100% {
+    left: 0%;
+    opacity: 0;
+    transform: translateX(-10px);
+  }
 }
 
 /* One dot per stop, centered on the rail at each full-width column center. */
@@ -387,7 +460,7 @@
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 18px;
+  height: 44px;
   margin: 0;
   padding: 0 var(--thinking-inset);
   background: transparent;
@@ -407,9 +480,9 @@
 
 .composer-thinking-range::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  margin-top: calc((var(--thinking-track-height) - 14px) / 2);
+  width: 28px;
+  height: 28px;
+  margin-top: calc((var(--thinking-track-height) - 28px) / 2);
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
@@ -421,8 +494,8 @@
 }
 
 .composer-thinking-range::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 28px;
+  height: 28px;
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
@@ -433,13 +506,13 @@
 .composer-thinking-thumb {
   z-index: 2;
   position: absolute;
-  top: 2px;
+  top: 8px;
   left: calc(100% / (2 * var(--stop-count, 1)) + var(--composer-thinking-progress, 0%));
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--ds-bg-elevated-opaque);
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-full);
-  background: var(--ds-accent);
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
   transform: translateX(-50%);
   pointer-events: none;
   transition: left var(--motion-duration-normal) var(--motion-ease-out);

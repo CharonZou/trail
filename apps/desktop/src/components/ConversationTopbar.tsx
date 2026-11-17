@@ -26,6 +26,7 @@ import {
   IconNewSession,
   IconSearch,
 } from "./icons";
+import { ProjectOpenWithButton } from "./ProjectOpenWithButton";
 import { TooltipButton } from "./ui";
 
 function projectName(path?: string | null, name?: string | null) {
@@ -220,6 +221,17 @@ export function ConversationTopbar({
   const breadcrumbTitle = project
     ? `${project} · ${fullTaskTitle}`
     : fullTaskTitle;
+  /*
+   * The open-with control follows the conversation's own folder, not whatever
+   * workspace the sidebar happens to show: a remote transcript's folder lives
+   * on the host, a temporary task has no folder, and a draft that has never
+   * been prompted belongs to the active workspace.
+   */
+  const openWithProjectPath = remoteSession
+    ? null
+    : activeSession
+      ? activeSession.projectPath ?? null
+      : workspace?.path ?? null;
 
   return (
     <div
@@ -318,6 +330,7 @@ export function ConversationTopbar({
       </div>
 
       <div className="ct-right">
+        <ProjectOpenWithButton projectPath={openWithProjectPath} />
         <div className="ct-actions">
           <TooltipButton
             type="button"

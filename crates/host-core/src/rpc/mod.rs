@@ -2050,7 +2050,20 @@ async fn handle_request(
                                     st.workspace.set_remote(&group);
                                 }
                             } else {
-                                st.workspace.set(PathBuf::from(path));
+                                let pb = PathBuf::from(path);
+                                // Only restore a workspace whose folder still exists.
+                                // A project row can point at a deleted or moved
+                                // directory (renamed folder, changed drive letter, or
+                                // the row synced to another machine where the path does
+                                // not exist). Restoring it anyway leaves the UI around a
+                                // ghost path where every "open with" call fails with
+                                // "folder not found". Leave the workspace empty so the
+                                // renderer falls back to the project picker; the row and
+                                // currentProjectId are kept, so a re-attached drive or an
+                                // explicit reopen updates the reference naturally.
+                                if pb.is_dir() {
+                                    st.workspace.set(pb);
+                                }
                             }
                         }
                     }
@@ -5813,6 +5826,91 @@ mod tests {
             deleted,
             json!({"ok": true, "deleted": false, "deletedCount": 0})
         );
+    }
+
+    #[tokio::test]
+    async fn handshake_does_not_restore_a_deleted_project_folder() {
+        let dir = tempfile::tempdir().unwrap();
+        let app = AppState::open(dir.path()).unwrap();
+        // A project row whose folder has since been deleted, with the user last
+        // having it open. Before the fix this became the active workspace and
+        // every "open with" call failed with "folder not found".
+        let missing = dir.path().join("deleted-folder");
+        app.db
+            .conn()
+            .execute(
+                "INSERT INTO projects (path, name, created_at, last_opened_at)
+                 VALUES (?1, 'deleted-folder', 0, 0)",
+                rusqlite::params![missing.to_string_lossy().to_string()],
+            )
+            .unwrap();
+        let pid: i64 = app
+            .db
+            .conn()
+            .query_row("SELECT id FROM projects WHERE name = 'deleted-folder'", [], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        app.db
+            .kv_set("app", "currentProjectId", &json!(pid))
+            .unwrap();
+
+        let state = Arc::new(Mutex::new(app));
+        let tx = mpsc::unbounded_channel().0;
+        handle_request(
+            state.clone(),
+            "app.handshake",
+            json!({ "protocolVersion": crate::state::PROTOCOL_VERSION }),
+            tx,
+        )
+        .await
+        .expect("handshake succeeds");
+
+        let st = state.lock().await;
+        assert!(
+            st.workspace.get().is_none(),
+            "a missing folder must not be restored as the active workspace"
+        );
+    }
+
+    #[tokio::test]
+    async fn handshake_still_restores_an_existing_project_folder() {
+        let dir = tempfile::tempdir().unwrap();
+        let app = AppState::open(dir.path()).unwrap();
+        let existing = tempfile::tempdir().unwrap();
+        app.db
+            .conn()
+            .execute(
+                "INSERT INTO projects (path, name, created_at, last_opened_at)
+                 VALUES (?1, 'existing', 0, 0)",
+                rusqlite::params![existing.path().to_string_lossy().to_string()],
+            )
+            .unwrap();
+        let pid: i64 = app
+            .db
+            .conn()
+            .query_row("SELECT id FROM projects WHERE name = 'existing'", [], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        app.db
+            .kv_set("app", "currentProjectId", &json!(pid))
+            .unwrap();
+
+        let state = Arc::new(Mutex::new(app));
+        let tx = mpsc::unbounded_channel().0;
+        handle_request(
+            state.clone(),
+            "app.handshake",
+            json!({ "protocolVersion": crate::state::PROTOCOL_VERSION }),
+            tx,
+        )
+        .await
+        .expect("handshake succeeds");
+
+        let st = state.lock().await;
+        let ws = st.workspace.get().expect("existing folder is restored");
+        assert_eq!(ws.name, existing.path().file_name().unwrap().to_string_lossy());
     }
 
     #[tokio::test]

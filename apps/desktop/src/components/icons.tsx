@@ -340,3 +340,25 @@ export function IconVSCode(props: SVGProps<SVGSVGElement> & { size?: number }) {
     </svg>
   );
 }
+
+/**
+ * Settings size-tier swap: a ring with two opposing arrows. Supplied glyph, so
+ * the fill is the current text color rather than the file's literal black —
+ * a fixed color would vanish on the dark theme and ignore plugin palettes.
+ */
+export function IconLayoutSwap(props: SVGProps<SVGSVGElement> & { size?: number }) {
+  const { size = 16, style, ...rest } = props;
+  return (
+    <svg
+      viewBox="0 0 1024 1024"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+      {...rest}
+      style={withScaledIconStyle(size, style)}
+    >
+      <path d="M128 512c0 212.074667 171.925333 384 384 384s384-171.925333 384-384S724.074667 128 512 128 128 299.925333 128 512z m38.4 0c0-190.869333 154.730667-345.6 345.6-345.6S857.6 321.130667 857.6 512 702.869333 857.6 512 857.6 166.4 702.869333 166.4 512z" />
+      <path d="M575.232 364.032a19.2 19.2 0 0 1 27.136 0l76.8 76.8A19.2 19.2 0 0 1 665.6 473.6H339.2a19.2 19.2 0 0 1 0-38.4h280.042667l-44.010667-44.032a19.2 19.2 0 0 1 0-27.136zM429.568 659.968a19.2 19.2 0 0 1-27.136 0l-76.8-76.8A19.2 19.2 0 0 1 339.2 550.4h326.4a19.2 19.2 0 0 1 0 38.4H385.557333l44.010667 44.032a19.2 19.2 0 0 1 0 27.136z" />
+    </svg>
+  );
+}

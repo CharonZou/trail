@@ -3,6 +3,7 @@ import type { CommandShellId } from "../command-shells.js";
 import type { KeybindingOverrides } from "../keyboard-shortcuts.js";
 import type { NetworkProxySettings } from "../network-proxy.js";
 import type { NetworkPolicySettings } from "../network-policy.js";
+import type { OpenWithApp } from "../open-with.js";
 import type { ContextCompactionSettings } from "./sessions.js";
 import type { Mode } from "./common.js";
 import type { GlobalPermissionMode } from "./permissions.js";
@@ -100,6 +101,29 @@ export type AppSettings = {
    * Absent means 1. Range 0.8–1.5 in 0.025 steps. Window zoom is independent.
    */
   fontScale?: number;
+  /**
+   * Size tier of the Settings page. `full` is the shipped full-window takeover;
+   * `compact` reframes the same page as a centered panel over the app scrim.
+   * Absent means `full`, so an upgrade never changes what a user already sees.
+   * Presentation only: it changes no destination, control, or stored value.
+   */
+  settingsLayout?: "full" | "compact";
+  /**
+   * Frame of the main window (Settings ▸ General ▸ Appearance ▸ 界面排版).
+   * `window` is the shipped continuous surface: the sidebar and the work area
+   * share one ground and a hairline divides them. `floating` insets the main
+   * pane into its own rounded plate over the shell ground, so the sidebar and
+   * the working area read as separate plates. Absent means `window`.
+   * Presentation only: no destination, control, or stored value changes, and
+   * the Settings page keeps its own `settingsLayout` tier.
+   */
+  appFrame?: "window" | "floating";
+  /**
+   * Which program the conversation top bar's Open button uses next. Absent
+   * means `explorer`, so the button starts as the shipped file-manager action
+   * and only changes after the user presses a menu row.
+   */
+  openWithLastApp?: OpenWithApp;
   /**
    * Show model reasoning in the transcript. Off keeps the live thinking
    * indicator visible and hides completed reasoning rows and excerpts; absent

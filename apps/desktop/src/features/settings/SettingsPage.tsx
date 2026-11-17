@@ -8,6 +8,7 @@ import type {
 } from "@trail/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
+import { nextSettingsTier, settingsTierOf } from "../../lib/settings-tier";
 import {
   isSettingsDestinationHidden,
   SETTINGS_NAV_GROUP_LABELS,
@@ -24,6 +25,7 @@ import {
   IconGlobe,
   IconInfo,
   IconKeyboard,
+  IconLayoutSwap,
   IconPalette,
   IconSearch,
   IconServer,
@@ -32,7 +34,8 @@ import {
   IconCloudDown,
   IconMic,
 } from "../../components/icons";
-import { Badge, Button, cx, SegmentedControl, SettingsToggle } from "../../components/ui";
+import { Badge, Button, cx, SegmentedControl, SettingsToggle, TooltipButton } from "../../components/ui";
+import { OverlayBackdrop } from "../../components/OverlayBackdrop";
 import { ModelConfigPage } from "../../components/settings/ModelConfigPage";
 import { KeyboardShortcutsSection } from "../../components/settings/KeyboardShortcutsSection";
 import { FontFamilyRow } from "../../components/settings/FontFamilyRow";
@@ -40,6 +43,7 @@ import { ShowThinkingRow } from "../../components/settings/ShowThinkingRow";
 import { TranscriptDisplayModeRow } from "../../components/settings/TranscriptDisplayModeRow";
 import { RadialMenuSettings } from "../../components/settings/RadialMenuSettings";
 import { FontSizeRow } from "../../components/settings/FontSizeRow";
+import { AppFrameRow } from "../../components/settings/AppFrameRow";
 import { LanguageRow } from "../../components/settings/LanguageRow";
 import { SettingsMenuSelect } from "../../components/settings/SettingsMenuSelect";
 import { ThemeRow } from "../../components/settings/ThemeRow";
@@ -287,10 +291,49 @@ export function SettingsPage() {
   const activeNavItem = navItems.find((item) => item.id === tab);
   const activeTitleKey = activeNavItem?.titleKey ?? "settings.title";
   const tabNeedsSettings = ["general", "ai", "shortcuts", "agent"].includes(tab);
+  const settingsLayout = settingsTierOf(settings);
+  const nextSettingsLayout = nextSettingsTier(settingsLayout);
+  const layoutTierLabels = {
+    full: t("settings.layoutFull"),
+    compact: t("settings.layoutCompact"),
+  } as const;
+  const layoutSwapLabel = t("settings.layoutSwitch", {
+    tier: layoutTierLabels[nextSettingsLayout],
+  });
 
   return (
-    <div className="settings-shell settings-shell-full">
+    <>
+      {settingsLayout === "compact" ? (
+        // The veil is the pointer target that returns to the app, so it must
+        // stay outside the window drag region: Electron hit-testing would
+        // swallow the press before React ever sees it.
+        <OverlayBackdrop
+          className="settings-veil"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setPage("chat");
+          }}
+        />
+      ) : null}
+      <div
+        className={cx(
+          "settings-shell",
+          "settings-shell-full",
+          settingsLayout === "compact" && "settings-shell-compact",
+        )}
+      >
       <div className="settings-titlebar" aria-hidden="true" />
+      {/* The frame is what tells the two tiers apart, so the control only has to
+          name the tier this press lands on rather than restate both. */}
+      <TooltipButton
+        type="button"
+        className="settings-tier-swap no-drag"
+        tooltip={layoutSwapLabel}
+        ariaLabel={layoutSwapLabel}
+        onClick={() => void saveSettings({ settingsLayout: nextSettingsLayout })}
+      >
+        <IconLayoutSwap size={16} />
+      </TooltipButton>
       <aside className="settings-nav sidebar-surface" aria-label={t("settings.title")}>
         <div className="settings-nav-top drag">
           <div className="settings-search-wrap no-drag">
@@ -417,6 +460,7 @@ export function SettingsPage() {
                 <LanguageRow settings={settings} saveSettings={saveSettings} />
                 <FontFamilyRow settings={settings} saveSettings={saveSettings} />
                 <FontSizeRow settings={settings} saveSettings={saveSettings} />
+                <AppFrameRow settings={settings} saveSettings={saveSettings} />
                 {platform === "darwin" && (
                   <MacosWindowTranslucencyRow settings={settings} saveSettings={saveSettings} />
                 )}
@@ -696,6 +740,7 @@ export function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { useTranslation } from "react-i18next";
 import { installRendererApi } from "../../capture/renderer-api";
 import { StartupSplash } from "../../components/StartupSplash";
+import { appFrameOf } from "../../lib/app-frame";
 import { api } from "../../lib/api";
 import { composerSuggestion } from "../chat/composer/plugins/suggestion-bridge";
 import { subscribeRemoteInteractions } from "../../lib/remote-interactions";
@@ -24,6 +25,7 @@ import {
   saveSidebarWidth,
 } from "../../lib/sidebar-preferences";
 import { sidebarWidthBudget } from "../../lib/sidebar-resize";
+import { settingsTierOf } from "../../lib/settings-tier";
 import { commitWorkPanelPresentation } from "../../lib/work-panel-presentation";
 import {
   MAIN_PANE_MIN_WIDTH,
@@ -1055,6 +1057,13 @@ export function useAppShellRuntime() {
     ? `${workPanelToggleLabel} ${workPanelToggleShortcut}`
     : workPanelToggleLabel;
 
+  // The compact tier floats the panel over the app, so the chat tree has to
+  // stay painted under the scrim; the shipped takeover keeps hiding it.
+  const settingsCompact = page === "settings" && settingsTierOf(settings) === "compact";
+
+  // The main window frame is independent of the Settings tier: one decides how
+  // the working surface is plated, the other how the Settings page is drawn.
+  const appFrame = appFrameOf(settings);
 
   // What the panel asks of the shared budget, including a width it lent to a
   // reopened sidebar; the stored preference may be wider.
@@ -1113,6 +1122,8 @@ export function useAppShellRuntime() {
     startupWaitedMs,
     retryStartup,
     startupRetrying,
+    settingsCompact,
+    appFrame,
     sidebarToggleShortcut,
     workPanelToggleTooltip,
   };

@@ -97,6 +97,8 @@ export function AppShell() {
     startupWaitedMs,
     retryStartup,
     startupRetrying,
+    settingsCompact,
+    appFrame,
     sidebarToggleShortcut,
     workPanelToggleTooltip,
     requestedWorkPanelWidth,
@@ -146,7 +148,10 @@ export function AppShell() {
         <PortalVisibilityProvider visible={page !== "settings"}>
           <div
             className="app-chat-shell"
-            hidden={page === "settings"}
+            /* The compact tier's scrim dims this tree, so it has to keep
+               painting; the full-window takeover owns the whole surface and
+               hides it. Either way it stays inert below. */
+            hidden={page === "settings" && !settingsCompact}
             inert={page === "settings" ? true : undefined}
           >
             {!sidebarCollapsed || sidebarExiting ? (
@@ -368,6 +373,9 @@ export function AppShell() {
         "app-shell",
         !ready && "app-shell-boot",
         page === "settings" && ready && "settings-mode",
+        /* The floating frame plates the working surface; Settings owns its own
+           tier, so the frame class steps aside while Settings is open. */
+        appFrame === "floating" && page !== "settings" && "app-frame-floating",
         sidebarCollapsed && "sidebar-collapsed",
         workPanelMaximized && "work-panel-maximized",
         showSplash && "is-booting",

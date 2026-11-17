@@ -61,6 +61,17 @@ import { ComposerStatus } from "../features/chat/composer/ComposerStatus";
 
 const EMPTY_QUEUED_PROMPTS: QueuedPrompt[] = [];
 
+const THINKING_LEVEL_I18N_KEYS: Record<string, string> = {
+  off: "chat.thinkingLevelOff",
+  minimal: "chat.thinkingLevelMinimal",
+  low: "chat.thinkingLevelLow",
+  medium: "chat.thinkingLevelMedium",
+  high: "chat.thinkingLevelHigh",
+  xhigh: "chat.thinkingLevelXhigh",
+  max: "chat.thinkingLevelMax",
+  omit: "chat.thinkingLevelOmit",
+};
+
 export {
   THINKING_LEVELS,
   thinkingLevelForProvider,
@@ -391,7 +402,8 @@ export function Composer({
     thinkingProvider,
     configuredThinkingLevel,
   );
-  const thinkingLabel = thinkingLevel;
+  const thinkingLabelKey = THINKING_LEVEL_I18N_KEYS[thinkingLevel];
+  const thinkingLabel = thinkingLabelKey ? t(thinkingLabelKey) : thinkingLevel;
   const modelLabel = modelId
     ? composerModelDisplayName(provider, modelId)
     : t("chat.model");
@@ -420,6 +432,24 @@ export function Composer({
     setModeOpen(false);
     setPermissionOpen(false);
   }, [controlsBlocked]);
+
+  // Ctrl+T cycles thinking levels: off -> low -> medium -> high -> xhigh -> max -> off
+  useEffect(() => {
+    if (controlsBlocked) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!event.ctrlKey || event.key.toLowerCase() !== "t") return;
+      if (event.isComposing) return;
+      const levels = modelMenu.thinkingMenuLevels;
+      if (levels.length < 2) return;
+      event.preventDefault();
+      const currentIndex = levels.findIndex((l) => l === thinkingLevel);
+      const nextIndex = (currentIndex + 1) % levels.length;
+      const next = levels[nextIndex];
+      if (next) void modelMenu.commitThinkingLevel(next);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [controlsBlocked, thinkingLevel, modelMenu]);
 
   const composerTransformController = useComposerTransforms({
     transforms: composerTransforms,

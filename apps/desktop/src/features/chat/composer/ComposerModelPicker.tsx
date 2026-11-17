@@ -1,9 +1,12 @@
 import type { TFunction } from "i18next";
 import type { ReactNode } from "react";
+import { useId } from "react";
 import { ComposerModelList } from "./ComposerModelList";
 import { AnchoredMenu } from "../../../components/settings/AnchoredMenu";
 import { IconBot, IconChevronDown, IconZap } from "../../../components/icons";
 import { TooltipButton } from "../../../components/ui";
+import { useAppStore } from "../../../stores/app-store";
+import { brandGlyphForProvider, type BrandGlyph } from "../../../components/settings/provider-brand-icons";
 import type { useComposerModelMenu } from "./hooks/useComposerModelMenu";
 import { ThinkingLevelSlider } from "./ThinkingLevelSlider";
 
@@ -58,6 +61,10 @@ export function ComposerModelPicker({
     onMenuKeyDown,
   } = controller;
   const fastSuffix = fastMode ? ` · ${t("chat.fastModeBadge")}` : "";
+  const providers = useAppStore((s) => s.providers);
+  const activeProvider = providers.find((p) => p.id === selectedProviderId);
+  const brandGlyph = activeProvider ? brandGlyphForProvider(activeProvider) : undefined;
+  const brandScope = useId().replace(/[^A-Za-z0-9_-]/g, "");
 
   return (
     <AnchoredMenu
@@ -92,7 +99,7 @@ export function ComposerModelPicker({
           }}
         >
           <span className="composer-model-thinking-icon" aria-hidden="true">
-            <IconBot size={14} />
+            {brandGlyph ? <BrandMarkInline glyph={brandGlyph} scope={brandScope} size={14} /> : <IconBot size={14} />}
           </span>
           <span className="composer-model-thinking-model">{modelLabel}</span>
           {thinkingLevel !== "off" ? (
@@ -125,10 +132,55 @@ export function ComposerModelPicker({
             levels={thinkingMenuLevels}
             level={thinkingLevel}
             label={t("chat.reasoningLevel")}
+            title={t("chat.thinkingLevelTitle")}
+            displayLabel={thinkingLabel}
             commit={commitThinkingLevel}
           />
         ) : null}
       </div>
     </AnchoredMenu>
+  );
+}
+
+function BrandMarkInline({ glyph, scope, size }: { glyph: BrandGlyph; scope: string; size: number }) {
+  return (
+    <svg viewBox={glyph.viewBox} width={size} height={size} aria-hidden="true">
+      {glyph.gradients ? (
+        <defs>
+          {glyph.gradients.map((gradient) => (
+            <linearGradient
+              key={gradient.id}
+              id={`composer-brand-${gradient.id}-${scope}`}
+              gradientUnits="userSpaceOnUse"
+              x1={gradient.x1}
+              y1={gradient.y1}
+              x2={gradient.x2}
+              y2={gradient.y2}
+            >
+              {gradient.stops.map((stop, index) => (
+                <stop
+                  key={index}
+                  offset={stop.offset}
+                  stopColor={stop.color}
+                  stopOpacity={stop.opacity}
+                />
+              ))}
+            </linearGradient>
+          ))}
+        </defs>
+      ) : null}
+      {glyph.paths.map((path, index) => (
+        <path
+          key={index}
+          d={path.d}
+          style={{
+            fill: path.gradient
+              ? `url(#composer-brand-${path.gradient}-${scope})`
+              : (path.fill ?? "currentColor"),
+          }}
+          fillRule={path.fillRule}
+        />
+      ))}
+    </svg>
   );
 }

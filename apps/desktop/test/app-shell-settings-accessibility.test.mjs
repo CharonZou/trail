@@ -17,7 +17,10 @@ test("settings hides and inerts chat without aria-hiding a focused descendant", 
   )?.[0];
 
   assert.ok(chatShell, "chat shell must exist");
-  assert.match(chatShell, /hidden=\{page === "settings"\}/);
+  // Settings owns the surface in both tiers: the shipped takeover hides the
+  // tree, the compact tier keeps it painting under the scrim but inert, so the
+  // inert attribute — not `hidden` — is what isolates it in every tier.
+  assert.match(chatShell, /hidden=\{page === "settings" && !settingsCompact\}/);
   assert.match(chatShell, /inert=\{page === "settings" \? true : undefined\}/);
   assert.doesNotMatch(chatShell, /aria-hidden/);
 });
@@ -45,6 +48,6 @@ test("chat code loads inside the existing route boundary and stays mounted in Se
   );
   assert.match(
     appShell,
-    /className="app-chat-shell"[\s\S]*?hidden=\{page === "settings"\}[\s\S]*?<ChatSurface visible=\{page === "chat"\} \/>/,
+    /className="app-chat-shell"[\s\S]*?hidden=\{page === "settings" && !settingsCompact\}[\s\S]*?<ChatSurface visible=\{page === "chat"\} \/>/,
   );
 });

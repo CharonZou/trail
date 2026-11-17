@@ -221,6 +221,20 @@
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--ds-accent) 28%, transparent);
 }
 
+/*
+ * The size-tier swap sits in the top band, not the rail: the frame is what tells
+ * the two tiers apart, so the control only has to name the other one.
+ * `.settings-titlebar` paints an opaque strip across this corner (z-index 10)
+ * and owns the drag region, so the button stacks above it and opts out of the
+ * drag.
+ */
+.settings-tier-swap {
+  position: absolute;
+  top: calc((var(--ds-toolbar-height) - var(--ds-work-panel-toggle-size)) / 2);
+  right: 12px;
+  z-index: 11;
+}
+
 .settings-nav-scroll {
   display: flex;
   flex-direction: column;
@@ -305,6 +319,61 @@
 .settings-content-inner {
   width: 100%;
   margin: 0;
+}
+
+/*
+ * The compact size tier: the same page tree, floated as a centered panel over
+ * the shared scrim. Nothing here may move the full tier — that is the shipped
+ * full-window takeover — so every rule is gated on `.settings-shell-compact`
+ * and only restyles the frame, the geometry and the chrome clearance.
+ *
+ * `inset: 0` with `margin: auto` centers a fixed box without a transform, so
+ * anchored menus and plugin overlay drawers that portal to #trail-overlays keep
+ * resolving against the viewport, and the absolute drag band inside the shell
+ * now lands on the panel's own top strip instead of the window's.
+ */
+.settings-veil {
+  position: fixed;
+  inset: 0;
+  /* Above every app surface the shell stacks (its top layer is 200) and below
+   * the 1000+ caption band, so the window buttons keep working over the scrim. */
+  z-index: 400;
+  background: var(--ds-scrim);
+}
+
+.settings-shell-compact {
+  /* One expression for the panel's width: the swap control reads it to clear
+   * the caption buttons when a narrow window pulls that band inside the panel. */
+  --settings-panel-width: min(clamp(720px, 54vw, 1040px), calc(100vw - 48px));
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: var(--settings-panel-width);
+  height: min(clamp(480px, 74vh, 880px), calc(100vh - 48px));
+  z-index: 450;
+  overflow: hidden;
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--radius-lg-plus);
+  background: var(--ds-bg-primary);
+  box-shadow: var(--ds-shadow-dialog);
+}
+
+/* chrome.css keeps .settings-shell transparent so macOS vibrancy reaches the
+ * full-page surface. A floating panel owns its own surface here; only the veil
+ * keeps the scrim. Scenic plugin themes still override both, as they already
+ * own the Settings canvas. */
+:root[data-platform="darwin"] .settings-shell.settings-shell-compact {
+  background: var(--ds-bg-primary);
+}
+
+/* The rail no longer sits under the traffic lights or the caption buttons, so
+ * the drag band inside the panel owns the top clearance instead. */
+.settings-shell-compact .settings-nav-top {
+  padding: var(--ds-toolbar-height) 12px 6px;
+}
+
+.settings-shell-compact .settings-content {
+  padding: calc(var(--ds-toolbar-height) + 8px) 28px 40px 24px;
 }
 
 /* The renderer owns this sandboxed iframe. It stays in normal Settings flow,

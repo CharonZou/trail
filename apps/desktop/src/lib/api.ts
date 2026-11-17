@@ -31,6 +31,8 @@ import type {
   PendingInteractiveRequests,
   AgentInstructionFile,
   AppSettings,
+  OpenWithEditorApp,
+  ProjectOpenWithResult,
   JevKeyCheckResult,
   CommandShellCatalog,
   AppVersionInfo,
@@ -161,6 +163,7 @@ import {
   defaultCommandShellForPlatform,
   IPC,
   isCommandShellId,
+  isOpenWithApp,
   normalizeLargePasteThreshold,
   normalizeMode,
   normalizeNetworkProxy,
@@ -429,6 +432,14 @@ function isTranscriptDisplayModeValue(value: unknown): value is TranscriptDispla
   return value === "flat" || value === "command-first" || value === "fully-folded";
 }
 
+function isSettingsLayoutValue(value: unknown): value is NonNullable<AppSettings["settingsLayout"]> {
+  return value === "full" || value === "compact";
+}
+
+function isAppFrameValue(value: unknown): value is NonNullable<AppSettings["appFrame"]> {
+  return value === "window" || value === "floating";
+}
+
 export function normalizeSettings(settings: AppSettings): AppSettings {
   return {
     ...settings,
@@ -486,6 +497,30 @@ export function validateSettingsWrite(settings: AppSettings): AppSettings {
     !isTranscriptDisplayModeValue(settings.transcriptDisplayMode)
   ) {
     throw Object.assign(new Error("transcriptDisplayMode is invalid"), {
+      errorCode: "INVALID_PARAMS",
+    });
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(settings, "settingsLayout") &&
+    !isSettingsLayoutValue(settings.settingsLayout)
+  ) {
+    throw Object.assign(new Error("settingsLayout is invalid"), {
+      errorCode: "INVALID_PARAMS",
+    });
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(settings, "appFrame") &&
+    !isAppFrameValue(settings.appFrame)
+  ) {
+    throw Object.assign(new Error("appFrame is invalid"), {
+      errorCode: "INVALID_PARAMS",
+    });
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(settings, "openWithLastApp") &&
+    !isOpenWithApp(settings.openWithLastApp)
+  ) {
+    throw Object.assign(new Error("openWithLastApp is invalid"), {
       errorCode: "INVALID_PARAMS",
     });
   }
@@ -796,6 +831,8 @@ export const api = {
     }),
   openProjectFolder: (path: string) =>
     invoke<{ ok: boolean; path: string }>(IPC.invoke.projectOpenFolder, path),
+  openProjectWith: (app: OpenWithEditorApp, path: string) =>
+    invoke<ProjectOpenWithResult>(IPC.invoke.projectOpenWith, { app, path }),
   renameSession: (id: string, title: string) =>
     invoke<{ ok: boolean }>(IPC.invoke.sessionRename, id, title),
   /** Ask the host for a first-prompt title; it refuses a renamed session. */

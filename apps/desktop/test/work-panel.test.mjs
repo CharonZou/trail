@@ -156,10 +156,11 @@ test("a viewport-fixed toggle is the sole pointer collapse control", () => {
   // `+` and maximize are chrome icon controls: transparent at rest, hover wash
   // only. A filled tile of their own re-seated the header's quiet group as two
   // filled squares beside the toggle (chrome-control-geometry.test.mjs owns the
-  // family and its interaction states).
+  // family and its interaction states). The family's tail also carries the
+  // Settings size-tier swap, so the match ends at the opening brace.
   assert.match(
     globalStyles,
-    /\.work-panel-new-tab,\n\.work-panel-maximize \{[^}]*background:\s*transparent;/s,
+    /\.work-panel-new-tab,\n\.work-panel-maximize[^{]*\{[^}]*background:\s*transparent;/s,
   );
   assert.doesNotMatch(
     globalStyles,

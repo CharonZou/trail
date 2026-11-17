@@ -13,7 +13,12 @@ test("Settings hides the mounted chat shell and keeps its portal layers out of v
     readFile(new URL("../src/lib/portal-visibility.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(appShell, /<PortalVisibilityProvider visible=\{page !== "settings"\}>/);
-  assert.match(appShell, /className="app-chat-shell"[\s\S]*?hidden=\{page === "settings"\}/);
+  // The full tier hides the tree; the compact tier lets it paint under the scrim
+  // and keeps it inert instead. Either way its portal layers stay out of view.
+  assert.match(
+    appShell,
+    /className="app-chat-shell"[\s\S]*?hidden=\{page === "settings" && !settingsCompact\}/,
+  );
   assert.match(appShell, /inert=\{page === "settings" \? true : undefined\}/);
   const chatShell = appShell.match(/<div\s+className="app-chat-shell"[\s\S]*?>/)?.[0];
   assert.ok(chatShell, "chat shell must exist");

@@ -3,6 +3,7 @@ import {
   SESSION_THINKING_LEVELS,
   defaultCommandShellForPlatform,
   isCommandShellId,
+  isOpenWithApp,
   normalizeRadialMenuPreferences,
   radialMenuWriteError,
   validateNetworkProxy,
@@ -203,6 +204,9 @@ export function createProviderCatalogRuntime({
       networkProxy?: unknown;
       macosWindowTranslucency?: unknown;
       transcriptDisplayMode?: unknown;
+      settingsLayout?: unknown;
+      appFrame?: unknown;
+      openWithLastApp?: unknown;
       radialMenu?: unknown;
     };
     if (
@@ -244,6 +248,32 @@ export function createProviderCatalogRuntime({
       value.transcriptDisplayMode !== "fully-folded"
     ) {
       throw Object.assign(new Error("transcriptDisplayMode is invalid"), {
+        errorCode: ErrorCodes.INVALID_PARAMS,
+      });
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(value, "settingsLayout") &&
+      value.settingsLayout !== "full" &&
+      value.settingsLayout !== "compact"
+    ) {
+      throw Object.assign(new Error("settingsLayout is invalid"), {
+        errorCode: ErrorCodes.INVALID_PARAMS,
+      });
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(value, "appFrame") &&
+      value.appFrame !== "window" &&
+      value.appFrame !== "floating"
+    ) {
+      throw Object.assign(new Error("appFrame is invalid"), {
+        errorCode: ErrorCodes.INVALID_PARAMS,
+      });
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(value, "openWithLastApp") &&
+      !isOpenWithApp(value.openWithLastApp)
+    ) {
+      throw Object.assign(new Error("openWithLastApp is invalid"), {
         errorCode: ErrorCodes.INVALID_PARAMS,
       });
     }

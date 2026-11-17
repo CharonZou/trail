@@ -26,16 +26,25 @@ test("open-folder is exposed as a project-only IPC action", () => {
 });
 
 test("main opens only a registered project directory", () => {
+  const gateStart = mainSource.indexOf("async function knownProjectPath(");
+  const gate = mainSource.slice(
+    gateStart,
+    mainSource.indexOf("handle(IPC.invoke.projectOpenFolder", gateStart),
+  );
   const start = mainSource.indexOf("handle(IPC.invoke.projectOpenFolder");
   const end = mainSource.indexOf("handle(IPC.invoke.projectOpen,", start);
   const handler = mainSource.slice(start, end);
 
+  assert.ok(gateStart >= 0, "the shared project path gate should exist");
   assert.ok(start >= 0 && end > start, "project open-folder handler should exist");
-  assert.match(handler, /host\.call\("projects\.list"\)/);
-  assert.match(handler, /resolve\(candidate\) === projectPath/);
-  assert.match(handler, /ErrorCodes\.INVALID_ARGUMENT/);
-  assert.match(handler, /ErrorCodes\.NOT_FOUND/);
-  assert.match(handler, /statSync\(projectPath\)\.isDirectory\(\)/);
+  // One gate for both open channels: it resolves the request against the
+  // host's own project records before anything reaches the OS.
+  assert.match(gate, /host\.call\("projects\.list"\)/);
+  assert.match(gate, /resolve\(candidate\) === projectPath/);
+  assert.match(gate, /ErrorCodes\.INVALID_ARGUMENT/);
+  assert.match(gate, /ErrorCodes\.NOT_FOUND/);
+  assert.match(gate, /statSync\(projectPath\)\.isDirectory\(\)/);
+  assert.match(handler, /await knownProjectPath\(path\)/);
   assert.match(handler, /shell\.openPath\(stripWinLongPrefix\(projectPath\)\)/);
   assert.match(handler, /return \{ ok: true, path: projectPath \}/);
 });

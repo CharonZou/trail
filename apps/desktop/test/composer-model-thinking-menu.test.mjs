@@ -42,23 +42,23 @@ test("the menu root carries the reasoning slider itself", () => {
   assert.match(composerSource, /type="range"/);
   assert.match(composerSource, /className="composer-thinking-range"/);
   assert.match(sliderSource, /aria-label=\{label\}/);
-  assert.match(sliderSource, /aria-valuetext=\{levels\[index\] \?\? level\}/);
+  assert.match(sliderSource, /aria-valuetext=\{displayLabel \?\? levels\[index\] \?\? level\}/);
   assert.match(composerSource, /const commitThinkingLevel = /);
   // The slider is the only path that writes a level, and its write is
   // latest-wins: the queue owns the ordering.
   assert.match(composerSource, /return queue\.commit\(level\)/);
   assert.match(pickerSource, /commit=\{commitThinkingLevel\}/);
   assert.match(composerSource, /if \(SLIDER_KEYS\.has\(event\.key\)\) event\.stopPropagation\(\);/);
-  assert.match(composerSource, /composer-thinking-tick/);
+  assert.match(composerSource, /composer-thinking-dot/);
   assert.match(composerSource, /createLatestCommitQueue/);
   assert.match(composerSource, /thinkingQueueRef\.current\?\.invalidate\(\)/);
-  assert.match(sliderSource, /tabIndex=\{-1\}/);
-  assert.match(sliderSource, /className="composer-thinking-ticks" aria-hidden="true"/);
+  assert.match(sliderSource, /className="composer-thinking-thumb" aria-hidden="true"/);
+  assert.match(sliderSource, /className="composer-thinking-sparks" aria-hidden="true"/);
   assert.doesNotMatch(pickerSource, /composer-thinking-tick[\s\S]{0,200}role="menuitemradio"/);
   assert.match(stylesSource, /\.composer-thinking-range::-webkit-slider-runnable-track/);
   assert.match(stylesSource, /\.composer-thinking-range::-webkit-slider-thumb/);
   assert.match(stylesSource, /\.composer-thinking-range::-moz-range-thumb/);
-  assert.match(stylesSource, /\.composer-thinking-tick\.active\s*\{/);
+  assert.match(stylesSource, /\.composer-thinking-dot\.active\s*\{/);
   assert.doesNotMatch(composerSource, /thinkingMode|showThinkingMode|ThinkingSelectionMode|thinkingCommitChainRef/);
 });
 
@@ -69,14 +69,13 @@ test("the reasoning slider aligns each track dot and label to the thumb", () => 
   // the native thumb's stops onto the same column centers for every n.
   assert.match(sliderSource, /className="composer-thinking-rail"/);
   assert.match(sliderSource, /className="composer-thinking-dots" aria-hidden="true"/);
-  assert.match(sliderSource, /className="composer-thinking-ticks" aria-hidden="true"/);
 
   // Rail, dots and labels all key off --stop-count; the dots and labels are
   // full-width grids and the input carries the inset.
-  assert.match(stylesSource, /--thinking-thumb-radius: 7px/);
+  assert.match(stylesSource, /--thinking-thumb-radius: 14px/);
   assert.match(stylesSource, /--thinking-inset: calc\(100% \/ \(2 \* var\(--stop-count, 1\)\) - var\(--thinking-thumb-radius\)\)/);
   assert.match(stylesSource, /\.composer-thinking-dots \{[\s\S]*?grid-template-columns: repeat\(var\(--stop-count, 1\), minmax\(0, 1fr\)\)/);
-  assert.match(stylesSource, /\.composer-thinking-ticks \{[\s\S]*?grid-template-columns: repeat\(var\(--stop-count, 1\), minmax\(0, 1fr\)\)/);
+  assert.match(stylesSource, /\.composer-thinking-thumb \{[\s\S]*?left: calc\(100% \/ \(2 \* var\(--stop-count, 1\)\) \+ var\(--composer-thinking-progress, 0%\)\)/);
   assert.match(stylesSource, /\.composer-thinking-range \{[\s\S]*?padding: 0 var\(--thinking-inset\)/);
 
   // Track dots sit on the rail (accent for the selected, muted for the rest)

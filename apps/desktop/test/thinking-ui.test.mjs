@@ -88,12 +88,21 @@ test("composer exposes the runtime thinking level order and provider filtering",
   assert.match(composerSource, /thinkingMenuLevels/);
 });
 
-test("thinking levels use their canonical English values without i18n", () => {
-  assert.match(composerSource, /const thinkingLabel = thinkingLevel;/);
-  // The slider's ticks print the canonical level values themselves.
-  assert.match(composerSource, /onClick=\{\(\) => select\(stop\)\}>\{candidate\}<\/button>/);
-  assert.doesNotMatch(composerSource, /THINKING_LEVEL_(LABELS|I18N_KEYS)/);
-  assert.doesNotMatch(composerSource, /chat\.effort(?:Off|Minimal|Low|Mid|High|Xhigh|Max)/);
+test("thinking levels render through the i18n catalog", () => {
+  // AGENTS §8 routes every user-visible string through i18n, so the level
+  // names come from the catalog rather than the canonical English values.
+  assert.match(composerSource, /THINKING_LEVEL_I18N_KEYS/);
+  assert.match(
+    composerSource,
+    /const thinkingLabelKey = THINKING_LEVEL_I18N_KEYS\[thinkingLevel\];/,
+  );
+  assert.match(
+    composerSource,
+    /const thinkingLabel = thinkingLabelKey \? t\(thinkingLabelKey\) : thinkingLevel;/,
+  );
+  assert.match(composerSource, /chat\.thinkingLevel(?:Off|Minimal|Low|Medium|High|Xhigh|Max|Omit)/);
+  // The slider renders a range plus its decoration; no raw level labels remain.
+  assert.doesNotMatch(composerSource, /onClick=\{\(\) => select\(stop\)\}/);
   assert.doesNotMatch(transcriptSource, /thinkingLevel\./);
   assert.doesNotMatch(settingsSource, /thinkingLevel\./);
 });

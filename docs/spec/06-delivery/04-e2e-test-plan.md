@@ -802,6 +802,34 @@
   other Electron power request is present at baseline. Controller lifecycle
   and Host settings round-trip also have targeted tests.
 
+### E2E-SETTINGS-layout-tier
+
+- **Preconditions:** An isolated desktop profile with `settingsLayout` absent,
+  one conversation with history, and a plugin dialog reachable from Settings.
+- **Steps:** Open Settings and confirm the tier switch is the single icon button
+  in the top-right of the band and its tooltip names 紧凑 / Compact. Press it,
+  then navigate to a non-General destination and scroll it, open a dialog, drag
+  the panel's top strip to move the window, press the scrim outside the panel,
+  and try to click or Tab into the app behind it. Restart the app on the same
+  profile, reopen Settings, and switch back to 铺满 / Full.
+- **Expected:** An absent field renders the shipped full-window page unchanged,
+  pixel for pixel. Compact reframes the same page as one centered panel over the
+  dimmed veil, and the veil dims the **painted app** rather than an empty window:
+  the conversation behind the panel stays visible but `inert`, so a press, a Tab,
+  or an assistive-technology traversal never reaches it. The destination and its
+  scroll position survive the switch, no category remounts, the native caption
+  buttons stay clickable and their band no longer cuts a rectangle out of the
+  veil, the tier switch keeps its 12px corner seat and never sits under a caption
+  button at the minimum window width, dragging the panel's top strip moves the
+  window, and pressing the scrim returns to the chat shell while a drag that
+  starts there does not. The tier persists across restart, is not a Settings
+  search hit, and changes no stored value other than `settingsLayout`.
+- **Specs linked:** `04-ux/06-settings-ia.md` §1, §4 items 1–2, 10–11, 29
+- **Acceptance:** Quality
+- **Status:** Covered by the source-contract suite
+  `pnpm --filter @trail/desktop test test/settings-layout-tier.test.mjs`; the
+  live Electron walk-through remains `Draft`.
+
 ### E2E-IMAGES-provider-save-feedback
 
 - **Preconditions:** Image configuration UI fixture; English and Chinese.
@@ -11837,6 +11865,38 @@ This test plan spec is accepted when:
   checks that both menu handlers always open the confirmation dialog without
   deleting, and that X/Cancel only dismiss while the confirm handler owns the
   delete call; the rendered Settings/sidebar journey remains Draft
+
+### E2E-PROJECT-open-with-in-an-external-editor
+
+- **Preconditions**: an isolated desktop profile with `openWithLastApp` absent,
+  one local project conversation, one remote-host conversation, one temporary
+  conversation, and at least one of VS Code / Trae / IntelliJ IDEA actually
+  installed on the machine.
+- **Steps**: press the top bar's Open label half. Open the caret menu and read
+  its rows. Press the row of the installed editor, then the row of a program
+  that is not installed. Restart on the same profile and press the label half
+  again. Switch to the remote and the temporary conversations, then drag the
+  window by the top bar beside the control.
+- **Expected**: with the field absent, the label half opens the folder in the
+  system file manager exactly as it did before this control existed, and no row
+  is marked. Pressing a row starts that editor on the conversation's own
+  folder, marks that row, and after a restart the label half carries that
+  program's mark and opens it directly — the only stored value that changes is
+  `openWithLastApp`. A program that is not installed answers with localized
+  copy naming it rather than a silent no-op, and the interface shows a reason,
+  not an OS error string. The menu keeps exactly its four rows whatever is
+  installed. The control is absent for the remote and temporary conversations,
+  and the band beside it still drags the window.
+- **Specs linked**: `03-runtime/01-ipc-protocol.md` (`project/openWith`),
+  `03-runtime/04-data-storage.md`, `04-ux/01-ui-ia.md` §2
+- **Acceptance criterion**: D (workspace), Security
+- **Milestone**: M6+
+- **Status**: Partially automated —
+  `apps/desktop/test/project-open-with.test.mjs` and
+  `apps/desktop/test/external-app-resolution.test.mjs` cover the allowlist, the
+  candidate table, the detached shell-free spawn, the shared project-path gate,
+  the top-bar seat and the copy; the live press against a real installed editor
+  remains Draft
 
 ### E2E-SESSION-two-click-delete-arms-first
 

@@ -2,7 +2,36 @@
 
 ## 1. Settings root (Codex full-page shell)
 
-Settings is a **full-window page** that replaces the app sidebar + main chrome (Codex electron behavior):
+Settings has two size tiers, set from one icon button in the top-right corner
+of the page and persisted in the optional `AppSettings.settingsLayout` field. An
+absent field resolves to `full`, so an upgrade never changes what an existing
+user sees.
+
+The **main window frame** is a separate appearance preference
+(`AppSettings.appFrame`, set from General ▸ Appearance ▸ 界面排版): `window`
+keeps the shipped continuous surface and `floating` turns the work area into its
+own sheet over the rail-coloured shell ground. It is not a Settings tier and the
+two never write each other's field.
+
+- **Full page / 整页** — Settings is a **full-window page** that replaces the app
+  sidebar + main chrome (Codex electron behavior):
+- **Floating panel / 浮层** — the same page, rail and content included, restyled as one
+  centered floating panel over the shared `--ds-scrim`. The scrim dims the
+  **live app**, not an empty window: the chat tree keeps painting under it and
+  is `inert`, so it is visible but a press, a Tab, or an assistive-technology
+  traversal can never reach it — the scrim owns every pointer over the app.
+  Pressing the scrim returns to the app; the scrim is deliberately **not** a
+  window drag region, because Electron hit-testing would swallow the press
+  before the dismiss handler runs. The tier is presentation-only and restyles one
+  tree: no destination remounts and no scroll container resets when it changes.
+  The panel is bounded by `min(clamp(720px, 54vw, 1040px), 100vw - 48px)` wide
+  and `min(clamp(480px, 74vh, 880px), 100vh - 48px)` tall, keeps an opaque
+  surface under macOS vibrancy, and neutralizes the native caption-button fill so
+  the panel reads as the top layer. A scenic plugin theme keeps its own image
+  canvas; the compact panel does not paint over it.
+
+Everything below describes the `full` tier and is unchanged by the `compact`
+tier except where a rule is explicitly scoped to it:
 
 - Switching to a different Settings destination starts the content pane at the
   top, including plugin destinations. Re-selecting the current destination or
@@ -30,6 +59,17 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   automatic collapse/restore transitions on the visible shell still animate;
   initial presentation and route restoration do not.
 - Top of rail: traffic-light clearance and the pill **Search settings…**
+- The size tier has one entry: an icon button in the top-right corner of the
+  46px band — the same 28px seat, vertical centering and `no-drag` treatment as
+  the shell's other chrome controls — and it names the tier it lands on
+  (`切换为浮层` / `Switch to Floating panel`), so the control states the result
+  of the press instead of restating both options. It is the last control in that
+  band and clears the native caption buttons: in the `full` tier it inherits the
+  window-controls width offset the rest of the band already uses, and in the
+  `compact` tier it only moves when a narrow window pulls that band over the
+  panel.
+  The Appearance card's **Interface layout** row is the main window frame, not
+  this tier: it writes `appFrame`, so the two preferences stay independent.
 - The **Back to app** (`返回应用`) action is pinned to the foot of the rail, not
   the top: it keeps its chevron + label form as a 32px control, and it shares
   the horizontal band of the main shell's sidebar footer icon row (settings /
@@ -42,7 +82,10 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   rail drags via its own top strip on the rail surface, and the content pane's
   band starts at the rail edge on the primary surface. The band must never paint
   the primary surface over the rail, which would show two colors in one top row.
-  Interactive controls remain explicitly non-draggable
+  Interactive controls remain explicitly non-draggable. In the `compact` tier the
+  band belongs to the panel instead of the window edge: the rail drops its
+  traffic-light inset and the panel's own top strip carries the drag region, so
+  the window still moves while the scrim stays clickable-to-dismiss
 - A compact navigation directory with short, parallel labels and icons, in this
   exact order:
   1. **General / 常规** — Lucide `SlidersHorizontal` (appearance)
@@ -160,6 +203,21 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
     shared Lucide icon scales in proportion without a reload. Window Zoom
     In/Out/Reset stays independent. The UI never asks for a px value
     (D343 / ADR 0180)
+  - **Interface layout**: a two-option segmented row (`整窗` / `浮卡`) that
+    writes `appFrame`, the main window frame. `整窗` keeps the shipped
+    continuous surface, where the sidebar and the work area share one ground and
+    only a hairline divides them. `浮卡` takes the reference shape: the shell
+    ground becomes the rail's own colour, so the rail and the 46px chrome band
+    read as one plate, and the work area becomes a 16px sheet inset 10px from the
+    rail, the right edge and the bottom, starting below the band. The window
+    buttons and the breadcrumb stay on the ground, and the transcript drops its
+    own band reserve inside the sheet. An open dock joins that sheet instead of
+    standing outside it: the sheet drops its right seam and right corners, the
+    dock takes the same band and seam, and its own tone step remains the only
+    division. Presentation only: it changes no
+    destination, control, or stored value, only the ground and the sheet change,
+    and it never writes the Settings page's own tier (`settingsLayout`). Absent
+    resolves to `整窗`.
   - **Translucent window** (macOS only): one switch for the native window
     surface (ADR 0332). On — and absent — keeps the shipped `sidebar` vibrancy
     material behind a transparent backing; off paints the opaque surface that
@@ -981,9 +1039,13 @@ system while preserving their different data ownership:
 
 ## 4. Acceptance
 
-1. Opening Settings hides the coding app sidebar (full-page takeover)
-2. Rail shows the search pill at the top, the back-to-app action pinned at the
-   foot on the main sidebar's footer icon line, and exactly General / 常规, AI,
+1. Opening Settings takes the app surface away from the coding shell: the
+   `full` tier hides it, the `compact` tier keeps it painting under the scrim
+   but `inert`, so nothing behind the panel is reachable
+2. Rail shows the search pill at the top, the size tier switch in the top-right
+   corner of the band rather than in the rail, the
+   back-to-app action pinned at the foot on the main sidebar's footer icon
+   line, and exactly General / 常规, AI,
    Shortcuts / 快捷键, Instructions / 指令, Models / 模型, Skills / 技能, MCP,
    Subagents / 子智能体, Projects / 项目, Cloud sync / 云同步 and Remote Hosts /
    远程主机 (both Experimental, all builds), and Info / 信息 in that order. Voice
@@ -1015,10 +1077,13 @@ system while preserving their different data ownership:
    default model) is data rather than prose and stays visible, and a form
    field's hint follows the same rule as a row's explanation
 10. Dragging the empty top band from either side of Settings moves the native
-   window without blocking Back, search, or navigation controls
+   window without blocking Back, search, tier, or navigation controls; in the
+   `compact` tier a press that starts and ends on the scrim returns to the app,
+   and dragging across the scrim never does
 11. Resizing the window expands or contracts the content cards with the
     available content pane; the fixed rail and pane gutters remain intact and
-    the page does not gain horizontal overflow
+    the page does not gain horizontal overflow. In the `compact` tier the panel
+    keeps at least a 24px window margin at every size instead of overflowing
 12. Project archive always exposes archived records and can restore them without
     duplicating the index in the app shell
 13. Project archive renders no description line — no hero, banner, or page-level
@@ -1080,6 +1145,10 @@ system while preserving their different data ownership:
     - Status indicators → `Badge` (not inline `<span>` with manual classes)
     - Layout → `SettingsCard` + `SettingsRow` from `features/settings/primitives`
     Inline reimplementation of any shared primitive is a spec violation.
+29. The size tier is a presentation preference, not a destination or a search
+    hit: the write path accepts only `full` / `compact`, an absent value renders
+    `full`, the choice survives a restart, and switching tiers keeps the current
+    destination and its scroll position.
 
 ## 5. General chrome metrics
 
@@ -1095,5 +1164,7 @@ the current window width:
 | Section title | 28px / 560, first baseline ~y70 |
 | Content width | Full available pane width after rail and gutters |
 | Card radius | ~14px elevated stroke |
+| Compact panel | centered `min(clamp(720px, 54vw, 1040px), 100vw - 48px)` × `min(clamp(480px, 74vh, 880px), 100vh - 48px)`, `--radius-lg-plus`, `--ds-shadow-dialog`, over `--ds-scrim`; the scrim dims the painted app tree, which stays `inert` |
+| Tier switch | 28px chrome seat, 16px icon, top-right of the band, `z-index` above the drag region, clears `--ds-window-controls-width` |
 | Toggle | **32×20** thumb 16, neutral accent on (not green) |
 | Open-target pill | leading VS Code glyph |

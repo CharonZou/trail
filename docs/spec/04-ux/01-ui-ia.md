@@ -164,8 +164,17 @@ destination, chat as the home surface, tools and permissions inline.
   Goal shows the same approval boundary for an outcome contract. Both keep the
   permission-mode chip and expose their host-written immutable `.pi/plan/*.md`
   or `.pi/goal/*.md` artifact opener after submission. The conversation top bar
-  retains only the task title and window actions; the Composer owns model and
-  reasoning selection as well as mode control.
+  retains the task title, the project Open control, and the window actions; the
+  Composer owns model and reasoning selection as well as mode control.
+  **Open** is a split button in the right action lane: its label half starts
+  the program the user chose last (`project/openWith`, or the file manager when
+  nothing has been chosen yet) and its caret half lists the four fixed rows —
+  file manager, VS Code, Trae, IntelliJ IDEA. The row list is the shared
+  `OPEN_WITH_APPS` allowlist, not installed-program discovery, and a program
+  that is missing reports that in the user's language instead of failing
+  silently. The control follows the conversation's own folder, so it is absent
+  for a remote transcript, a temporary task, and any destination other than a
+  conversation.
 - **Backend status capsule**: appears under the titlebar while the backend
   restarts or is fatally degraded (D080), with an Open-logs action.
 

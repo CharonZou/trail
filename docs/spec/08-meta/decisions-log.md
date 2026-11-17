@@ -8319,3 +8319,153 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   settings placement and the search keys); the interlock itself is covered by
   the existing window-lifecycle tests. See
   E2E-SETTINGS-window-actions-minimize-and-fullscreen.
+
+## 2026-11-07 — Settings page size tiers (D684)
+
+- D684 gives Settings two size tiers: **整页 / Full page** keeps the shipped
+  full-window takeover, and **浮层 / Floating panel** reframes the same page as a
+  centered floating panel over the app scrim. The tier has one entry — a
+  `TooltipButton` in the top-right corner of the window band, in the same 28px
+  seat as the shell's other chrome controls, whose label names the tier the
+  press lands on, so it states a transition instead of restating two options.
+- **`full` is the resolved default, not a written one.** `settingsLayout` stays
+  optional in `AppSettings` and an absent value means `full`, so upgrading
+  changes nothing an existing profile sees and nothing is rewritten at boot. One
+  `settingsTierOf` helper holds that resolution, because two surfaces read the
+  same field: the page restyles itself from it and the shell decides whether the
+  app tree keeps painting under the scrim from it.
+  The host stores the field as part of the settings blob; the renderer and main
+  validators are `full` | `compact` allowlists, which is why this needed no
+  migration and no schema version bump.
+- **The tier restyles one tree instead of duplicating the page.** Compact adds
+  no wrapper element: `.settings-shell-compact` is `position: fixed` with
+  `inset: 0; margin: auto` and a bounded `clamp()` size, and the only new node is
+  the scrim. A wrapper would have re-indented the whole Settings subtree and,
+  worse, given `position: fixed` descendants a new containing block — dialogs and
+  menus portal to `#trail-overlays` and must keep resolving against the
+  viewport. Restyling one tree is what makes the invariant testable: switching
+  tiers cannot remount a destination or reset its scroll container.
+- **The scrim is deliberately not a drag region.** Electron resolves
+  `app-region: drag` during hit-testing, before React receives the press, so a
+  draggable veil would swallow the dismiss. The panel's own top strip carries the
+  drag band instead, so the window still moves, and `OverlayBackdrop` dismisses
+  only when a press and its release both land on the scrim — a selection that
+  starts there does not close Settings.
+- **Escape is not wired.** A dismiss key belongs in the configurable keybinding
+  registry, not in this component; that would be a separate decision with its own
+  override and conflict surface.
+- **The Appearance row is a different preference, not a second entry (2026-11-16).**
+  The row that landed in the Appearance card is the **main window frame**
+  (`AppSettings.appFrame`), not this tier: the tier already has its chrome button,
+  so a second control for it would have been duplicated state on screen. `window`
+  is the shipped continuous surface; `floating` pads the shell, recesses its
+  ground, and gives `.main-pane` its own rounded plate, so the sidebar and the
+  work area read as separate plates. Only the ground and the plate change — no
+  portal, dialog, toast anchor, resize handle, or drag region moves — and the
+  Settings page keeps its own `settingsLayout` tier, because `AppShell` drops the
+  frame class while that page is open. Labels are 整窗 / 浮卡 (Whole window /
+  Floating card) so the pair does not reuse the Settings tier's 整页 / 浮层,
+  which names a page takeover rather than a plate.
+- **The compact scrim dims the live app, not an empty window.** The chat tree
+  keeps painting under the scrim — `.app-chat-shell` loses only its `hidden`, so
+  `display: contents` and the shell's flex layout are untouched — and stays
+  `inert`, which is what makes the background visible but unreachable by pointer,
+  Tab, or assistive technology. The veil is z-index 400 and the panel 450 inside
+  `.app-shell`'s isolated stacking context: above the app's own 200 ceiling,
+  below the caption band's 1000/1100, and never able to bury a portaled menu,
+  because `#trail-overlays` lives on the document element above the whole shell.
+  `PortalVisibilityProvider` still hides the body-level portal surfaces, so
+  popovers owned by the hidden app cannot float over the panel. The full tier
+  keeps hiding the tree, so the shipped takeover is unchanged.
+- Covered by `apps/desktop/test/settings-layout-tier.test.mjs` (the field
+  contract on both write paths, absent-means-full, the swap control's seat and
+  glyph, one tree, scrim dismiss and drag exclusion, the painted-but-`inert` app
+  under the veil, panel geometry, chrome clearance, the darwin surface and all
+  nine catalogs). The caption-button override lives in `chrome.css` because
+  `plugin-themes.test.mjs` forbids a `.window-controls` rule in the Settings
+  sheet. See E2E-SETTINGS-layout-tier.
+- The main window frame is a separate preference covered by
+  `apps/desktop/test/settings-app-frame.test.mjs` (field contract on both write
+  paths, absent-means-window, the Appearance row's mount site and labels, the
+  shell class on the chat page only, the ground/plate rules, and all nine
+  catalogs).
+
+## 2026-11-07 — Project open-with split button (D685)
+
+- D685 adds one top-bar control that opens the current project in the file
+  manager, VS Code, Trae or IntelliJ IDEA and remembers which one the user last
+  picked. The conversation top bar gains a split button: the labelled half
+  launches the remembered app, the caret half opens a four-row menu whose
+  checkmark names that same app. Nothing here is a new subsystem — it is the
+  existing `pi-desktop/project/openFolder` channel plus one sibling channel,
+  surfaced once in the chrome.
+- **The app list is a closed allowlist living in `packages/shared`.**
+  `OPEN_WITH_APPS` and the `OpenWithApp` / `OpenWithEditorApp` types are the only
+  copy of that list; the menu renders it, the IPC boundary validates against
+  `isOpenWithApp` / `isOpenWithEditorApp`, and the resolver keys off the same
+  ids. A renderer-supplied executable path was never on the table: the contract
+  takes an id from a four-value union, so the caller cannot name a program at
+  all. Adding a fifth editor is one shared-array edit plus its icon and its
+  catalog strings.
+- **Electron Main launches, Rust does not.** The process model already says the
+  main process owns native integration and `host-core` owns persistence and
+  authoritative host state. Spawning a GUI editor is native integration, and the
+  lookup it needs — `PATH`, `ProgramFiles` / `LOCALAPPDATA`, the macOS bundle
+  layout — is the same kind of environment reading that
+  `apps/desktop/electron/main/external-apps.ts` already does behind an injected
+  probe, so the host is not involved. This is also why the shipped
+  reveal-in-Finder/Explorer path stays in main.
+- **On Windows only a real `.exe` may be spawned.** The usual editor entries on
+  that platform are `.cmd` shims (`code`, and the JetBrains launchers), and running
+  one requires `shell: true`, which would place the user's project path inside a
+  command line — quoting bugs turn a folder name into an argument. So the resolver
+  resolves the install directories and targets the executable itself
+  (`Microsoft VS Code/Code.exe` and equivalents), and any candidate that is not a
+  `.exe` is treated as not installed rather than shelled around. A PATH wrapper
+  is still useful as a *location*: an editor on a custom drive is often only
+  reachable through `bin/code.cmd`, so the resolver checks closed per-vendor
+  executable names one and two levels above the wrapper and starts that verified
+  `.exe` — never the wrapper; a wrapper with no executable beside it reads as not
+  installed. That is a deliberate improvement over the reference implementation
+  this feature came from, and the resolution roots are documented so they can be
+  extended.
+- **"Not installed" is a result, not an error code.** `projectOpenWith` resolves
+  `{ ok: false, reason: "not_installed" | "launch_failed", app }`. A missing
+  program is an expected, per-machine outcome the renderer renders as localized
+  copy in a toast; a new `ErrorCodes` entry would push it through the RPC error
+  path, where the message would be English from the main process and would leak
+  OS error text. Genuine call failures — a path outside the known-workspace gate,
+  a malformed `app` — still reject like every other channel.
+- **Both open channels share one path gate.** `knownProjectPath()` is the single
+  check that the requested folder is a project this app actually knows about, so
+  neither `project/openFolder` nor `project/openWith` can be pointed at an
+  arbitrary directory by a compromised renderer. Extracting it kept the shipped
+  reveal-in-explorer behavior byte-for-byte and stopped the two handlers from
+  carrying parallel copies of the same rule.
+- **`openWithLastApp` is absent by default, not seeded.** Like
+  `settingsLayout` in D684, the field is optional in `AppSettings`, an absent
+  value resolves to `explorer`, and nothing is written at boot or on upgrade, so
+  no migration and no schema version bump. Both write validators reject any value
+  outside the union, and the stored value is only an id: the setting never names a
+  binary, so a stale preference cannot outlive an uninstall.
+- **The control is absent, not disabled, when there is nothing to open.** A remote
+  session and a temporary conversation have no local folder, and a disabled
+  button in the chrome would advertise a capability the user cannot use. The
+  top bar resolves `openWithProjectPath` with the three-branch rule
+  (remote → none, active session → its project, otherwise → the current workspace)
+  and the component returns `null` on an empty path.
+- **The row marks are the vendors' shipped raster icons, not host-drawn glyphs.**
+  `src/assets/open-with/{explorer,vscode,trae,idea}.png` are the reference app's
+  own asset files, imported through Vite and rendered at the row's 14px seat
+  (`object-fit: contain`, `alt=""`, `aria-hidden`, `draggable={false}`). A redrawn
+  approximation loses recognizability at 14px and drifts from the vendor mark;
+  the raster keeps the exact colors on both themes instead of inheriting theme
+  ink. Small files inline as data URLs and larger ones emit as hashed assets —
+  both resolve through the same import, so the component never branches on size.
+- Covered by `apps/desktop/test/project-open-with.test.mjs` (the shared closed
+  allowlist, the whitelist and protocol surface, the `.exe`-only and no-shell
+  rules, the shared path gate, the settings field on both write paths, the menu
+  rows from the shared array, the raster brand marks at the row size, the top
+  bar's project-path rule and seat, all nine catalogs) and
+  `apps/desktop/test/external-app-resolution.test.mjs` for the resolver itself.
+  See E2E-PROJECT-open-with-in-an-external-editor.

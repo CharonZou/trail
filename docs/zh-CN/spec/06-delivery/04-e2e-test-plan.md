@@ -112,6 +112,14 @@
   当基线不存在其他 Electron 电源请求时，以 Windows `powercfg /requests`
   验证系统请求。控制器生命周期和 Host 设置往返另有定向测试。
 
+### E2E-SETTINGS-layout-tier
+
+- **前提：** `settingsLayout` 缺失的隔离桌面配置；已有一段带历史的会话，且设置内可打开插件对话框。
+- **步骤：** 打开设置，确认档位切换是顶部带右上角的单个图标按钮，其提示读作「切换为紧凑」。按下切到「紧凑」，再进入非「常规」分类并滚动、打开对话框、拖动面板顶部条移动窗口、在面板外的遮罩上按下，并尝试点击或用 Tab 进入遮罩后面的应用。用同一配置重启应用，打开设置后切回「铺满」。
+- **预期：** 字段缺失时渲染出厂的全窗口页面，逐像素不变。紧凑档把同一页面重排为浮在暗化遮罩上的居中面板，且遮罩暗化的是**真实在绘制的应用界面**而不是空窗口：面板之后的会话仍可见，但保持 `inert`，点击、Tab 和读屏都到不了它。切换分类不丢失、滚动位置不重置、没有组件重新挂载；原生窗口按钮仍可点击且其底色不再在遮罩上切出一块实心矩形；档位切换按钮保持在 12px 角位、窗口窄到最小宽度时也不会压到原生按钮上；拖动面板顶部条可移动窗口；在遮罩上按下并松开返回会话页，从遮罩起始的拖动则不会。档位跨重启保留，不是设置搜索命中项，除 `settingsLayout` 外不改动任何存储值。
+- **关联规格：** `04-ux/06-settings-ia.md` §1、§4 第 1–2、10–11、29 项
+- **状态：** 由源码契约套件 `pnpm --filter @trail/desktop test test/settings-layout-tier.test.mjs` 覆盖；真实 Electron 走查仍为草稿。
+
 ### E2E-IMAGES-provider-save-feedback
 
 - **前提：** 生图配置 UI fixture，中英文界面。
@@ -6784,6 +6792,27 @@ eleven-tool-round desktop paths are verified by
 - **状态**：部分自动化 —— `apps/desktop/test/project-delete.test.mjs` 固定了两个菜单在传入项目
   当前运行会话 id 的情况下都能到达对话框、对话框的运行中会话行与“停止任务并删除”标签、abort 循环
   先于 `deleteProject` 执行、`CONFLICT` 兜底路径，以及所有已发布语言包中的新文案；端到端旅程仍为
+  草稿
+
+### E2E-PROJECT-open-with-in-an-external-editor
+
+- **前提条件**：`openWithLastApp` 缺失的隔离桌面配置；一段本地项目会话、一段远程主机会话、
+  一段临时会话，且本机确实安装了 VS Code / Trae / IntelliJ IDEA 中的至少一个。
+- **步骤**：按下顶部栏「打开」的文字半侧。展开箭头菜单并读出其中的行。按下已安装编辑器的行，
+  再按下未安装程序的行。用同一配置重启应用，再次按下文字半侧。切到远程会话和临时会话，然后在
+  控件旁边的顶部栏拖动窗口。
+- **预期**：字段缺失时，文字半侧像这个控件出现之前一样，把目录交给系统文件管理器打开，且没有
+  任何行被标记。按下某一行会在该会话自己的目录上启动对应编辑器、标记该行，重启后文字半侧换成
+  该程序并直接启动它——唯一被改动的存储值是 `openWithLastApp`。未安装的程序给出点名该程序的
+  本地化提示，而不是静默无反应，界面展示的是原因而不是操作系统错误串。无论装了多少程序，菜单
+  固定四行。远程会话与临时会话不显示该控件，其旁边的拖拽带仍可移动窗口。
+- **链接规格**：`03-runtime/01-ipc-protocol.md`（`project/openWith`）、
+  `03-runtime/04-data-storage.md`、`04-ux/01-ui-ia.md` §2
+- **验收**：D（工作区）、安全
+- **里程碑**：M6+
+- **状态**：部分自动化 —— `apps/desktop/test/project-open-with.test.mjs` 与
+  `apps/desktop/test/external-app-resolution.test.mjs` 覆盖了白名单、候选安装根、不经 shell 的
+  detached 启动、两个通道共用的项目路径闸门、顶部栏座位与文案；对真实已安装编辑器的实际点击仍为
   草稿
 
 ### E2E-SESSION-two-click-delete-arms-first

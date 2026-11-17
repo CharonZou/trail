@@ -526,6 +526,23 @@ compatibility; it is no longer exposed in Settings and no longer read for
 rendering. These additive display preferences neither rewrite stored reasoning
 nor change the database schema.
 
+The app settings JSON also optionally stores `settingsLayout` (`full` |
+`compact`), the size tier of the Settings page described in
+[spec 04-ux/06](../04-ux/06-settings-ia.md#1-settings-root-codex-full-page-shell).
+An absent value renders `full`, so an upgrade never changes the page a user
+already sees, and both write paths reject any other value. Like the display
+preferences above, it is presentation-only: it stores no destination, changes no
+other field, and needs no schema version bump.
+
+The same JSON may store `openWithLastApp` (`explorer` | `vscode` | `trae` |
+`idea`): which program the conversation top bar's Open button uses next, as
+described in [spec 04-ux/01](../04-ux/01-ui-ia.md#2-shell-regions). An absent
+value resolves to `explorer`, so the control starts as the file-manager action
+it was before this field existed, and both write paths reject any value outside
+that closed list. The field stores an id only; it never stores an executable,
+and starting a program is the `project/openWith` channel's job, not this
+record's. It needs no schema version bump.
+
 The settings blob may still contain legacy prompt-enhancement keys from an
 earlier release. They are retained for rollback and downgrade compatibility,
 but the host no longer reads or writes them as active preferences. When the

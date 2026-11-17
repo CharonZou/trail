@@ -59,6 +59,7 @@ event: pi-desktop/<domain>/event/<name>
 - `pi-desktop/project/clone`
 - `pi-desktop/project/cloneCheckout`
 - `pi-desktop/project/openFolder`
+- `pi-desktop/project/openWith`
 - `pi-desktop/project-group/list`
 - `pi-desktop/project-group/create`
 - `pi-desktop/project-group/rename`
@@ -1121,6 +1122,14 @@ StrictMode 会在挂载时把 effect 跑两遍，第二次尝试会再开一个�
 - `project/clone({ url })`：选择父目录，将 URL `git clone` 进去，并返回克隆后的工作区（由渲染器激活）
 - `project/cloneCheckout({ url, parentPath })`：将公共远程 `git clone` 到显式指定的父目录，返回 `{ path, name }`，不更改当前工作空间；新建项目对话框先用它克隆，再创建逻辑项目组
 - `project/openFolder(path)`：打开系统文件中已知的项目目录
+- `project/openWith({ app, path })`：为对话顶栏的「打开」菜单在一个已知项目目录上
+  启动编辑器。`app` 只能是 `vscode`、`trae`、`idea`——即 `@trail/shared` 里的封闭白名单
+  （`OpenWithEditorApp`），它是选择程序的唯一依据：该通道不接受渲染层给出的可执行文件、
+  命令或参数。主进程按 PATH 和厂商文档约定的安装根解析该 id（Windows 只接受真实 `.exe`，
+  因此全程不经过 shell；PATH 上的 `.cmd`/`.bat` 壳只作为位置线索，用来定位它旁边的可执行
+  文件，从而覆盖自定义安装盘），以 detached 方式启动，并返回 `{ ok: true, app, path }` 或
+  `{ ok: false, reason, app }`，`reason` 为 `not_installed` 或 `launch_failed`。
+  程序未安装是结果而不是调用失败：渲染层把原因本地化，主进程记录操作系统细节。
 - `project/get()`：当前工作空间
 - `project/list()`：持久的项目记录，包括导入创建的条目
 - `project/set(path)`：设置工作空间

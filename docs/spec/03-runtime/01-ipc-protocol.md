@@ -59,6 +59,7 @@ Examples:
 - `pi-desktop/project/clone`
 - `pi-desktop/project/cloneCheckout`
 - `pi-desktop/project/openFolder`
+- `pi-desktop/project/openWith`
 - `pi-desktop/project-group/list`
 - `pi-desktop/project-group/create`
 - `pi-desktop/project-group/rename`
@@ -1423,6 +1424,18 @@ authorization code. `accountLabel` is a display string.
   logical project group
 - `project/openFolder(path)`: open a known project directory in the system file
   manager
+- `project/openWith({ app, path })`: start an editor on a known project
+  directory for the conversation's Open menu. `app` is one of `vscode`, `trae`,
+  `idea` — the closed allowlist in `@trail/shared` (`OpenWithEditorApp`), and it
+  is the only thing that selects a program: the channel accepts no executable,
+  command, or argument from the renderer. Main resolves the id against PATH and
+  the vendor's documented install roots (Windows accepts a real `.exe` only, so
+  no shell is ever involved; a PATH `.cmd`/`.bat` wrapper is used solely as a
+  location hint for the executable beside it, which covers custom install
+  drives), spawns it detached, and returns
+  `{ ok: true, app, path }` or `{ ok: false, reason, app }` where `reason` is
+  `not_installed` or `launch_failed`. A missing program is a result, not a
+  call failure: the renderer localizes the reason and Main logs the OS detail.
 - `project/get()`: current workspace
 - `project/list()`: durable project records, including import-created entries
 - `project/memory/get(path)`: read the host-owned memory for a canonical project

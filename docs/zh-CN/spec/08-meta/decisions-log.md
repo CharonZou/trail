@@ -5810,3 +5810,105 @@ Markdown 源码，不是 `text/html` 负载；对禁用行内 HTML 的外部编�
 - 由 `apps/desktop/test/token-usage-meter.test.mjs` 覆盖（两个通道、设置在的位置与搜索键）；
   互锁本身由既有窗口生命周期测试覆盖。见
   E2E-SETTINGS-window-actions-minimize-and-fullscreen。
+
+## 2026-11-07 — 设置页尺寸档位（D684）
+
+- D684 给设置两档尺寸：**整页** 保留出厂的全窗口接管，**浮层** 把同一页面重排为
+  浮在应用遮罩之上的居中面板。档位只有一条入口：窗口顶部带右上角的一个
+  `TooltipButton`——用与主外壳其它 chrome 控件相同的 28px 座位，文案说明
+  这次点击会落到哪一档，因此它表达的是切换，而不是把两个选项再念一遍。
+- **`full` 是解析出的默认，而不是写入的默认。** `settingsLayout` 在 `AppSettings`
+  中保持可选，缺失即 `full`，所以升级不会改变已有配置看到的东西，启动时也不重写任何值。
+  这个解析只有一份 `settingsTierOf`：页面按它重排自己，外壳也按它决定应用树是否继续在遮罩下
+  绘制，两处读的是同一个字段。
+  宿主把它作为设置 blob 的一部分存储；渲染层与主进程的校验器是 `full` | `compact`
+  白名单，因此无需迁移，也无需 schema 版本号变更。
+- **档位只重排同一棵树，不复制页面。** 紧凑档不新增包装元素：
+  `.settings-shell-compact` 是 `position: fixed` 配 `inset: 0; margin: auto`，
+  尺寸由 `clamp()` 约束，唯一新增的节点是遮罩。加一层包装会重排整个设置子树，更糟的是会
+  给 `position: fixed` 的后代换一个包含块——对话框和菜单挂到 `#trail-overlays`，必须
+  继续以视口为基准解析。只重排一棵树才让这条不变式可测：切换档位不会重挂载分类，也不会
+  重置它的滚动容器。
+- **遮罩刻意不是拖动区。** Electron 在命中测试阶段就解析 `app-region: drag`，早于 React
+  收到按下，因此可拖动的遮罩会吞掉关闭动作。拖动带改由面板自己的顶部条承担，窗口仍可拖动；
+  `OverlayBackdrop` 只在按下与松开都落在遮罩上时关闭，从遮罩起始的框选不会关掉设置。
+- **外观卡里那一行是另一项偏好，不是第二入口（2026-11-16）。**
+  落在外观卡里的行是**主界面排版**（`AppSettings.appFrame`），不是这个尺寸档：
+  尺寸档已经有自己的 chrome 按钮，再放一行只是屏幕上重复的状态。`window` 是出厂的
+  一体连续底面；`floating` 给外壳加内边距、压暗底面，并让 `.main-pane` 成为自己的
+  圆角面板，侧栏与工作区因此读作两块独立面板。只有底与面板变化——portal、对话框、
+  toast 锚点、宽度拖手与拖动区都不移动——设置页保留自己的 `settingsLayout` 档位，
+  因为打开那个页面时 `AppShell` 会摘掉 frame 类。文案用「整窗 / 浮卡」，
+  不复用设置页档位的「整页 / 浮层」——那一对说的是整页接管，不是一块板。
+- **未接 Escape。** 关闭快捷键属于可配置的快捷键注册表，而不是这个组件；那是一项独立决定，
+  还牵涉覆盖表与冲突面。
+- **紧凑档的遮罩暗化的是真实在绘制的应用。** 聊天树在遮罩下方继续绘制——
+  `.app-chat-shell` 只去掉 `hidden`，`display: contents` 与外壳的 flex 布局都不受影响——
+  并保持 `inert`，这正是「看得到却点不到」的来源：鼠标、Tab 和读屏都到不了它。遮罩在
+  `.app-shell` 自己的隔离层叠上下文里是 400 层，面板是 450 层：高于应用自身的 200 上限，
+  低于顶部带的 1000/1100，也不会埋掉 portal 出去的菜单，因为 `#trail-overlays` 挂在文档根上，
+  本来就压在整棵外壳之上。`PortalVisibilityProvider` 仍继续隐藏挂在 body 上的 portal 层，
+  被隐藏的应用不能把浮层飘到面板上面。铺满档照旧隐藏这棵树，出厂的全窗口接管不变。
+- 由 `apps/desktop/test/settings-layout-tier.test.mjs` 覆盖（两条写入路径上的字段契约、
+  缺失即 full、切换按钮的座位与字形、同一棵树、遮罩关闭与拖动排除、遮罩下「可见但 inert」的应用、
+  面板几何、镶边留白、darwin 表面与
+  九个语言包）。窗口按钮的底色覆盖写在 `chrome.css`，因为 `plugin-themes.test.mjs` 禁止设置
+  样式表出现 `.window-controls` 规则。见 E2E-SETTINGS-layout-tier。
+- 主界面排版是另一项偏好，由 `apps/desktop/test/settings-app-frame.test.mjs` 覆盖
+  （两条写入路径上的字段契约、缺失即 window、外观行的挂载位置与文案、
+  外壳类只在聊天页出现、底与面板的 CSS 规则，以及九个语言包）。
+
+## 2026-11-07 — 项目「打开方式」分裂按钮（D685）
+
+- D685 在顶部带加一个控件：用文件管理器、VS Code、Trae 或 IntelliJ IDEA 打开当前
+  项目，并记住用户上一次选的是哪个。聊天顶部带因此多出一个分裂按钮：带文字的那一半启动
+  上次使用的应用，箭头那一半打开四行菜单，菜单里同样由一个勾选标记指出那个应用。这里没有
+  新子系统——就是出厂的 `pi-desktop/project/openFolder` 通道再加一个同级通道，在
+  chrome 里露出一次。
+- **应用清单是放在 `packages/shared` 的闭合白名单。** `OPEN_WITH_APPS` 与
+  `OpenWithApp` / `OpenWithEditorApp` 类型是这份清单的唯一副本：菜单渲染它，IPC
+  边界用 `isOpenWithApp` / `isOpenWithEditorApp` 校验它，解析器也按同一批 id 取值。
+  「由渲染层提交可执行文件路径」从来不在考虑范围内：契约只收四值联合里的一个 id，调用方
+  根本没有指名程序的能力。要加第五个编辑器，改一处共享数组，配一个图标和九份文案。
+- **由 Electron 主进程启动，不交给 Rust。** 进程模型已经写明主进程负责原生集成，
+  `host-core` 负责持久化与权威的宿主状态。启动一个 GUI 编辑器属于原生集成，而它需要的查找
+  ——`PATH`、`ProgramFiles` / `LOCALAPPDATA`、macOS 的 bundle 结构——正是
+  `apps/desktop/electron/main/external-apps.ts` 通过注入的 probe 已经在做的那类环境
+  读取，所以宿主不参与。这也是出厂的「在资源管理器/访达中显示」留在主进程的原因。
+- **Windows 上只允许启动真正的 `.exe`。** 这个平台常见的编辑器入口其实是 `.cmd`
+   壳（`code`，以及 JetBrains 的启动器），跑它们需要 `shell: true`，而那会把用户的项目
+   路径塞进一条命令行——引号处理稍有差错，文件夹名就变成了参数。所以解析器解析安装目录、
+   直接定位可执行文件本身（`Microsoft VS Code/Code.exe` 及同类），任何不是 `.exe`
+   的候选一律当作「未安装」，而不是绕道 shell。PATH 上的壳仍然有「位置」价值：装在自定义
+   盘的编辑器往往只能通过 `bin/code.cmd` 够到，所以解析器在壳的上一级和上两级按封闭的
+   厂商可执行文件名查找，启动那个校验过的 `.exe`——绝不启动壳；壳旁边没有可执行文件时才
+   读作「未安装」。相对这份功能参考的那个实现，这是刻意的收紧；解析根目录写进文档，可以扩展。
+- **「未安装」是一个结果，不是一个新的错误码。** `projectOpenWith` 解析为
+  `{ ok: false, reason: "not_installed" | "launch_failed", app }`。程序缺失是每台
+  机器都会有的预期结果，渲染层把 `reason` 变成本地化文案放进 toast；新增一个
+  `ErrorCodes` 会把它推上 RPC 错误路径，那时消息来自主进程、是英文，还会带出操作系统的
+  原始报错文本。真正的调用失败——路径不在已知工作区闸门内、`app` 格式不对——照其它通道
+  一样 reject。
+- **两个打开通道共用一个路径闸门。** `knownProjectPath()` 是「这个目录确实是本应用
+  知道的项目」这条检查的唯一实现，所以被攻陷的渲染层既不能把 `project/openFolder`
+  指向任意目录，也不能把 `project/openWith` 这么做。抽出它之后出厂的「在资源管理器中显示」
+  行为逐字节不变，两个 handler 也不再各存一份同样的规则。
+- **`openWithLastApp` 默认缺失，不写入初值。** 和 D684 里的 `settingsLayout`
+  一样，这个字段在 `AppSettings` 中可选，缺失解析为 `explorer`，启动和升级都不写值，
+  因此无需迁移，也无需 schema 版本号变更。两条写入校验都拒绝联合之外的值，而且存下来的
+  只是一个 id：设置里从不出现可执行文件路径，所以卸载之后也不会留下失效的偏好。
+- **没有可打开的东西时控件缺席，而不是置灰。** 远程会话和临时对话都没有本地目录，而顶部带里
+  一个禁用按钮等于在宣传用户此刻用不了的能力。顶部带用三分支规则算出
+  `openWithProjectPath`（远程 → 无；活动会话 → 它的项目；否则 → 当前工作区），
+  组件在路径为空时返回 `null`。
+- **行内标记用厂商自带的位图图标，不用宿主手绘的字形。**
+  `src/assets/open-with/{explorer,vscode,trae,idea}.png` 就是参考应用自己的素材文件，
+  经 Vite 导入后按行的 14px 座位渲染（`object-fit: contain`、`alt=""`、
+  `aria-hidden`、`draggable={false}`）。重绘的近似版在 14px 下会失去辨识度、也会偏离
+  厂商标记；位图在亮暗两套主题下都保留原色，而不是继承主题墨色。小文件内联成 data URL，
+  大文件产出带哈希的资源——两者走同一条 import，组件不按尺寸分支。
+- 由 `apps/desktop/test/project-open-with.test.mjs` 覆盖（共享闭合白名单、白名单与
+  协议表面、只允许 `.exe` 与不用 shell 这两条、共用的路径闸门、两条写入路径上的设置字段、
+  菜单行来自共享数组、行尺寸下的位图品牌标记、顶部带的项目路径规则与座位、九个语言包），
+  解析器本身由 `apps/desktop/test/external-app-resolution.test.mjs` 覆盖。见
+  E2E-PROJECT-open-with-in-an-external-editor。

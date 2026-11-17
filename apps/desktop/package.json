@@ -1,6 +1,6 @@
 {
   "name": "@trail/desktop",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "desktopName": "trail.desktop",
   "private": true,
   "description": "Trail Electron application",

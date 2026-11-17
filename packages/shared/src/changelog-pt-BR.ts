@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const ptBREntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "Em Configurações › Geral › Aparência agora se escolhe o layout da janela: a janela inteira mantém a bancada de superfície única, e o cartão flutuante eleva a área principal como um cartão arredondado sobre o fundo da barra lateral, com o dock da direita fechando esse mesmo cartão.",
+      "A própria página de Configurações pode abrir como página inteira ou camada flutuante, na mesma seção de Aparência.",
+      "O controle de intensidade de pensamento ganhou uma linha de título com o nível atual e a dica Ctrl+T, um trilho em degradê de verde para azul com seis marcas e partículas de luz em movimento no nível mais alto.",
+      "Ctrl+T percorre os níveis de pensamento direto do compositor, sem abrir o menu de modelos.",
+      "O chip de modelo do compositor mostra a marca do provedor em vez de um ícone genérico de robô.",
+      "Pastas de projeto podem ser abertas no VS Code, Trae ou IntelliJ IDEA pela barra lateral; o editor é resolvido por PATH, pastas de instalação ou Windows App Paths, e a ausência dele é avisada em vez de adivinhada.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const deEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "Unter Einstellungen › Allgemein › Darstellung lässt sich das Fensterlayout wählen: Das ganze Fenster behält die einflächige Werkbank, die schwebende Karte hebt den Hauptbereich als abgerundete Karte auf den Seitenleisten-Grund, und das rechte Dock schließt dieselbe Karte ab.",
+      "Die Einstellungsseite selbst lässt sich im selben Darstellungsbereich als ganze Seite oder als schwebende Ebene öffnen.",
+      "Der Denkstufen-Regler hat eine neue Kopfzeile mit aktueller Stufe und Ctrl+T-Hinweis, eine Schiene im Grün-zu-Blau-Verlauf mit sechs Stufen und fließende Lichtpartikel auf der höchsten Stufe.",
+      "Ctrl+T schaltet die Denkstufe direkt im Composer weiter, ohne das Modellmenü zu öffnen.",
+      "Die Modell-Chip im Composer zeigt die Marke des Anbieters statt eines allgemeinen Bot-Symbols.",
+      "Projektordner lassen sich in der Seitenleiste mit VS Code, Trae oder IntelliJ IDEA öffnen; der Editor wird über PATH, Installationsordner oder Windows App Paths ermittelt, und ein fehlender wird gemeldet statt geraten.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const frEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "Dans Réglages › Général › Apparence, on choisit la mise en page de la fenêtre : la fenêtre entière garde l'atelier à surface unique, la carte flottante élève la zone principale en carte arrondie sur le fond de la barre latérale, et le dock de droite ferme cette même carte.",
+      "La page Réglages elle-même peut s'ouvrir en page entière ou en couche flottante depuis la même section.",
+      "Le curseur d'intensité de réflexion a une nouvelle ligne d'en-tête avec le niveau actuel et l'indice Ctrl+T, un rail dégradé du vert au bleu à six repères, et des particules lumineuses en mouvement au niveau le plus élevé.",
+      "Ctrl+T fait défiler les niveaux de réflexion depuis le composeur sans ouvrir le menu des modèles.",
+      "La puce de modèle du composeur affiche la marque du fournisseur au lieu d'un icône de bot générique.",
+      "Les dossiers de projet peuvent s'ouvrir dans VS Code, Trae ou IntelliJ IDEA depuis la barre latérale ; l'éditeur est résolu via PATH, ses dossiers d'installation ou Windows App Paths, et son absence est signalée plutôt que devinée.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

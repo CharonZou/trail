@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const trEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "Pencere düzeni artık Ayarlar › Genel › Görünüm altında seçiliyor: tam pencere modu tek yüzeyli çalışma alanını korur, yüzen kart modu ana alanı kenar çubuğu zemininde yuvarlatılmış bir karta taşır ve sağ yerleştirme aynı kartı kapatır.",
+      "Ayarlar sayfası da aynı Görünüm bölümünden tam sayfa ya da yüzen katman olarak açılabilir.",
+      "Düşünme kaydırıcısı yeni bir başlık satırı aldı: geçerli düzey ve Ctrl+T ipucu, altı duraklı yeşilden maviye geçişli ray ve en yüksek düzeyde akan ışıklı parçacıklar.",
+      "Ctrl+T, model menüsünü açmadan besteci içinden düşünme düzeyini döndürür.",
+      "Besteci içindeki model rozeti, genel bir bot simgesi yerine sağlayıcının kendi markasını gösterir.",
+      "Proje klasörleri kenar çubuğundan VS Code, Trae veya IntelliJ IDEA ile açılabilir; düzenleyici PATH, kurulum kökleri veya Windows App Paths üzerinden bulunur, yoksa tahmin yerine açıkça bildirilir.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

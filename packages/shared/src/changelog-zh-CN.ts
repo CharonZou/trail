@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const zhCNEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "设置 › 常规 › 外观可切换窗口排版：整窗保持单一工作台；浮卡把主区抬成侧栏底色上的圆角卡片，右侧工作面板拼进同一张卡，不再单独成列。",
+      "设置页本身也可以选择整页或浮层，入口同样在「外观」分区。",
+      "思考强度滑块换了新样式：标题行显示当前档位与 Ctrl+T 提示，轨道改为绿到蓝的渐变并带六个刻度，最高档有流动的发光粒子。",
+      "在输入框按 Ctrl+T 即可循环切换思考强度，不必打开模型菜单。",
+      "模型 chip 显示服务商自己的品牌标识，不再统一用机器人图标。",
+      "可从侧栏用 VS Code、Trae 或 IntelliJ IDEA 打开项目目录；编辑器按 PATH、安装目录或 Windows App Paths 解析，没装会明确提示而不是乱猜。",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

@@ -7,7 +7,7 @@ export const APP_ID = "net.aiuo.pi-desktop";
 // paired remote hosts — renaming those strands existing data and breaks
 // contracts that ship outside this repository, not just this build.
 export const APP_NAME = "Trail";
-export const APP_VERSION = "1.0.2";
+export const APP_VERSION = "1.0.3";
 
 export const APP_MENU_COMMANDS = [
   "newTask",
@@ -190,6 +190,7 @@ export const IPC = {
     sessionGetScratchPath: "pi-desktop/session/getScratchPath",
     sessionOpenScratchPath: "pi-desktop/session/openScratchPath",
     projectOpenFolder: "pi-desktop/project/openFolder",
+    projectOpenWith: "pi-desktop/project/openWith",
     settingsGet: "pi-desktop/settings/get",
     settingsSet: "pi-desktop/settings/set",
     configSyncGetState: "pi-desktop/configSync/getState",

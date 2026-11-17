@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const enEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "Settings › General › Appearance now sets the window layout: the whole-window mode keeps the single-surface workbench, and the floating-card mode lifts the main area into a rounded card on the sidebar ground with the right dock closing that same card.",
+      "The Settings page can also be shown as a full page or a floating layer, chosen from the same Appearance section.",
+      "The thinking slider has a new header with the current level and the Ctrl+T hint, a green-to-blue gradient rail with six stops, and flowing light particles at the highest level.",
+      "Ctrl+T cycles the thinking level from the composer without opening the model menu.",
+      "The model chip in the composer shows the provider's own brand mark instead of a generic bot glyph.",
+      "Project folders can open in VS Code, Trae or IntelliJ IDEA from the sidebar; the editor is resolved from PATH, its install roots or Windows App Paths, and an absent one is reported instead of guessed.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

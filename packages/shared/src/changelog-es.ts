@@ -2,6 +2,18 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const esEntries: ChangelogEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-11-17",
+    highlights: [
+      "En Ajustes › General › Apariencia se elige el diseño de la ventana: la ventana completa mantiene el banco de trabajo de una sola superficie, y la tarjeta flotante eleva el área principal como una tarjeta redondeada sobre el fondo de la barra lateral, con el panel derecho cerrando esa misma tarjeta.",
+      "La propia página de Ajustes puede mostrarse como página completa o capa flotante desde esa misma sección.",
+      "El deslizador de intensidad de pensamiento tiene una fila de título con el nivel actual y la pista Ctrl+T, un raíl con degradado de verde a azul y seis marcas, y partículas de luz en movimiento en el nivel más alto.",
+      "Ctrl+T recorre los niveles de pensamiento desde el compositor sin abrir el menú de modelos.",
+      "El chip de modelo del compositor muestra la marca del proveedor en lugar de un icono de bot genérico.",
+      "Se pueden abrir carpetas de proyecto en VS Code, Trae o IntelliJ IDEA desde la barra lateral; el editor se resuelve por PATH, sus carpetas de instalación o Windows App Paths, y si falta se avisa en lugar de adivinar.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-11-06",
     highlights: [

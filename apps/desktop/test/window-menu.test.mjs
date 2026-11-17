@@ -322,7 +322,7 @@ test("menu and window IPC reject actions outside their shared allowlists", () =>
 test("Windows/Linux explicit minimize paths use the native taskbar", () => {
   assert.match(mainSource, /import \{[\s\S]*Tray[\s\S]*\} from "electron"/);
   assert.match(mainSource, /function createTray\(\)/);
-  assert.match(mainSource, /join\(resourceRoot, "tray-icon-mac\.png"\)/);
+  assert.match(mainSource, /join\(root, "tray-icon-mac\.png"\)/);
   assert.match(mainSource, /icon\.setTemplateImage\(true\)/);
   assert.match(mainSource, /tray\.on\("click", restoreMainWindow\)/);
   assert.match(mainSource, /tray\.on\("double-click", restoreMainWindow\)/);

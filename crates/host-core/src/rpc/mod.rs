@@ -5847,9 +5847,11 @@ mod tests {
         let pid: i64 = app
             .db
             .conn()
-            .query_row("SELECT id FROM projects WHERE name = 'deleted-folder'", [], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT id FROM projects WHERE name = 'deleted-folder'",
+                [],
+                |r| r.get(0),
+            )
             .unwrap();
         app.db
             .kv_set("app", "currentProjectId", &json!(pid))
@@ -5910,7 +5912,10 @@ mod tests {
 
         let st = state.lock().await;
         let ws = st.workspace.get().expect("existing folder is restored");
-        assert_eq!(ws.name, existing.path().file_name().unwrap().to_string_lossy());
+        assert_eq!(
+            ws.name,
+            existing.path().file_name().unwrap().to_string_lossy()
+        );
     }
 
     #[tokio::test]

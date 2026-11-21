@@ -78,7 +78,7 @@ test("Windows packages and windows use the canonical Trail icon", () => {
   assert.match(iconScriptSource, /format="ICO"/);
   assert.match(
     windowSource,
-    /function windowsIconPath\(isDevelopmentBuild: boolean, style: AppIconStyle\)/,
+    /function windowsIconPath\([\s\S]{0,160}isDevelopmentBuild: boolean,[\s\S]{0,160}style: AppIconStyle,[\s\S]{0,160}appearance: AppIconAppearance/,
   );
   // Build mode decides the asset root: a development launch that reports
   // `app.isPackaged === true` (ELECTRON_FORCE_IS_PACKAGED) must still resolve
@@ -89,7 +89,10 @@ test("Windows packages and windows use the canonical Trail icon", () => {
     /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/,
   );
   // The chosen style ships as a PNG and wins over the .ico fallback.
-  assert.match(windowSource, /icon: windowsIconPath\(isDevelopmentBuild, readAppIcon\(dataDir\)\.style\)/);
+  assert.match(
+    windowSource,
+    /icon: windowsIconPath\([\s\S]{0,200}appIconRecord\.style,/,
+  );
 });
 
 /** The alpha split of a decoded image: the brand mark is flat, so only
@@ -220,7 +223,7 @@ test("macOS Dock icon follows the stored app icon style", () => {
   assert.match(brandingSource, /process\.platform !== "darwin" \|\| !app\.dock/);
   assert.match(
     brandingSource,
-    /resolveAppIconPath\(\{[\s\S]*?style: readAppIcon\(dataDir\)\.style/,
+    /const record = readAppIcon\(dataDir\);[\s\S]{0,240}resolveAppIconPath\(\{[\s\S]{0,240}style: record\.style/,
   );
   assert.match(brandingSource, /nativeImage\.createFromPath\(iconPath\)/);
   assert.match(brandingSource, /if \(icon\.isEmpty\(\)\)/);

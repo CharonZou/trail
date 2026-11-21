@@ -27,7 +27,7 @@
 
 <br />
 
-<img src="docs/image/readme/home.webp" alt="Trail" width="94%" />
+<img src="docs/image/readme/hero.png" alt="Trail" width="94%" />
 
 </div>
 
@@ -65,6 +65,20 @@ Trail 是独立桌面应用，不是 IDE 插件，也不是终端前端。项目
 * **本地优先**：项目、转录、设置与密钥留在本地 SQLite 数据库里，
   应用运行不依赖上传任何数据。
 * **三平台一致**：macOS、Windows 与 Linux 提供同一套本地优先 Agent 工作流。
+
+## 界面
+
+以下截图全部来自 Windows 上运行的 1.0.4 预览版，默认「森林」主题，不是效果图。
+
+| 资产中心 · 总览 | 资产中心 · 技能 |
+| --- | --- |
+| <img src="docs/image/readme/asset-center.png" alt="资产中心总览" width="100%" /> | <img src="docs/image/readme/asset-skills.png" alt="技能标签" width="100%" /> |
+| **资产中心 · 子智能体** | **资产中心 · 记忆** |
+| <img src="docs/image/readme/asset-subagents.png" alt="子智能体标签" width="100%" /> | <img src="docs/image/readme/asset-memory.png" alt="记忆标签" width="100%" /> |
+| **扩展** | **外观设置** |
+| <img src="docs/image/readme/extensions.png" alt="扩展与插件市场" width="100%" /> | <img src="docs/image/readme/settings.png" alt="外观设置" width="100%" /> |
+
+主题、排版、语言与字号都是设置项，而不是写死的设计。
 
 ## 快速开始
 

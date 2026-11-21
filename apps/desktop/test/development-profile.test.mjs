@@ -256,7 +256,12 @@ test("a development build takes its own userData before the single-instance lock
 
 test("main resolves one data directory and publishes it to everything below", () => {
   assert.match(installationSource, /const defaultDataDir = desktopDataDir\(isDevelopmentBuild\);/);
-  assert.match(entrySource, /prepareStorage\(defaultDataDir, !singleInstanceRequired\)/);
+  // The legacy default is handed to storage bootstrap so an upgrade can adopt
+  // the renamed directory without rewriting a pointer the user chose.
+  assert.match(
+    entrySource,
+    /prepareStorage\(\s*defaultDataDir,\s*!singleInstanceRequired,\s*legacyDataDir\(isDevelopmentBuild\),?\s*\)/,
+  );
   assert.match(indexSource, /const storage = getStorageBootstrap\(\);/);
   assert.match(indexSource, /const dataDir = storage\.preferences\.roots\.data;/);
   // The plugin runtime resolves this root from the environment rather than

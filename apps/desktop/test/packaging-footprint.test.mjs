@@ -194,6 +194,12 @@ test("packaging keeps only shipped locales and excludes non-runtime artifacts", 
       from: "build/icon.png",
       to: "tray-icon.png",
     },
+    // The chosen app icon style is read from resources at launch, so the
+    // packaged build has to carry every shipped style and appearance.
+    {
+      from: "build/app-icons",
+      to: "app-icons",
+    },
     {
       from: "../../packages/agent-runtime/dist-bundle",
       to: "agent-runtime",

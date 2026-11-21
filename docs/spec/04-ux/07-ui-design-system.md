@@ -745,7 +745,8 @@ While Electron bootstrap is not yet ready, the renderer paints a full-window
 **startup splash** (`StartupSplash`, `data-testid="startup-splash"`) instead of
 plain status text:
 
-- Brand mark (`BrandLogo` 64px), shell name, and tagline from the active catalog
+- Brand mark (`BrandLogo` 64px) and shell name from the active catalog; the
+  product tagline is deliberately not part of the boot surface
 - Accessible status copy via `app.starting` (screen-reader only) with
   `role="status"` / `aria-live="polite"`
 - Soft indeterminate progress bar as loading feedback (≤1.1s loop)

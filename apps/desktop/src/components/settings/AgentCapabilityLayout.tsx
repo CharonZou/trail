@@ -5,7 +5,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { ProjectRecord } from "@trail/shared";
+import type { ProjectGroupRecord, ProjectRecord } from "@trail/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import { Button, SegmentedControl, SettingsToggle, TooltipButton, cx } from "../ui";
@@ -22,6 +22,9 @@ import {
 export type AgentProjectOption = {
   name: string;
   path: string;
+  /** Project-group context keeps memory reads on the same owner as Projects. */
+  groupId?: string;
+  legacy?: boolean;
 };
 
 /** Which level the workbench is currently showing. */
@@ -37,20 +40,28 @@ export function projectDisplayName(path: string, fallback?: string): string {
 export function useAgentProjects() {
   const currentProjectPath = useAppStore((state) => state.workspace?.path ?? null);
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
+  const [groups, setGroups] = useState<ProjectGroupRecord[]>([]);
   const [selectedProjectPath, setSelectedProjectPath] = useState<string | null>(
     currentProjectPath,
   );
 
   useEffect(() => {
     let cancelled = false;
-    void api
-      .listProjects()
-      .then((result) => {
+    void Promise.all([
+      api.listProjects(),
+      // Group metadata is additive: a legacy host must not break skill scopes.
+      api.listProjectGroups().catch(() => ({ groups: [] as ProjectGroupRecord[] })),
+    ])
+      .then(([projectResult, groupResult]) => {
         if (cancelled) return;
-        setProjects(result.projects ?? []);
+        setProjects(projectResult.projects ?? []);
+        setGroups(groupResult.groups ?? []);
       })
       .catch(() => {
-        if (!cancelled) setProjects([]);
+        if (!cancelled) {
+          setProjects([]);
+          setGroups([]);
+        }
       });
     return () => {
       cancelled = true;
@@ -64,18 +75,29 @@ export function useAgentProjects() {
   const options = useMemo<AgentProjectOption[]>(() => {
     const seen = new Set<string>();
     const result: AgentProjectOption[] = [];
+    const groupsByPath = new Map<string, ProjectGroupRecord>();
+    const keyFor = (path: string) =>
+      path.replaceAll("\\", "/").replace(/\/+$/, "").toLocaleLowerCase();
+    for (const group of groups) {
+      for (const root of group.roots) groupsByPath.set(keyFor(root.path), group);
+    }
     const add = (path: string | null | undefined, name?: string) => {
       const normalized = path?.trim();
       if (!normalized) return;
       const key = normalized.toLocaleLowerCase();
       if (seen.has(key)) return;
       seen.add(key);
-      result.push({ path: normalized, name: projectDisplayName(normalized, name) });
+      const group = groupsByPath.get(keyFor(normalized));
+      result.push({
+        path: normalized,
+        name: projectDisplayName(normalized, name),
+        ...(group ? { groupId: group.id, legacy: group.legacy } : {}),
+      });
     };
     add(currentProjectPath);
     for (const project of projects) add(project.path, project.name);
     return result;
-  }, [currentProjectPath, projects]);
+  }, [currentProjectPath, groups, projects]);
 
   useEffect(() => {
     if (options.length === 0) {

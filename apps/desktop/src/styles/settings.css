@@ -137,6 +137,13 @@
   padding: 0;
   gap: 0;
   overflow: hidden;
+  /* Chromium composes the window drag regions in paint order. Pinning the rail
+     below the shell's band controls keeps `.settings-close`, which is painted
+     after the rail, above the rail's own chrome; the tier swap lives inside
+     `.settings-nav-top` instead, so its hole is subtracted after that strip's
+     caption rectangle rather than before it. */
+  position: relative;
+  z-index: 0;
 }
 
 /*
@@ -150,6 +157,9 @@
   gap: 8px;
   /* traffic-light / titlebar clearance */
   padding: 48px 12px 6px;
+  /* Containing block for the tier swap, which lives inside this drag strip so
+     its `no-drag` hole paints after the strip instead of before it. */
+  position: relative;
 }
 
 /*
@@ -222,13 +232,33 @@
 }
 
 /*
- * The size-tier swap sits in the top band, not the rail: the frame is what tells
- * the two tiers apart, so the control only has to name the other one.
- * `.settings-titlebar` paints an opaque strip across this corner (z-index 10)
- * and owns the drag region, so the button stacks above it and opts out of the
- * drag.
+ * The size-tier swap sits in the top band, not in the rail's flow: the frame is
+ * what tells the two tiers apart, so the control only has to name the other one.
+ * It anchors the band's left edge inside `.settings-nav-top` (the rail's drag
+ * strip) and the close control anchors the right, so the two window-level
+ * actions read as a pair instead of stacking in one corner. Living inside the
+ * drag strip is what keeps the press a press: the strip paints its caption
+ * rectangle first and the button's `no-drag` hole is subtracted after it, while
+ * a sibling painted before the strip would have the corner reclaimed as caption.
  */
 .settings-tier-swap {
+  position: absolute;
+  top: calc((var(--ds-toolbar-height) - var(--ds-work-panel-toggle-size)) / 2);
+  left: 12px;
+  z-index: 11;
+}
+
+/* The full tier reaches the window edge, where macOS draws its traffic lights
+ * over the left band. The compact panel floats away from that corner, so only
+ * the full tier pays the lead inset. */
+:root[data-platform="darwin"] .settings-shell-full .settings-tier-swap {
+  left: var(--ds-window-lead-inset);
+}
+
+/* Mirror of the swap: same band, opposite edge. The compact tier still has the
+ * veil as a second way out, but the full tier only has this control and the
+ * rail's back-to-app row. */
+.settings-close {
   position: absolute;
   top: calc((var(--ds-toolbar-height) - var(--ds-work-panel-toggle-size)) / 2);
   right: 12px;
@@ -4326,3 +4356,457 @@
 .sklm-page-jump::placeholder {
   color: var(--ds-text-muted);
 }
+
+/* ---------------------------------------------------------------------------
+   Startup appearance (Settings ▸ General ▸ Appearance ▸ 进度条动画)
+   One row, one surface: the animation title leads the card, the logo switch
+   closes the same head line, and three selectable preview cards sit beneath —
+   the choice is visual, so each card shows what it plays.
+   ------------------------------------------------------------------------- */
+.settings-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.startup-animation-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+/* The logo switch is part of this card's head line, not a row of its own. */
+.startup-logo-switch {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.startup-logo-switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+}
+
+.startup-animation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.startup-animation-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 560px;
+}
+
+.startup-animation-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--ds-tile-deep);
+  color: var(--ds-text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.startup-animation-option:hover:not(:disabled) {
+  border-color: var(--ds-border-strong);
+  background: var(--ds-tile-hover);
+}
+
+.startup-animation-option.is-selected {
+  border-color: var(--ds-border-strong);
+  background: var(--ds-tile-hover);
+}
+
+.startup-animation-option:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 2px;
+}
+
+.startup-animation-option:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.startup-animation-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--ds-tile);
+  overflow: hidden;
+}
+
+.startup-animation-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 64px;
+  object-fit: contain;
+}
+
+/* The shipped animation is the loading bar, so the default card previews one. */
+.startup-animation-preview-track {
+  display: block;
+  width: 72px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--ds-text-primary) 8%, transparent);
+}
+
+.startup-animation-preview-bar {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: color-mix(in oklab, var(--ds-text-primary) 55%, transparent);
+}
+
+.startup-animation-placeholder {
+  color: var(--ds-text-muted);
+}
+
+.startup-animation-label {
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--leading-body);
+}
+
+.startup-animation-option.is-selected .startup-animation-label {
+  color: var(--ds-text-primary);
+}
+
+.startup-animation-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--ds-accent);
+  color: var(--ds-bg-primary);
+}
+
+.startup-animation-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.startup-animation-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.startup-animation-file-action {
+  flex: 0 0 auto;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--ds-accent-soft);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--leading-body);
+  cursor: pointer;
+}
+
+.startup-animation-file-action:hover:not(:disabled) {
+  color: var(--ds-text-primary);
+  text-decoration: underline;
+}
+
+.startup-animation-file-action:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.startup-animation-file-action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.startup-animation-hint {
+  margin: 0;
+  color: var(--ds-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+/*
+ * App icon styles. Each tile previews the file that ships to a taskbar or a
+ * dock, split light/dark so the same icon is judged on both surfaces.
+ */
+.app-icon-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.app-icon-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+  cursor: pointer;
+}
+
+.app-icon-option:hover:not(:disabled) .app-icon-preview {
+  border-color: var(--ds-border-strong);
+}
+
+.app-icon-option:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+.app-icon-option:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.app-icon-option.is-selected {
+  color: var(--ds-text-primary);
+}
+
+.app-icon-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--ds-tile-deep);
+}
+
+.app-icon-preview img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.app-icon-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--ds-text-primary);
+  color: var(--ds-bg-primary);
+}
+
+.app-icon-label {
+  display: block;
+  max-width: 88px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Icon appearance head line. The picker sits at the card's right edge on the
+ * style title line, so the tiles stay the row's single visual subject and the
+ * appearance reads as a compact drop-down, not a second card.
+ */
+.app-icon-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+/* The stored selection, spelled out above the behaviour hint: the tile badge
+   alone does not say which style is in use once the row is scrolled past. */
+.app-icon-current {
+  margin-top: 2px;
+  color: var(--ds-text-primary);
+}
+
+.app-icon-appearance {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-icon-appearance-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+  white-space: nowrap;
+}
+
+/*
+ * Chrome palette presets (主题模式). Four tiles, each painted from its own
+ * `data-chrome-theme` token block (tokens.css), so the preview is the preset's
+ * real chrome: the sidebar plate with its vertical gradient, the content sheet
+ * on top of it, and the marker accent. Selection is one accent ring, matching
+ * the reference's single filled marker instead of a second badge layer.
+ */
+.chrome-theme-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.chrome-theme-option {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.chrome-theme-option:focus-visible {
+  outline: none;
+}
+
+.chrome-theme-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 11;
+  border-radius: var(--radius-sm);
+  background-color: var(--ds-bg-sidebar);
+  background-image: var(--ds-bg-sidebar-image, none);
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: inset 0 0 0 1px var(--ds-border-subtle);
+  transition:
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.chrome-theme-tile-accent {
+  position: absolute;
+  top: 9px;
+  left: 10px;
+  width: 40%;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--ds-chrome-accent);
+}
+
+.chrome-theme-tile-dot {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-round);
+  background: var(--ds-bg-primary);
+  box-shadow: inset 0 0 0 1px var(--ds-border-strong);
+}
+
+.chrome-theme-tile-sheet {
+  position: absolute;
+  top: 20px;
+  right: 9px;
+  bottom: 0;
+  left: 9px;
+  display: block;
+  overflow: hidden;
+  padding: 9px 10px;
+  border-radius: var(--radius-2xs) var(--radius-2xs) 0 0;
+  background: var(--ds-bg-primary);
+  box-shadow: 0 -1px 0 color-mix(in oklab, var(--ds-text-primary) 8%, transparent);
+}
+
+.chrome-theme-tile-line {
+  display: block;
+  width: 62%;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--ds-text-primary) 16%, transparent);
+}
+
+.chrome-theme-tile-line.is-short {
+  width: 44%;
+  margin-top: 5px;
+}
+
+.chrome-theme-option.is-selected .chrome-theme-tile {
+  box-shadow:
+    inset 0 0 0 1px var(--ds-chrome-accent),
+    0 0 0 1px var(--ds-chrome-accent);
+}
+
+.chrome-theme-option.is-selected .chrome-theme-tile-dot {
+  background: var(--ds-chrome-accent);
+  box-shadow: none;
+}
+
+.chrome-theme-option:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.chrome-theme-label {
+  color: var(--ds-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-compact);
+  text-align: center;
+}
+
+.chrome-theme-option.is-selected .chrome-theme-label {
+  color: var(--ds-text-primary);
+}
+
+@media (max-width: 720px) {
+  .chrome-theme-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

@@ -158,6 +158,12 @@ import type {
   TrustedExtensionUiPromptResponse,
   SessionTodoSnapshot,
   StorageInfo,
+  StartupAppearancePatch,
+  StartupAppearancePickResult,
+  StartupAppearanceState,
+  AppIconState,
+  AppIconStyle,
+  AppIconAppearance,
 } from "@trail/shared";
 import {
   defaultCommandShellForPlatform,
@@ -878,6 +884,25 @@ export const api = {
     invoke<void>(IPC.invoke.storageRemoveBackup, input),
   setSettings: (settings: AppSettings) =>
     invoke(IPC.invoke.settingsSet, validateSettingsWrite(settings)),
+  /*
+   * Startup appearance (logo switch + loading animation) lives in the
+   * main-process record, not in `AppSettings`: the boot splash needs it before
+   * the host and settings bootstrap finish.
+   */
+  getStartupAppearance: () =>
+    invoke<StartupAppearanceState>(IPC.invoke.startupAppearanceGet),
+  pickStartupAnimation: () =>
+    invoke<StartupAppearancePickResult>(IPC.invoke.startupAppearancePick),
+  setStartupAppearance: (patch: StartupAppearancePatch) =>
+    invoke<StartupAppearanceState>(IPC.invoke.startupAppearanceSet, patch),
+  /*
+   * App icon style: a main-process record, applied when the window/dock is
+   * created next, so the Settings row tells the user a restart is required.
+   */
+  getAppIcon: () => invoke<AppIconState>(IPC.invoke.appIconGet),
+  setAppIcon: (style: AppIconStyle) => invoke<AppIconState>(IPC.invoke.appIconSet, style),
+  setAppIconAppearance: (appearance: AppIconAppearance) =>
+    invoke<AppIconState>(IPC.invoke.appIconAppearanceSet, appearance),
   /** Store the Jev key in Host secure storage; it is never returned to renderer state. */
   setJevApiKey: (value: string) =>
     invoke<void>(IPC.invoke.secretsSet, { secretRef: JEV_API_KEY_SECRET_REF, value }),

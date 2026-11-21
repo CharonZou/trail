@@ -5,6 +5,126 @@
 > macOS signing/notarization remains the detailed qualification lane below.
 > Cross-references: [milestones](01-mvp-milestones.md) · [process model](../03-runtime/07-process-model.md) · [security](../05-security/01-security.md)
 
+## Pipeline at a glance (CI → CD)
+
+Desktop delivery here is continuous integration plus continuous delivery of
+installers, not server deployment: the pipeline's end product is a GitHub
+Release carrying signed installers and the `latest*.yml` feeds that
+`electron-updater` reads. Sections 4–6 hold the detail; this chart fixes only
+the order, the gates and the hand-off between stages.
+
+<svg class="rp-figure" width="100%" viewBox="0 0 1460 850" role="img" aria-label="Release pipeline: every change, main, tag, delivery" xmlns="http://www.w3.org/2000/svg">
+<style>
+.rp-bx{fill:var(--vp-c-bg-soft,#f6f6f7);stroke:var(--vp-c-divider,#e2e2e3);stroke-width:1}
+.rp-hd,.rp-gate{fill:var(--vp-c-brand-soft,#eaf0ff)}
+.rp-n{fill:var(--vp-c-brand-1,#3b6ef0);font:700 15px 'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.rp-st{fill:var(--vp-c-text-1,#1f2328);font:600 15px 'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.rp-bt{fill:var(--vp-c-text-1,#1f2328);font:600 13.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.rp-bl{fill:var(--vp-c-text-2,#57606a);font:400 12.5px 'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.rp-cp{fill:var(--vp-c-text-3,#8a929c);font:400 11px 'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.rp-gt{fill:var(--vp-c-text-1,#1f2328);font:600 12px 'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.rp-ln{stroke:var(--vp-c-brand-1,#3b6ef0);stroke-width:2;fill:none}
+.rp-ar{fill:var(--vp-c-brand-1,#3b6ef0)}
+</style>
+<rect class="rp-hd" x="25" y="24" width="330" height="46" rx="12"/>
+<text class="rp-n" x="45" y="53">1</text>
+<text class="rp-st" x="68" y="53">Change — every PR</text>
+<rect class="rp-hd" x="385" y="24" width="330" height="46" rx="12"/>
+<text class="rp-n" x="405" y="53">2</text>
+<text class="rp-st" x="428" y="53">main — after merge</text>
+<rect class="rp-hd" x="745" y="24" width="330" height="46" rx="12"/>
+<text class="rp-n" x="765" y="53">3</text>
+<text class="rp-st" x="788" y="53">Tag — release build</text>
+<rect class="rp-hd" x="1105" y="24" width="330" height="46" rx="12"/>
+<text class="rp-n" x="1125" y="53">4</text>
+<text class="rp-st" x="1148" y="53">Delivery — installers</text>
+<rect class="rp-bx" x="25" y="86" width="330" height="150" rx="12"/>
+<text class="rp-bt" x="41" y="112">ci.yml</text>
+<text class="rp-bl" x="41" y="134">js: build · typecheck · lint</text>
+<text class="rp-bl" x="41" y="154">architecture budget · unit tests</text>
+<text class="rp-bl" x="41" y="174">rust: fmt · clippy · test (linux)</text>
+<text class="rp-bl" x="41" y="194">windows-specific Rust lanes</text>
+<text class="rp-bl" x="41" y="214">Electron E2E under xvfb</text>
+<rect class="rp-bx" x="25" y="252" width="330" height="84" rx="12"/>
+<text class="rp-bt" x="41" y="278">pr-base.yml</text>
+<text class="rp-bl" x="41" y="300">PR head contains latest origin/main</text>
+<rect class="rp-bx" x="25" y="352" width="330" height="118" rx="12"/>
+<text class="rp-bt" x="41" y="378">docs-check.yml</text>
+<text class="rp-bl" x="41" y="400">policy sync · en/zh page pairs</text>
+<text class="rp-bl" x="41" y="420">dead links · VitePress build</text>
+<text class="rp-bl" x="41" y="440">on docs/**, *.md, AGENTS.md, CLAUDE.md</text>
+<text class="rp-cp" x="33" y="496">Trigger: branch push · any PR</text>
+<rect class="rp-gate" x="25" y="516" width="330" height="52" rx="12"/>
+<text class="rp-gt" x="41" y="548">Gate · nothing merges red</text>
+<rect class="rp-bx" x="385" y="86" width="330" height="86" rx="12"/>
+<text class="rp-bt" x="401" y="112">merge through gates</text>
+<text class="rp-bl" x="401" y="134">review + every job green</text>
+<rect class="rp-bx" x="385" y="188" width="330" height="80" rx="12"/>
+<text class="rp-bt" x="401" y="214">ci.yml re-runs</text>
+<text class="rp-bl" x="401" y="236">on the push to main</text>
+<rect class="rp-bx" x="385" y="284" width="330" height="86" rx="12"/>
+<text class="rp-bt" x="401" y="310">sync local main</text>
+<text class="rp-bl" x="401" y="332">remove merged branch + worktree</text>
+<text class="rp-cp" x="393" y="398">Trigger: merged PR</text>
+<rect class="rp-gate" x="385" y="418" width="330" height="52" rx="12"/>
+<text class="rp-gt" x="401" y="450">Gate · remote main only</text>
+<rect class="rp-bx" x="745" y="86" width="330" height="84" rx="12"/>
+<text class="rp-bt" x="761" y="112">release.mjs X.Y.Z --tag</text>
+<text class="rp-bl" x="761" y="134">bump every version surface</text>
+<rect class="rp-bx" x="745" y="186" width="330" height="80" rx="12"/>
+<text class="rp-bt" x="761" y="212">git push origin vX.Y.Z</text>
+<text class="rp-bl" x="761" y="234">a tag push skips ci.yml</text>
+<rect class="rp-bx" x="745" y="282" width="330" height="80" rx="12"/>
+<text class="rp-bt" x="761" y="308">verify</text>
+<text class="rp-bl" x="761" y="330">same gates, run again</text>
+<rect class="rp-bx" x="745" y="378" width="330" height="140" rx="12"/>
+<text class="rp-bt" x="761" y="404">build · 5 native lanes</text>
+<text class="rp-bl" x="761" y="426">mac arm64 + x64: sign, notarize, staple</text>
+<text class="rp-bl" x="761" y="446">win x64: NSIS + portable ZIP</text>
+<text class="rp-bl" x="761" y="466">linux x64 + arm64: AppImage/deb/rpm</text>
+<text class="rp-bl" x="761" y="486">each lane ships matching host-core</text>
+<rect class="rp-bx" x="745" y="534" width="330" height="80" rx="12"/>
+<text class="rp-bt" x="761" y="560">pi-host</text>
+<text class="rp-bl" x="761" y="582">linux x64 + arm64 bundles + .sha256</text>
+<rect class="rp-bx" x="745" y="630" width="330" height="80" rx="12"/>
+<text class="rp-bt" x="761" y="656">publish</text>
+<text class="rp-bl" x="761" y="678">GitHub Release + latest*.yml feeds</text>
+<text class="rp-cp" x="753" y="742">Trigger: tag v*.*.* · manual dispatch</text>
+<rect class="rp-gate" x="745" y="762" width="330" height="52" rx="12"/>
+<text class="rp-gt" x="761" y="794">Gate · tag == package.json version</text>
+<rect class="rp-bx" x="1105" y="86" width="330" height="88" rx="12"/>
+<text class="rp-bt" x="1121" y="112">GitHub Release</text>
+<text class="rp-bl" x="1121" y="134">github.com/CharonZou/trail</text>
+<rect class="rp-bx" x="1105" y="190" width="330" height="88" rx="12"/>
+<text class="rp-bt" x="1121" y="216">electron-updater</text>
+<text class="rp-bl" x="1121" y="238">in-app: Windows NSIS, Linux AppImage</text>
+<rect class="rp-bx" x="1105" y="294" width="330" height="88" rx="12"/>
+<text class="rp-bt" x="1121" y="320">manual download</text>
+<text class="rp-bl" x="1121" y="342">mac dmg/zip, Windows portable ZIP</text>
+<rect class="rp-bx" x="1105" y="398" width="330" height="88" rx="12"/>
+<text class="rp-bt" x="1121" y="424">CNB mirror</text>
+<text class="rp-bl" x="1121" y="446">present but disabled in this fork</text>
+<rect class="rp-gate" x="1105" y="506" width="330" height="52" rx="12"/>
+<text class="rp-gt" x="1121" y="538">Gate · signed + feed present</text>
+<path class="rp-ln" d="M357 300h18"/>
+<polygon class="rp-ar" points="383,300 375,295 375,305"/>
+<path class="rp-ln" d="M717 300h18"/>
+<polygon class="rp-ar" points="743,300 735,295 735,305"/>
+<path class="rp-ln" d="M1077 300h18"/>
+<polygon class="rp-ar" points="1103,300 1095,295 1095,305"/>
+</svg>
+
+| Stage | Trigger | Input | Output | Blocking gate |
+|---|---|---|---|---|
+| 1 · change | branch push, any PR | branch / worktree commits | green CI on a reviewable PR | any failed job, PR behind `main`, docs drift |
+| 2 · main | merge through repository gates | reviewed, rebased PR | `origin/main` tip | merge conflict, stale PR head |
+| 3 · tag | `v*.*.*` tag or manual dispatch | the tagged tree | published GitHub Release | tag/version mismatch, signing, notarization, glibc floor, artifact-name and feed checks |
+| 4 · delivery | release published | release assets | in-app update or manual download | none — users pull; there is no push channel |
+
+Out of scope of this pipeline: no server or container deployment; the
+documentation site is built (dead links) but not published by `docs-check.yml`;
+`linux-package.yml` is a manual repackaging lane, not a release step.
+
 ## 1. Build lanes
 
 | Lane | Command | Signing | Use |

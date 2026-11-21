@@ -21,6 +21,7 @@ import {
   IconBookOpen,
   IconBot,
   IconChevronLeft,
+  IconClose,
   IconFileText,
   IconGlobe,
   IconInfo,
@@ -44,9 +45,12 @@ import { TranscriptDisplayModeRow } from "../../components/settings/TranscriptDi
 import { RadialMenuSettings } from "../../components/settings/RadialMenuSettings";
 import { FontSizeRow } from "../../components/settings/FontSizeRow";
 import { AppFrameRow } from "../../components/settings/AppFrameRow";
+import { StartupAppearanceRows } from "../../components/settings/StartupAppearanceRows";
+import { AppIconRows } from "../../components/settings/AppIconRows";
 import { LanguageRow } from "../../components/settings/LanguageRow";
 import { SettingsMenuSelect } from "../../components/settings/SettingsMenuSelect";
 import { ThemeRow } from "../../components/settings/ThemeRow";
+import { ChromeThemeRow } from "../../components/settings/ChromeThemeRow";
 import { MacosWindowTranslucencyRow } from "../../components/settings/MacosWindowTranslucencyRow";
 import { NetworkProxySection } from "../../components/settings/NetworkProxySection";
 import { ProjectsPage } from "../../pages/ProjectsPage";
@@ -264,7 +268,7 @@ export function SettingsPage() {
   }, [navEntries]);
 
   // Search matches the tab label and the titles of the rows inside it, so
-  // typing e.g. "theme" or "主题" surfaces Basics even though the tab is
+  // typing e.g. "theme" or "明暗模式" surfaces Basics even though the tab is
   // named differently.
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -323,19 +327,39 @@ export function SettingsPage() {
         )}
       >
       <div className="settings-titlebar" aria-hidden="true" />
-      {/* The frame is what tells the two tiers apart, so the control only has to
-          name the tier this press lands on rather than restate both. */}
-      <TooltipButton
-        type="button"
-        className="settings-tier-swap no-drag"
-        tooltip={layoutSwapLabel}
-        ariaLabel={layoutSwapLabel}
-        onClick={() => void saveSettings({ settingsLayout: nextSettingsLayout })}
-      >
-        <IconLayoutSwap size={16} />
-      </TooltipButton>
+      {/* The compact panel carries its own close control at the band's right
+          edge. The full tier deliberately does not: it already shows the native
+          caption buttons in that corner, so a second X would be a duplicate of
+          the window's own close button; Back to app and the scrim stay the ways
+          out there. */}
+      {settingsLayout === "compact" ? (
+        <TooltipButton
+          type="button"
+          className="settings-close no-drag"
+          tooltip={t("common.close")}
+          ariaLabel={t("common.close")}
+          onClick={() => setPage("chat")}
+        >
+          <IconClose size={16} />
+        </TooltipButton>
+      ) : null}
       <aside className="settings-nav sidebar-surface" aria-label={t("settings.title")}>
         <div className="settings-nav-top drag">
+          {/* The band's left-edge control sits inside the rail's drag strip and
+              opts out of it. A `no-drag` child paints after its `drag` parent,
+              so Chromium subtracts the hole last; as a sibling painted earlier
+              the strip's caption rectangle wins the corner back and the press
+              starts a window drag instead. The frame is what tells the two
+              tiers apart, so the label names the tier this press lands on. */}
+          <TooltipButton
+            type="button"
+            className="settings-tier-swap no-drag"
+            tooltip={layoutSwapLabel}
+            ariaLabel={layoutSwapLabel}
+            onClick={() => void saveSettings({ settingsLayout: nextSettingsLayout })}
+          >
+            <IconLayoutSwap size={16} />
+          </TooltipButton>
           <div className="settings-search-wrap no-drag">
             <IconSearch size={14} />
             <input
@@ -457,10 +481,13 @@ export function SettingsPage() {
             <div className="settings-stack">
               <SettingsCard title={t("settings.appearance")}>
                 <ThemeRow settings={settings} saveSettings={saveSettings} />
+                <ChromeThemeRow settings={settings} saveSettings={saveSettings} />
                 <LanguageRow settings={settings} saveSettings={saveSettings} />
                 <FontFamilyRow settings={settings} saveSettings={saveSettings} />
                 <FontSizeRow settings={settings} saveSettings={saveSettings} />
                 <AppFrameRow settings={settings} saveSettings={saveSettings} />
+                <StartupAppearanceRows />
+                <AppIconRows />
                 {platform === "darwin" && (
                   <MacosWindowTranslucencyRow settings={settings} saveSettings={saveSettings} />
                 )}

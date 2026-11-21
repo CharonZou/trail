@@ -32,8 +32,9 @@ destination, chat as the home surface, tools and permissions inline.
 - **Sidebar**: primary navigation — path-less conversations under a compact
   **Sessions** section with new-session and sort actions, retained open-project
   groups under a following **Projects** section with a persistent new-project
-  action, and the WorkBuddy-inspired footer. The footer keeps compact Settings,
-  Extensions, Scheduled (clock), and notification icon actions. Each retained
+  action, and the WorkBuddy-inspired footer. Asset Center and Extensions have
+  labelled primary entries above the session lists. The footer keeps compact Settings,
+  Scheduled (clock), and notification icon actions. Each retained
   project is a
   path-keyed tab/group that can be
   collapsed independently. Project and conversation rows expose
@@ -53,12 +54,20 @@ destination, chat as the home surface, tools and permissions inline.
   the traffic-light row. `Codex` remains only an external import source or a
   design-reference term.
 - **Main pane**: exactly one destination at a time; destinations replace the
-  pane (they are pages, not modals). Once Settings or Extensions is selected,
+  pane (they are pages, not modals). Once Settings, Extensions, or Asset Center is selected,
   bootstrap completion and background refreshes must not replace that
   destination with the chat home; only an explicit navigation action may do so.
   The outer pane stays fluid while the sidebar is collapsed. The centered chat
   content band defaults to 760px and is user-resizable (D439); it compresses
   with `min(available pane, preferred)` instead of tightening to a 640px ceiling.
+  Asset Center provides Overview, Memory, Skills, and Subagents tabs. Overview
+  summarizes host-owned counts and storage scopes; Memory reuses the project
+  dialog's structured editor, including project-group ownership, search, and
+  dirty-state protection; Skills and Subagents embed their existing management
+  surfaces. A user-triggered, versioned JSON backup contains selected-project
+  memory and user-owned skill/subagent documents, never built-in documents or
+  credentials. Visiting another tab preserves unsaved editors, and dirty memory
+  disables project switching until it is saved.
 - **Titlebar**: platform-native desktop chrome (D118). macOS uses
   `hiddenInset` traffic lights and the system application menu. The expanded
   sidebar keeps Collapse sidebar in the same 46px row, aligned to

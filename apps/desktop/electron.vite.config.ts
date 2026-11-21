@@ -4,6 +4,17 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import type { Plugin } from "vite";
 
+const sharedSourceAliases = [
+  {
+    find: /^@trail\/shared$/,
+    replacement: resolve(__dirname, "../../packages/shared/src/index.ts"),
+  },
+  {
+    find: /^@trail\/shared\/(.+)$/,
+    replacement: resolve(__dirname, "../../packages/shared/src/$1.ts"),
+  },
+];
+
 // Dev needs 'unsafe-eval' for vite HMR tooling; production must not ship it.
 function tightenCsp(): Plugin {
   return {
@@ -77,6 +88,9 @@ export default defineConfig({
       // the CommonJS `__dirname` global used by Electron's relative asset paths.
       "__dirname": "import.meta.dirname",
     },
+    resolve: {
+      alias: sharedSourceAliases,
+    },
     build: {
       rollupOptions: {
         // Bundle JS workspace packages into Main. Native voice modules must
@@ -105,6 +119,9 @@ export default defineConfig({
   preload: {
     // The preload must be a fully bundled CJS file so it can run in a
     // sandboxed renderer without Node module resolution.
+    resolve: {
+      alias: sharedSourceAliases,
+    },
     build: {
       rollupOptions: {
         input: {
@@ -136,6 +153,7 @@ export default defineConfig({
     plugins: [react(), tailwindcss(), tightenCsp(), dropLegacyFontFallbacks(), injectWebPreload()],
     resolve: {
       alias: [
+        ...sharedSourceAliases,
         { find: "@renderer", replacement: resolve("src") },
         {
           find: /^@trail\/i18n\/locales\/([^/]+)$/,

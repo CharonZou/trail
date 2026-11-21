@@ -79,6 +79,14 @@ export type AppSettings = {
   defaultPermissionMode?: GlobalPermissionMode;
   theme: ThemePreference;
   /**
+   * Chrome palette preset (Settings ▸ General ▸ Appearance ▸ 主题模式). It
+   * recolours the sidebar plate/gradient, the settings rail, and the content
+   * pane ground; it never changes semantic colours, control accents, or any
+   * behaviour. Absent means `forest`, the shipped chrome palette, so an
+   * upgrade looks exactly as it did before the field existed.
+   */
+  chromeTheme?: import("../theme.js").ChromeThemeId;
+  /**
    * macOS only: keep the native `sidebar` vibrancy material behind a
    * transparent window surface. This is the shipped look, so absent and `true`
    * both mean translucent; `false` paints an opaque surface, which keeps the

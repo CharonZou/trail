@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from "electron";
-import { defaultDataDir, hasSingleInstanceLock, singleInstanceRequired } from "./installation";
+import { defaultDataDir, hasSingleInstanceLock, isDevelopmentBuild, singleInstanceRequired } from "./installation";
+import { legacyDataDir } from "./data-paths";
 import { prepareStorage } from "./storage/bootstrap";
 
 // Do not top-level-await Electron readiness: module evaluation gates the ready event.
@@ -12,7 +13,7 @@ if (hasSingleInstanceLock) {
     window?.show();
     window?.focus();
   });
-  void prepareStorage(defaultDataDir, !singleInstanceRequired)
+  void prepareStorage(defaultDataDir, !singleInstanceRequired, legacyDataDir(isDevelopmentBuild))
     .then(() => {
       booted = true;
       return import("./index");

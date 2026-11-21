@@ -1,0 +1,79 @@
+# Notice
+
+Trail — a long-lived desktop workspace for AI agents.
+Copyright (C) 2026 CharonZou. <https://github.com/CharonZou/trail>
+
+## License of this repository
+
+The original work in this repository is distributed under the
+**PolyForm Noncommercial License 1.0.0** (`LICENSE`). It is a
+source-available license, not an OSI-approved open source license:
+
+* personal study, research, experiment, hobby and other noncommercial use is permitted;
+* use by charitable, educational, public research, public health, environmental
+  or government organizations is permitted;
+* **commercial use, hosted or managed service offerings, redistribution as part
+  of a paid product, and any other commercial purpose require prior written
+  authorization** from the copyright holder.
+
+Commercial licensing requests: **2085723867@qq.com**
+
+## Upstream and third-party components
+
+Trail builds on, vendors, or derives from the components below. Their licenses
+apply to their own code and are not replaced by the repository license above.
+Each component's full license text stays with its source, package metadata or
+the paths named here.
+
+### Agent engine — pi (MIT)
+
+`@earendil-works/pi-ai`, `@earendil-works/pi-agent-core` and
+`@earendil-works/pi-coding-agent` (pinned at `1.4.0`, patched under `patches/`)
+are published by earendil-works under the MIT License:
+
+> <https://github.com/earendil-works/pi>
+
+MIT permits use, modification and redistribution provided that the copyright
+notice and permission notice are retained. Those notices are kept in the
+installed package metadata and in `patches/`. Nothing in this repository
+restricts the rights the MIT License grants to that code.
+
+### Desktop shell origin — PI-Desktop (LGPL-3.0)
+
+The Electron workbench, Rust host core, plugin system, specifications and tests
+that this repository grew from were released by vastsa under the GNU Lesser
+General Public License v3.0:
+
+> <https://github.com/vastsa/PI-Desktop>
+
+The corresponding LGPL-3.0 terms continue to apply to that code and to the
+files derived from it. The full LGPL-3.0 text is available at
+<https://www.gnu.org/licenses/lgpl-3.0.txt>. Combined distribution of those
+files must keep the LGPL notices and provide the corresponding source, which is
+this repository. The PolyForm terms above apply to the original Trail work,
+not as a replacement of the LGPL terms on the derived files.
+
+### Bundled plugins
+
+The built-in `pi.file-manager` plugin is vendored from its upstream under the
+MIT License; its `LICENSE`, `UPSTREAM.md` and PDF.js notices are kept beside it
+under `apps/desktop/resources/plugins/pi.file-manager/`. The `pi.browser`
+plugin and other bundled assets keep the notices that ship in their own
+directories.
+
+### Runtime, libraries and assets
+
+* Electron (MIT) and Chromium (BSD-3-Clause plus additional component licenses),
+  distributed with the application.
+* Node.js and the Rust crates listed in `Cargo.lock`, each under the license
+  declared by its crate.
+* JavaScript dependencies listed in `pnpm-lock.yaml`, each under the license
+  declared by its package.
+* KaTeX (MIT), PDF.js (Apache-2.0), and the icon, font and illustration assets
+  whose notices live next to them.
+
+## Trademarks
+
+"Trail" and the Trail logo identify this project. The names of upstream
+projects, model providers and plugin publishers remain the trademarks of their
+respective owners and are used only to describe compatibility.

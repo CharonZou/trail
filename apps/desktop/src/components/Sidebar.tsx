@@ -116,6 +116,7 @@ import {
   IconChevronDown,
   IconCopy,
   IconCircleAlert,
+  IconDatabase,
   IconNewSession,
   IconFolder,
   IconMore,
@@ -2593,6 +2594,20 @@ export function Sidebar({
       <div className="sidebar-body no-drag">
 
         <div className="sidebar-extensions">
+          <TooltipButton
+            type="button"
+            className={`extensions-entry ${page === "assets" ? "active" : ""}`}
+            data-nav="assets"
+            tooltip={t("assets.title")}
+            ariaLabel={t("assets.title")}
+            onClick={() => page === "assets"
+              ? (canNavBack() ? navBack() : setPage("chat"))
+              : setPage("assets")}
+            aria-pressed={page === "assets"}
+          >
+            <IconDatabase size={14} aria-hidden />
+            <span>{t("assets.title")}</span>
+          </TooltipButton>
           <TooltipButton
             type="button"
             className={`extensions-entry ${page === "plugins" ? "active" : ""}`}

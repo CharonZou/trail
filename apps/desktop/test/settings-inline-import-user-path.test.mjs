@@ -327,6 +327,9 @@ test("Settings disables a bundled skill and imports an external MCP server into 
       platform: "browser",
       format: "esm",
       jsx: "automatic",
+      // Vite turns asset imports into URLs; the Settings page imports icon and
+      // animation previews that way, so the harness has to do the same.
+      loader: { ".png": "dataurl", ".svg": "dataurl", ".gif": "dataurl" },
       define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "true" },
       alias: {
         "@trail/i18n": join(root, "packages/i18n/src"),

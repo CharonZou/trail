@@ -140,6 +140,48 @@ test("Windows storage root comparison ignores case and separator differences", (
   );
 });
 
+test("a pointer left on the pre-Trail default adopts the renamed directory", { timeout: 60_000 }, async (t) => {
+  const value = await fixture(t); resetHarness(value.anchor);
+  const branded = join(value.root, "trail-data");
+  await mkdir(branded);
+  const file = join(value.anchor, storage.STORAGE_PREFERENCE_FILE);
+  storage.writeStoragePreferences(file, { version: 1, roots: value.roots, backups: [] });
+
+  const prepared = await storage.prepareStorage(branded, false, value.roots.data);
+
+  assert.equal(harness.messageBoxes.length, 0);
+  assert.deepEqual(prepared.preferences.roots, { data: branded, browser: value.roots.browser });
+  assert.deepEqual(storage.readStoragePreferences(file, value.roots).roots, { data: branded, browser: value.roots.browser });
+  assert.deepEqual(harness.paths, [["sessionData", value.roots.browser]]);
+  assert.equal(await exists(value.roots.data), true, "the legacy directory is never deleted");
+});
+
+test("a pointer to a directory the user chose is not renamed", { timeout: 60_000 }, async (t) => {
+  const value = await fixture(t); resetHarness(value.anchor);
+  const chosen = join(value.root, "user-chosen-data");
+  const branded = join(value.root, "trail-data");
+  await Promise.all([mkdir(chosen), mkdir(branded)]);
+  const file = join(value.anchor, storage.STORAGE_PREFERENCE_FILE);
+  storage.writeStoragePreferences(file, { version: 1, roots: { ...value.roots, data: chosen }, backups: [] });
+
+  const prepared = await storage.prepareStorage(branded, false, value.roots.data);
+
+  assert.deepEqual(prepared.preferences.roots, { data: chosen, browser: value.roots.browser });
+  assert.deepEqual(storage.readStoragePreferences(file, value.roots).roots, { data: chosen, browser: value.roots.browser });
+});
+
+test("the legacy default is kept when the branded directory does not exist yet", { timeout: 60_000 }, async (t) => {
+  const value = await fixture(t); resetHarness(value.anchor);
+  const branded = join(value.root, "trail-data");
+  const file = join(value.anchor, storage.STORAGE_PREFERENCE_FILE);
+  storage.writeStoragePreferences(file, { version: 1, roots: value.roots, backups: [] });
+
+  const prepared = await storage.prepareStorage(branded, false, value.roots.data);
+
+  assert.equal(prepared.preferences.roots.data, value.roots.data);
+  assert.deepEqual(storage.readStoragePreferences(file, value.roots).roots, value.roots);
+});
+
 test("missing default data can adopt an existing storage root before boot", { timeout: 60_000 }, async (t) => {
   const value = await fixture(t, { dataMissing: true }); resetHarness(value.anchor);
   const recovered = join(value.root, "existing-storage");

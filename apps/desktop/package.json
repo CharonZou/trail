@@ -1,6 +1,6 @@
 {
   "name": "@trail/desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "desktopName": "trail.desktop",
   "private": true,
   "description": "Trail Electron application",
@@ -123,6 +123,10 @@
       {
         "from": "build/icon.png",
         "to": "tray-icon.png"
+      },
+      {
+        "from": "build/app-icons",
+        "to": "app-icons"
       },
       {
         "from": "../../packages/agent-runtime/dist-bundle",

@@ -807,11 +807,15 @@
 - **Preconditions:** An isolated desktop profile with `settingsLayout` absent,
   one conversation with history, and a plugin dialog reachable from Settings.
 - **Steps:** Open Settings and confirm the tier switch is the single icon button
-  in the top-right of the band and its tooltip names 紧凑 / Compact. Press it,
-  then navigate to a non-General destination and scroll it, open a dialog, drag
-  the panel's top strip to move the window, press the scrim outside the panel,
-  and try to click or Tab into the app behind it. Restart the app on the same
-  profile, reopen Settings, and switch back to 铺满 / Full.
+  at the top-left of the band and its tooltip names 紧凑 / Compact. Press the
+  switch, then navigate to a non-General destination and scroll it, open a
+  dialog, drag the panel's top strip to move the window, press the scrim outside
+  the panel, and try to click or Tab into the app behind it. Confirm the compact
+  band's close control sits at its right edge, and that the full tier renders no
+  renderer close control in that corner (only the native caption buttons). Also
+  press the close control once from the compact tier and reopen Settings.
+  Restart the app on the same profile, reopen Settings, and switch back to
+  铺满 / Full.
 - **Expected:** An absent field renders the shipped full-window page unchanged,
   pixel for pixel. Compact reframes the same page as one centered panel over the
   dimmed veil, and the veil dims the **painted app** rather than an empty window:
@@ -819,11 +823,14 @@
   or an assistive-technology traversal never reaches it. The destination and its
   scroll position survive the switch, no category remounts, the native caption
   buttons stay clickable and their band no longer cuts a rectangle out of the
-  veil, the tier switch keeps its 12px corner seat and never sits under a caption
-  button at the minimum window width, dragging the panel's top strip moves the
-  window, and pressing the scrim returns to the chat shell while a drag that
-  starts there does not. The tier persists across restart, is not a Settings
-  search hit, and changes no stored value other than `settingsLayout`.
+  veil, the tier switch keeps its 12px left seat, the compact tier's close
+  control keeps its 12px right seat and is the only band control clearing the
+  caption buttons at the minimum window width, the full tier shows no renderer
+  close control in that corner, pressing close on the compact tier returns to
+  the chat shell without changing `settingsLayout`, dragging the panel's top
+  strip moves the window, and pressing the scrim returns to the chat shell while
+  a drag that starts there does not. The tier persists across restart, is not a
+  Settings search hit, and changes no stored value other than `settingsLayout`.
 - **Specs linked:** `04-ux/06-settings-ia.md` §1, §4 items 1–2, 10–11, 29
 - **Acceptance:** Quality
 - **Status:** Covered by the source-contract suite
@@ -7038,7 +7045,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   5. On macOS, compare the splash surface with the sidebar glass after the shell appears.
   6. Repeat with `bootstrap` held unanswered past the watchdog bounds, and observe the boot surface at 30s and after 180s (issue #831).
 - **Expected**:
-  - Before ready: full-window splash with brand mark, shell name, tagline, and accessible starting status (`data-testid="startup-splash"`).
+  - Before ready: full-window splash with brand mark, shell name, and accessible starting status (`data-testid="startup-splash"`); the product tagline is not shown.
   - After ready: splash exits with a short fade (or instantly under reduced motion) and the main shell (or settings page) is interactive underneath.
   - If the initial state never arrives, the splash is replaced rather than held: the boot surface gains logs, diagnostics, and quit at 30s (`STARTUP_SLOW_HINT_MS`) without reporting a failure, and at 180s (`STARTUP_STALLED_MS`) becomes the recovery surface, which also offers a retry (`data-testid="startup-recovery"`); every action works without a backend, the renderer-drawn window controls stay above the surface on Windows/Linux, and quit goes through `pi-desktop/app/quit`.
   - On macOS the splash uses the same glass tint and sheen as the sidebar over native `sidebar` vibrancy; the mounted shell stays hidden until the splash exit fade, then cross-fades in. Other platforms keep the opaque `--ds-bg-primary` fill.
@@ -19630,3 +19637,35 @@ their separate platform acceptance.
   event/result agreement, batch rejection and delegate restoration.
 - **Status**: Automated offline; native UI clicking and live providers are
   outside this fixture's coverage.
+
+### E2E-ASSET-CENTER-workspace: Manage project memory and agent capabilities
+
+- **Preconditions**: One local project with saved memory, one grouped project,
+  one global custom skill, one project skill, and one custom subagent. Built-in
+  skills and subagents are also present.
+- **Steps**:
+  1. Open Asset Center from the labelled sidebar entry and inspect Overview.
+  2. Add a memory, edit its title and body, search for it, and save. Switch
+     between Memory, Skills, Subagents, and Overview before saving a second
+     edit; verify that the visited tabs retain their drafts. Try to switch the
+     project while memory is dirty, then save and switch.
+  3. Repeat memory loading and saving for the grouped project. Create, edit,
+     enable, and disable user skills and subagents through the embedded
+     management surfaces; return to Overview and compare the counts.
+  4. Export a backup, parse the JSON, and inspect the document bodies and
+     owning scopes.
+- **Expected**: The sidebar opens one lazy-loaded destination without replacing
+  it during background refreshes. Overview counts reflect host data. Project
+  and group memory use their existing authoritative IPC methods; the existing
+  project dialog and Asset Center save the same normalized entries. Dirty
+  memory prevents an accidental project switch. Skill and subagent behavior is
+  identical to Settings. The versioned backup includes selected-project memory,
+  user skill and subagent bodies, and no built-in documents or credentials.
+- **Specs linked**: `04-ux/01-ui-ia.md`, ADR 0234 and ADR 0332.
+- **Acceptance**: One user can discover, edit, preserve, and export the assets
+  without creating a second renderer-owned persistence system.
+- **Status**: Pure-function and source-contract coverage in
+  `apps/desktop/test/asset-center.test.mjs` and
+  `apps/desktop/test/project-memory.test.mjs`. Full native clicking remains a
+  Draft scenario and runs only when explicitly requested in a capable
+  environment.

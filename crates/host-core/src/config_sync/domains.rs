@@ -30,6 +30,7 @@ pub const DOMAIN_MEMORY: &str = "memory";
 
 pub(crate) const PORTABLE_APPLICATION_FIELDS: &[&str] = &[
     "theme",
+    "chromeTheme",
     "language",
     "fontFamily",
     "fontScale",
@@ -97,6 +98,7 @@ pub const DOMAIN_ADAPTERS: &[DomainAdapterSpec] = &[
         schema_version: 1,
         exportable_fields: &[
             "theme",
+            "chromeTheme",
             "language",
             "fontFamily",
             "fontScale",

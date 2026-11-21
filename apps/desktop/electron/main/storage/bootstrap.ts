@@ -9,7 +9,7 @@ import type { StorageProgress } from "@trail/shared";
 import { resolveHostBinary } from "../host-process";
 import { clearCaches, migrateFiles, removeBackups } from "./files";
 import { readStoragePreferences, STORAGE_PREFERENCE_FILE, writeStoragePreferences, type StoragePreferences } from "./preferences";
-import { recoverMissingDefaultStorage, sameStorageRoots } from "./startup-recovery";
+import { recoverMissingDefaultStorage, sameStoragePath, sameStorageRoots } from "./startup-recovery";
 
 export type StorageBootstrap = { file: string; anchor: string; managed: boolean; preferences: StoragePreferences };
 class StorageRecoveryCancelled extends Error {}
@@ -20,8 +20,33 @@ export function getStorageBootstrap(): StorageBootstrap {
 }
 const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] ?? char);
 
+/**
+ * A pointer written under the pre-Trail brand names the directory that brand
+ * created, so the renamed default never applies and the profile keeps its old
+ * name for the life of the installation. Once the Trail directory exists,
+ * adopt it: the pointer names the current profile, the data is already there,
+ * and nothing is copied. Anything the user picked themselves is left alone.
+ */
+function adoptRenamedDefault(
+  file: string,
+  preferences: StoragePreferences,
+  defaultData: string,
+  legacyDefault: string | undefined,
+): StoragePreferences | null {
+  if (!legacyDefault || preferences.pending) return null;
+  if (!sameStoragePath(preferences.roots.data, legacyDefault)) return null;
+  if (sameStoragePath(defaultData, preferences.roots.data) || !existsSync(defaultData)) return null;
+  const next = { ...preferences, roots: { ...preferences.roots, data: defaultData } };
+  writeStoragePreferences(file, next);
+  return next;
+}
+
 /** Runs before creating any application service or writer. userData remains the stable lock anchor. */
-export async function prepareStorage(defaultData: string, overridden: boolean): Promise<StorageBootstrap> {
+export async function prepareStorage(
+  defaultData: string,
+  overridden: boolean,
+  legacyDefault?: string,
+): Promise<StorageBootstrap> {
   const anchor = app.getPath("userData");
   mkdirSync(anchor, { recursive: true });
   const file = join(anchor, STORAGE_PREFERENCE_FILE);
@@ -31,6 +56,9 @@ export async function prepareStorage(defaultData: string, overridden: boolean): 
     const hasPersistedPreferences = existsSync(file);
     preferences = overridden ? { version: 1, roots: defaults, backups: [] }
       : readStoragePreferences(file, defaults);
+    if (!overridden) {
+      preferences = adoptRenamedDefault(file, preferences, defaultData, legacyDefault) ?? preferences;
+    }
     const missingData = !overridden && !existsSync(preferences.roots.data);
     const missingBrowser = !overridden && !existsSync(preferences.roots.browser);
     if (missingData || missingBrowser) {

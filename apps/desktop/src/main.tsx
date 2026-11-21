@@ -9,6 +9,7 @@ import { MAC_TRAFFIC_LIGHT_EDGE_DIP } from "@trail/shared";
 import App from "./App";
 import { ErrorBoundary, RoutePending } from "./features/app/chrome";
 import { initLanguageSync } from "./lib/app-language";
+import { syncPageIcon } from "./lib/app-icon-favicon";
 import { installScrollbarReveal } from "./lib/scrollbar-reveal";
 import "./styles/globals.css";
 
@@ -86,6 +87,7 @@ async function startRenderer(): Promise<void> {
     interpolation: { escapeValue: false },
   });
   document.documentElement.lang = "en";
+  void syncPageIcon();
   root.render(
     <React.StrictMode>
       <RoutePending />

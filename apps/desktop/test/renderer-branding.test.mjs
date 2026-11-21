@@ -50,7 +50,11 @@ test("app chrome uses the shared brand asset without branding the composer input
   assert.match(brandLogo, /import brandLogoUrlDark from\s*"\.\.\/assets\/brand\/logo-dark\.png"/);
   assert.doesNotMatch(brandLogo, /\.\.\/\.\.\/build\//);
   assert.match(brandLogo, /export function BrandLogo/);
-  assert.match(brandLogo, /src=\{.*brandLogoUrl/);
+  // The selected app icon wins; the shipped brand mark is the fallback until
+  // the main-process record has loaded.
+  assert.match(brandLogo, /appIconUrl\(icon\.style, icon\.appearance, dark\)/);
+  assert.match(brandLogo, /brandLogoUrlDark/);
+  assert.match(brandLogo, /brandLogoUrlLight/);
   assert.match(icons, /export const IconNewSession/);
   assert.doesNotMatch(icons, /IconCodexHome|IconCompose|IconPiMark|IconPiHome/);
   await access(new URL("../src/assets/home-mascot-dark.gif", import.meta.url));

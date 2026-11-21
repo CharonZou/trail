@@ -123,6 +123,22 @@ export function desktopDataDir(
   });
 }
 
+/**
+ * The home data directory the pre-Trail releases created for a profile.
+ *
+ * A pointer persisted under the old brand keeps naming this directory, so the
+ * storage bootstrap compares it against the current default and adopts the
+ * Trail directory once that one exists.
+ */
+export function legacyDataDir(development: boolean = process.env.TRAIL_DEV === "1"): string {
+  return resolve(
+    join(
+      homedir(),
+      development ? LEGACY_DEVELOPMENT_DATA_DIR_NAME : LEGACY_INSTALLATION_DATA_DIR_NAME,
+    ),
+  );
+}
+
 /** The Electron `app` surface this helper needs; kept structural so tests need no Electron. */
 export type UserDataApp = {
   commandLine: { hasSwitch(name: string): boolean };

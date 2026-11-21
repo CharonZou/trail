@@ -4,9 +4,9 @@
 
 # Trail
 
-### 可拆卸的 AI Agent 桌面工作台
+### 长期可用的 AI Agent 桌面工作台
 
-**把项目、Agent、模型、插件和工作流，装进一个长期可用的桌面环境。**
+**把项目、会话、子智能体、模型、插件和资产，装进一个能留住工作的桌面环境。**
 
 本地优先 · 模型自由 · 插件驱动 · macOS / Windows / Linux
 
@@ -14,7 +14,6 @@
 
 [![Release](https://img.shields.io/github/v/release/CharonZou/trail?label=release)](https://github.com/CharonZou/trail/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/CharonZou/trail/total?label=downloads)](https://github.com/CharonZou/trail/releases)
-[![Stars](https://img.shields.io/github/stars/CharonZou/trail?style=flat\&label=stars)](https://github.com/CharonZou/trail/stargazers)
 [![CI](https://github.com/CharonZou/trail/actions/workflows/ci.yml/badge.svg)](https://github.com/CharonZou/trail/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/CharonZou/trail)](LICENSE)
 
@@ -30,629 +29,64 @@
 
 <img src="docs/image/readme/home.webp" alt="Trail" width="94%" />
 
-<br />
-
-**你的项目留在本地 · 你的模型由你选择 · 你的工作台由你组装**
-
 </div>
 
----
-
-## 为什么是 Trail？
-
-终端 Agent 擅长执行，IDE Agent 擅长嵌入编辑器。
-
-Trail 想做得更进一步：
-
-> **给 AI Agent 一个独立、长期、可扩展的桌面工作空间。**
-
-<table>
-<tr>
-
-<td width="25%" valign="top">
-
-### 独立工作台
-
-不依附某个 IDE 或 Terminal。
-
-Project、Session、Review、Preview 与 Agent 都有自己的空间。
-
-</td>
-
-<td width="25%" valign="top">
-
-### 插件驱动
-
-插件扩展的不只是 Agent。
-
-面板、视图、Widget、Tool、MCP、主题与后台服务都可以插件化。
-
-</td>
-
-<td width="25%" valign="top">
-
-### Agent 编排
-
-一个 Agent 不够，就拆开做。
-
-Subagent 与 Worker Session 可以承担独立任务并行工作。
-
-</td>
-
-<td width="25%" valign="top">
-
-### 模型自由
-
-云端、本地、自建网关、Compatible API。
-
-模型随时换，工作流不用换。
-
-</td>
-
-</tr>
-</table>
-
-<div align="center">
-
-**它不是某个模型的壳，也不是某个 IDE 的插件。**
-
-### 它是承载 Agent 工作流的桌面平台。
-
-</div>
-
-> [!NOTE]
-> **Trail 目前仍处于 Early Preview。** 已可用于真实开发工作流，部分 API、插件接口与桌面能力仍在持续演进。
-
-> **当前发布线：1.0.x（Early Preview）。**
+<sub>许可：源码可见（PolyForm Noncommercial 1.0.0）· 个人、研究与非商业使用免费 · **商业使用须书面授权** · **不是** OSI 开源许可证。详见[授权](#授权)。</sub>
 
 ---
 
-## 插件不是附加功能，而是工作台的一部分
-
-Trail 的 Core 负责提供稳定底座。
-
-**真正属于你的工作流，由插件组合出来。**
-
-<table>
-<tr>
-
-<td width="33%" valign="top">
-
-### Agent
-
-扩展 Agent 能力
-
-**Agent Tools**
-**Skills**
-**Completion**
-**pi Extensions**
-
-</td>
-
-<td width="33%" valign="top">
-
-### Workspace
-
-扩展整个桌面
-
-**Commands**
-**Panels**
-**Work Panel Views**
-**Floating Widgets**
-**Themes**
-
-</td>
-
-<td width="33%" valign="top">
-
-### Platform
-
-扩展运行平台
-
-**MCP Servers**
-**Resident Services**
-**Plugin Message Bus**
-
-</td>
-
-</tr>
-</table>
-
-插件不必只是“给 Agent 多加一个 Tool”。
-
-它可以是一整个产品：
-
-```text
-Voice Agent
-├── Floating Widget
-├── Speech Service
-├── Agent Tool
-└── Commands
-
-GitHub Workspace
-├── Work Panel
-├── MCP Server
-├── Agent Tools
-└── Background Service
-
-Session Analytics
-├── Dashboard
-├── Commands
-└── Workspace View
-```
-
-### 插件能做什么？
-
-| 能力                  | 用途                  |
-| ------------------- | ------------------- |
-| **Command**         | 向全局命令系统添加操作         |
-| **Panel**           | 创建独立插件界面            |
-| **Floating Widget** | 创建语音球、状态窗、计时器等悬浮界面  |
-| **Work Panel View** | 向右侧工作区加入新视图         |
-| **Agent Tool**      | 注册 Agent 可调用工具      |
-| **Completion**      | 调用用户已经配置的模型         |
-| **Skill**           | 为 Agent 提供可复用能力与工作流 |
-| **Theme**           | 修改工作台视觉             |
-| **MCP Server**      | 接入本地或远程 MCP         |
-| **Service**         | 运行常驻后台任务            |
-| **Message Bus**     | 在插件之间传递消息           |
-
-插件可以通过 `.piplug` 分发，也可以从插件市场安装。
-
-<div align="center">
-
-### [开发一个插件 →](docs/plugin-development.md)
-
-</div>
-
----
-
-## 一个底座，组装不同的工作流
-
-```text
-                         Trail
-                             │
-          ┌──────────────────┼──────────────────┐
-          │                  │                  │
-        Agent            Workspace           Platform
-          │                  │                  │
-     Agent Tools           Panels              MCP
-       Skills             Widgets            Services
-     Subagents             Views            Message Bus
-   pi Extensions          Themes
-          │                  │                  │
-          └──────────────────┼──────────────────┘
-                             │
-                       Your Workflow
-```
-
-Trail 可以只是一个 Coding Agent。
-
-也可以被组装成：
-
-**AI 开发工作台 · Voice Agent · DevOps Console · GitHub Workspace · 数据分析助手 · 多 Agent 调度中心 · 自动化平台**
-
-> **Core 提供底座，插件决定它最终长什么样。**
-
----
-
-## 三种工作方式
-
-<table>
-<tr>
-
-<td width="33%" valign="top">
-
-### Agent
-
-**你给任务，它直接做。**
-
-读代码、改文件、跑命令、测试、持续迭代。
-
-适合日常开发。
-
-</td>
-
-<td width="33%" valign="top">
-
-### Plan
-
-**它先给方案，你确认后再执行。**
-
-先研究项目，再生成实施计划。
-
-适合重构与高风险修改。
-
-</td>
-
-<td width="33%" valign="top">
-
-### Goal
-
-**你定义结果，它决定路径。**
-
-锁定目标与验收条件，其余交给 Agent。
-
-适合复杂与长期任务。
-
-</td>
-
-</tr>
-</table>
-
-高权限操作始终经过 Trail 的 Permission Layer。
-
----
-
-## 一个 Agent 不够，就拆开做
-
-复杂任务不应该全部挤在一个 Context 里。
-
-Trail 提供两层任务拆分能力。
-
-### Subagents
-
-把独立工作交给后台 Agent：
-
-**代码调查 · 独立实现 · 测试分析 · Research · Review**
-
-每个 Subagent 拥有独立 Context，完成后将结果返回主 Agent。
-
-### Session Orchestrator
-
-需要更完整、更长期的并行任务时，可以继续拆成多个 Worker Session。
-
-```text
-Main Session
-│
-├── Worker A
-│   └── Frontend
-│
-├── Worker B
-│   └── Backend
-│
-├── Worker C
-│   └── Tests
-│
-└── Worker D
-    └── Review
-```
-
-Worker 是完整的 Trail Session：
-
-**独立 Context · 独立运行 · 可直接查看 · 可持续接受任务 · 保留完整 Transcript**
-
-<table>
-<tr>
-
-<td width="50%">
-
-<img src="docs/image/readme/session-orchestrator-overview.png" alt="Session Orchestrator" />
-
-<p align="center"><sub>一个 Session 编排多个 Worker</sub></p>
-
-</td>
-
-<td width="50%">
-
-<img src="docs/image/readme/session-orchestrator-worker.png" alt="Worker Session" />
-
-<p align="center"><sub>每个 Worker 都是完整、可查看的 Session</sub></p>
-
-</td>
-
-</tr>
-</table>
-
-<div align="center">
-
-**从「一个 Agent 帮我写代码」，走向「多个 Agent 分工完成任务」。**
-
-</div>
-
----
-
-## 为持续工作而设计
-
-Trail 围绕：
-
-<div align="center">
-
-### Project → Session → Agent → Work
-
-</div>
-
-而不是围绕一次性聊天窗口设计。
-
-支持：
-
-* 多 Project / 多 Session
-* Pin / Archive / Branch / Search
-* Agent 运行时继续 Queue Prompt
-* 使用 `@` 引用项目文件
-* Slash Commands
-* Diff Review
-* Command Output
-* Work Panel
-* Streaming Checkpoint
-* 异常后尽可能恢复任务现场
-
-**Session 可以跨多次启动持续工作。**
-
----
-
-## 看见 Agent 在做什么
-
-<table>
-<tr>
-
-<td width="50%">
-
-<img src="docs/image/readme/chat_en.png" alt="Trail Session" />
-
-<p align="center"><sub>长期 Session，而不是一次性对话</sub></p>
-
-</td>
-
-<td width="50%">
-
-<img src="docs/image/readme/model_en.png" alt="Trail Model" />
-
-<p align="center"><sub>在 Session 中直接切换模型与推理等级</sub></p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td width="50%">
-
-<img src="docs/image/readme/plugins_en.png" alt="Trail Plugins" />
-
-<p align="center"><sub>插件市场：扩展 Agent，也扩展整个桌面</sub></p>
-
-</td>
-
-<td width="50%">
-
-<img src="docs/image/readme/addmodel_en.png" alt="Trail Providers" />
-
-<p align="center"><sub>连接 Provider、Gateway 或本地模型</sub></p>
-
-</td>
-
-</tr>
-</table>
-
-<div align="center">
-
-**[查看更多界面 →](docs/guide/screenshots.md)**
-
-</div>
-
----
-
-## 模型可以换，工作流不用换
-
-Trail 不把 Agent 工作流绑定到某一家模型厂商。
-
-支持：
-
-**OpenAI · Anthropic · OpenAI Compatible API · 自建 Gateway · Ollama · LM Studio · Local Model**
-
-每个模型都可以独立配置：
-
-**Provider · Model ID · Context Window · 最大输出 · Reasoning / Thinking · Temperature · OAuth · API Key · Endpoint**
-
-不同 Session 可以使用不同模型。
-
-同一个 Session 也可以随时切换。
-
-```text
-Planning     → Model A
-Coding       → Model B
-Review       → Model C
-Private Task → Local Model
-```
-
-> **模型是可以替换的组件，而不是工作流本身。**
-
----
-
-## 已经在用其他 Coding Agent？
-
-已有工作不需要从零开始。
-
-Trail 可以导入本地 Session：
-
-**Claude Code · Codex · OpenCode · Pi**
-
----
-
-## Local-first
-
-Trail 不要求你把开发环境搬到我们的云端。
-
-| 数据                   | 默认行为               |
-| -------------------- | ------------------ |
-| Project              | 本地                 |
-| Session              | 本地                 |
-| Settings             | 本地                 |
-| Logs                 | 本地                 |
-| API Credentials      | OS Keychain        |
-| Trail Telemetry    | 无                  |
-| Model Request        | 直接发送到你配置的 Provider |
-
-**无需 Trail 账号。**
-
-**无需经过 Trail 云端 Relay。**
-
-使用远程模型时，请求所需 Context 会直接发送给对应 Provider。
-
----
-
-## 权限属于你
-
-Agent 可以读取文件、修改代码、运行命令、调用 Tool、使用扩展和委派任务。
-
-高权限操作仍然经过 Permission Layer：
-
-```text
-Agent
-  ↓
-Tool Request
-  ↓
-Permission Layer
-  ↓
-Allow / Ask / Deny
-  ↓
-Execution
-```
-
-**你决定每个 Session 拥有多少自主权。**
-
----
-
-## 开始使用
-
-<table>
-<tr>
-
-<td width="25%" valign="top">
-
-### 01
-
-**下载**
-
-安装 Trail
-
-</td>
-
-<td width="25%" valign="top">
-
-### 02
-
-**连接模型**
-
-配置 Provider
-
-</td>
-
-<td width="25%" valign="top">
-
-### 03
-
-**打开项目**
-
-选择本地 Repository
-
-</td>
-
-<td width="25%" valign="top">
-
-### 04
-
-**开始工作**
-
-Agent / Plan / Goal
-
-</td>
-
-</tr>
-</table>
-
-<div align="center">
-
-### [下载 Trail →](https://github.com/CharonZou/trail/releases/latest)
-
-**macOS · Windows · Linux**
-
-</div>
-
-### 安装包
-
-| Platform | Architecture  | Package                                 |
-| -------- | ------------- | --------------------------------------- |
-| macOS    | Apple Silicon | `.dmg` / `.zip`                         |
-| macOS    | Intel         | `.dmg` / `.zip`                         |
-| Windows  | x64           | 安装程序 / `.zip`                       |
-| Linux    | x64 / ARM64   | `.AppImage` / `.deb` / `.rpm` / `.asar` |
-
-macOS Release 使用 Developer ID 签名并经过 Apple Notarization。
-
-<details>
-<summary><strong>Linux Compatibility</strong></summary>
-
-<br />
-
-Linux 软件包（x64 与 arm64）需要 **glibc 2.35+**。
-
-常见支持版本：
-
-* Ubuntu 22.04+
-* Debian 12+
-* Fedora 36+
-
-检查当前版本：
+## 简介
+
+多数 Agent 工具只优化一轮对话：终端负责执行，编辑器侧栏负责补全。
+Trail 面向的是会继续下去的工作——一个项目、项目里的会话、正在处理它的 Agent、
+审阅与预览面板，以及它们沉淀下来的资产，全部放在同一个长期可用的桌面环境里，
+重启之后仍然在。
+
+Trail 是独立桌面应用，不是 IDE 插件，也不是终端前端。项目、转录、设置与凭据
+保存在你自己电脑上的 SQLite 数据库里，由 Rust host core 管理。模型可以随时更换：
+云端服务商、本地运行时和订阅账户（OAuth）都能进入同一套工作流。
+
+> **当前发布线：1.0.4（早期预览）。**
+
+## 能力
+
+* **资产中心（1.0.4）**：侧栏一级入口，把总览、记忆、技能与子智能体收进同一个工作台；
+  区分全局与项目作用域，记忆可搜索编辑，技能与子智能体可完整管理，
+  并能导出版本化 JSON 备份。
+* **对话 / Plan / Goal**：日常协作；先出可修订计划再执行；长任务按明确的回合预算运行。
+* **子智能体与并行会话**：委派任务在自己的会话里执行；并行会话隔离在独立 Git worktree，
+  避免并发任务互相覆盖。
+* **外观可配置（1.0.4）**：启动外观、应用图标样式、窗口主题、整窗或浮卡排版、
+  设置页呈现方式都是设置项，而不是写死的设计。
+* **插件，而不是堆功能**：面板、工具、输入框触发器、主题、浮窗、后台服务与 MCP 服务
+  都以插件形式接入，权限需声明，插件有自己的沙箱。
+* **权限由你控制**：文件、网络、Shell、浏览器、剪贴板与凭据访问按能力授权，
+  插件无法绕过这道闸门。
+* **本地优先**：项目、转录、设置与密钥留在本地 SQLite 数据库里，
+  应用运行不依赖上传任何数据。
+* **三平台一致**：macOS、Windows 与 Linux 提供同一套本地优先 Agent 工作流。
+
+## 快速开始
+
+### 桌面安装包
+
+1. 从 [Releases](https://github.com/CharonZou/trail/releases/latest) 下载对应平台的包：
+   Windows 安装程序或便携版 ZIP，macOS 的 DMG / ZIP（Apple Silicon 与 Intel），
+   以及 Linux 的 AppImage / deb / rpm。
+2. 打开 Trail，在 **设置 → 模型** 添加服务商与 API Key，测试连接后设为主模型。
+3. 开始对话。需要先审阅的工作用 **Plan**，有边界的长期任务用 **Goal**。
+
+macOS 版本尚未做 Apple 公证。若提示「已损坏」或无法验证，可以执行
 
 ```bash
-ldd --version
+xattr -cr /Applications/Trail.app
 ```
 
-</details>
-
----
-
-## Built on Pi
-
-Trail 构建在 [pi](https://github.com/earendil-works/pi) 生态之上。
-
-Agent Runtime 使用：
-
-* `pi-ai`
-* `pi-agent-core`
-* `pi-coding-agent`
-
-> **Pi 提供 Agent Engine，Trail 在其上构建 Desktop Workspace、Session、权限、插件与 Agent 编排。**
-
----
-
-## 开发者
-
-Trail 也可以作为开发者构建 Agent 产品的宿主平台。
-
-你可以开发：
-
-**Plugin · MCP Server · Skill · Agent Tool · pi Extension · Theme · Panel · Floating Widget · Background Service**
-
-### 插件快速开始
-
-内置模板：
-
-* `panel-basic`
-* `agent-tool-basic`
-* `skill-pack`
-* `full-demo`
-
-创建完成后即可作为 Development Plugin 加载。
-
-**[Plugin Development Guide →](docs/plugin-development.md)**
+或在 **系统设置 → 隐私与安全性 → 仍要打开** 中放行。
 
 ### 从源码运行
 
-<details>
-<summary><strong>Development Setup</strong></summary>
-
-<br />
-
-#### Requirements
-
-* Node.js `>=22.19`
-* pnpm `>=10`
-* Stable Rust Toolchain
-
-#### Start
+依赖：Node.js `>=22.19`、pnpm `>=10`、稳定的 Rust 工具链。
 
 ```bash
 git clone https://github.com/CharonZou/trail.git
@@ -666,98 +100,112 @@ pnpm build:js
 pnpm dev
 ```
 
-#### Validate
+验证：
 
 ```bash
 pnpm typecheck
 pnpm lint
 pnpm test
+cargo test -p host-core
 ```
 
-</details>
+打包需要 release 版 host 二进制与运行时 bundle：
 
-### 文档
+```bash
+pnpm dist
+```
 
-[Documentation](docs/guide/index.md) ·
-[Architecture](docs/spec/02-architecture/01-architecture.md) ·
-[Specification](docs/spec/README.md) ·
-[Plugin Development](docs/plugin-development.md) ·
-[E2E Test Plan](docs/spec/06-delivery/04-e2e-test-plan.md) ·
-[Release Runbook](docs/spec/06-delivery/06-release-runbook.md) ·
-[AGENTS.md](AGENTS.md)
+Windows 上可直接双击 `start-dev.cmd` 完成同样的启动步骤。
 
----
+## 最新发布：1.0.4
 
-## Contributing
+发布于 2026-11-20。**设置 → 关于**里的版本日志只保留 1.0.1 至 1.0.4 的详细介绍，
+更早的历史已移除。
 
-欢迎：
+| 版本 | 主要改进 |
+| --- | --- |
+| **1.0.4** | 资产中心（总览、记忆、技能、子智能体、JSON 备份）、启动外观 / 应用图标 / 窗口主题可配置、已有安装沿用 Trail 数据目录 |
+| **1.0.3** | 整窗与浮卡排版、设置页浮层、思考强度滑块与 `Ctrl+T`、服务商品牌标识、用 VS Code / Trae / IntelliJ IDEA 打开项目 |
+| **1.0.2** | 项目工作区图标与颜色、工作区索引开关、Token 用量卡、窗口卡片、更多服务商标识 |
+| **1.0.1** | 初始版本：本地优先工作台、模型自由、持久转录、并行 worktree 会话、子智能体、插件、三平台 |
 
-**Issues · Pull Requests · Plugins · Skills · MCP Integrations · Documentation · Translations**
+## 仓库结构
 
-对于相对独立的新能力，优先考虑一个问题：
+| 路径 | 职责 |
+| --- | --- |
+| `apps/desktop` | 渲染进程、preload 与 Electron 主进程 |
+| `apps/pi-host` | 通过 SSH 使用的远程 host 构建 |
+| `crates/host-core` | Rust host：持久化、文件、插件、凭据 |
+| `packages/agent-runtime` | 基于 pi 的 Agent 执行 |
+| `packages/shared` | 跨边界契约与 schema |
+| `packages/plugin-sdk` | 插件开发契约 |
+| `docs/` | 规格、ADR、用户文档 |
 
-> **它是否更适合作为一个 Plugin？**
+## 文档
 
-让 Core 保持克制，让生态持续生长。
+* [使用文档](docs/guide/index.md) 与 [界面预览](docs/guide/screenshots.md)
+* [架构](docs/spec/02-architecture/01-architecture.md) 与
+  [规格](docs/spec/README.md)
+* [决策记录](docs/adr/README.md)
+* [插件开发](docs/plugin-development.md)
+* [E2E 测试计划](docs/spec/06-delivery/04-e2e-test-plan.md) 与
+  [发布手册](docs/spec/06-delivery/06-release-runbook.md)
+* [Agent 开发策略](AGENTS.md)
 
-**[提交 Issue](https://github.com/CharonZou/trail/issues/new/choose)** ·
-[查看 Issues](https://github.com/CharonZou/trail/issues) ·
-[开发插件](docs/plugin-development.md)
+## 参与贡献
 
----
----
+欢迎缺陷报告、PR、插件、技能、MCP 集成、文档与翻译。写代码之前请先读
+[`AGENTS.md`](AGENTS.md) 与 [`CONTRIBUTING.md`](CONTRIBUTING.md)——它们定义了不能越过的边界。
 
-## 友情链接
+如果某项能力只属于你，先问一个问题：**它做成插件会不会更好？**
+让核心保持克制，让生态自己生长。
 
-[Linux.Do](https://linux.do/) — 新的理想型社区
+安全问题请按 [`SECURITY.md`](SECURITY.md) 私下报告，不要发公开 Issue。
 
----
+## 支持项目
 
-## Model Acknowledgements
+如果 Trail 对你有帮助，欢迎支持项目的持续开发。
+支持完全自愿，不影响你在许可证下的权利，也不构成商业许可或优先支持承诺。
 
-> **Not by a lone genius, but by a token-powered construction crew.**
+<p align="center">
+<img src="docs/image/readme/wechat-sponsor.jpg" alt="微信支持" width="260" />
+<br />
+<sub>微信扫码支持</sub>
+</p>
 
-Trail 的开发过程中使用了来自多个 Provider 的模型。
+商业合作、定制开发与授权：**2085723867@qq.com**
 
-累计模型使用量已超过 **27 Billion Tokens**。
+## 授权
 
-感谢参与构建 Trail 的每一位贡献者，以及陪我们一起写下这些代码的模型。
+版权所有 © 2026 CharonZou。
 
----
+Trail 以 **PolyForm Noncommercial License 1.0.0**（[`LICENSE`](LICENSE)）发布：
+源码可见，个人学习、研究与其他非商业用途免费，**商业使用须事先取得版权持有人的
+书面授权**（2085723867@qq.com）。这是源码可见许可证，**不是** OSI 认定的开源许可证。
 
-## 来源与致谢
+上游与内置组件保留各自的许可证，完整声明见 [`NOTICE`](NOTICE)，
+包括 MIT 协议的 pi Agent 引擎，以及本项目早期所基于的 LGPL-3.0 桌面外壳。
 
-Trail 不从零写起，它站在两个上游的肩膀上：
+## 致谢
 
-- **Agent 引擎**：[earendil-works/pi](https://github.com/earendil-works/pi) 的 `pi-ai`、`pi-agent-core`
-  与 `pi-coding-agent` 提供模型接入、Agent 循环和编码工具底座。
-- **桌面应用**：[vastsa/PI-Desktop](https://github.com/vastsa/PI-Desktop)（LGPL-3.0）提供 Electron
-  工作台、Rust 宿主核心与插件体系。
+Trail 的开发参考并建立在多个项目之上。Agent 循环、服务商接入与编码工具来自
+[`earendil-works/pi`](https://github.com/earendil-works/pi)（MIT）；
+早期桌面工作台、Rust host core、插件体系与规格文档源于
+[`vastsa/PI-Desktop`](https://github.com/vastsa/PI-Desktop)（LGPL-3.0）；
+内置文件管理器来自其 MIT 协议的上游。设计思路也参考了开源 Agent 工作台、
+MCP、Electron 与 Rust 生态。完整归属见 [`NOTICE`](NOTICE)。
 
-本仓库是在 PI-Desktop 之上维护的 Trail 发行版：工作区包名、环境变量与本地数据目录改用
-Trail，发布、自动更新与反馈入口指向本仓库；`net.aiuo.pi-desktop` 应用 ID、已落盘的数据格式、
-插件设备 ID 命名空间、内置技能 ID（`pi-desktop/imagegen`、`pi-desktop/visualize`）与会话租约
-锁后缀 `.pi-desktop.lock`、会话工作树的 `pi-desktop/*` 分支命名空间、远端已配对机器上 Host 的
-安装目录与默认数据目录（`~/.pi-desktop/pi-host`、`~/.pi-desktop`），配置同步协议常量，
-渲染进程桥全局名 `window.piDesktop`，以及 IPC／远程控制的方法名和本地 MCP 控制面名称
-（`pi_desktop_invoke`、`X-Pi-Desktop-Token` 头）保持不变，以便老数据与已有仓库直接升级；后两组是对外的线上协议，
-换它们需要协议版本边界，而不是一次改名。插件市场目录与安装记录里的 publisher id 同样沿用
-上游词汇。会话链接改用 `trail://session/<id>`，粘贴进来的旧 `pi-desktop://` 链接仍可解析；
-工作区忽略文件也保留对旧 `.pi-desktopignore` 的读取。只对外发送、本机不回读的值直接改名，
-不做回退：Provider 看到的 `User-Agent` 与 `x-opencode-client`，以及 Linux 可执行文件、
-deb/rpm 包名和图标名——所以旧包名的 `.deb`／`.rpm` 与 Trail 包是两个独立包，不会互相覆盖升级。
-老安装会继续使用改名前的 `~/.pi-desktop` 目录和
-`PI_DESKTOP_DATA_DIR`；其余 `TRAIL_*` 只服务开发与测试脚本，直接改名、不做兼容回退，
-本地 `.env` 与脚本请改用新名。上游社区渠道（
-[r/AIUO](https://www.reddit.com/r/AIUO/)、[QQ 开发者群](https://qm.qq.com/q/iWP8i0XxIc)）仍由原作者运营。
+## 联系
 
----
+* [GitHub Issues](https://github.com/CharonZou/trail/issues) 与
+  [Discussions](https://github.com/CharonZou/trail/discussions)
+* **2085723867@qq.com**
 
-## License
-
-Trail 使用 **GNU Lesser General Public License v3.0**。
-
-详见 [LICENSE](LICENSE)。
+<p align="center">
+<img src="docs/image/readme/wechat-contact.jpg" alt="微信联系" width="260" />
+<br />
+<sub>微信扫码添加作者</sub>
+</p>
 
 ---
 
@@ -765,20 +213,18 @@ Trail 使用 **GNU Lesser General Public License v3.0**。
 
 <img src="docs/image/readme/logo.png" alt="Trail" width="72" />
 
-## Trail
+### 组装你自己的 Agent 工作台。
 
-### Build your own Agent workspace.
-
-**你的模型 · 你的 Agent · 你的插件 · 你的工作台**
+**你的模型 · 你的 Agent · 你的插件 · 你的工作区**
 
 <br />
 
 **[立即下载](https://github.com/CharonZou/trail/releases/latest)** ·
-[Documentation](docs/guide/index.md) ·
-[Build a Plugin](docs/plugin-development.md)
+[使用文档](docs/guide/index.md) ·
+[开发插件](docs/plugin-development.md)
 
 <br /><br />
 
-<sub>Local-first · Model-agnostic · Plugin-powered</sub>
+<sub>本地优先 · 模型自由 · 插件驱动</sub>
 
 </div>

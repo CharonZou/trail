@@ -75,6 +75,21 @@ providers, local runtimes and OAuth-backed accounts join the same workflow.
 * **Three platforms.** macOS, Windows and Linux ship the same local-first agent
   workflow.
 
+## Screenshots
+
+Every frame below is captured from the 1.0.4 preview build running on Windows
+with the default Forest theme — no mockups.
+
+| Asset center | Skills |
+| --- | --- |
+| <img src="docs/image/readme/asset-center.png" alt="Asset center overview" width="100%" /> | <img src="docs/image/readme/asset-skills.png" alt="Skills tab" width="100%" /> |
+| **Subagents** | **Memory** |
+| <img src="docs/image/readme/asset-subagents.png" alt="Subagents tab" width="100%" /> | <img src="docs/image/readme/asset-memory.png" alt="Memory tab" width="100%" /> |
+| **Extensions** | **Appearance** |
+| <img src="docs/image/readme/extensions.png" alt="Extensions" width="100%" /> | <img src="docs/image/readme/settings.png" alt="Appearance settings" width="100%" /> |
+
+Theme, layout, language and typography are settings, not design.
+
 ## Quick start
 
 ### Desktop build

@@ -20,7 +20,10 @@ test("boot path renders a branded startup splash instead of plain status text", 
   assert.match(splash, /data-testid="startup-splash"/);
   assert.match(splash, /<BrandLogo size=\{64\}/);
   assert.match(splash, /t\("app\.shellName"\)/);
-  assert.match(splash, /t\("app\.tagline"\)/);
+  // The splash is a wordmark plus a load indicator: the product tagline is not
+  // part of the boot surface.
+  assert.doesNotMatch(splash, /t\("app\.tagline"\)/);
+  assert.doesNotMatch(splash, /startup-splash-tagline/);
   assert.match(splash, /t\("app\.starting"\)/);
   assert.match(app, /import \{ StartupSplash \}/);
   assert.match(app, /app-shell-boot/);

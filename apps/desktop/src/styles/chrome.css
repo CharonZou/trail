@@ -72,6 +72,29 @@
   animation: startup-mark-in var(--motion-duration-slow) var(--motion-ease-out) both;
 }
 
+/*
+ * An imported 进度条动画 replaces the loading bar, not the logo (the logo has
+ * its own switch): it gets a short stage where the bar sits, so both
+ * appearances keep the same rhythm and the card's brand mark never doubles as
+ * an animation preview.
+ */
+.startup-splash-stage {
+  display: flex;
+  width: 200px;
+  height: 96px;
+  align-items: center;
+  justify-content: center;
+  animation: startup-copy-in var(--motion-duration-slow) var(--motion-ease-out) both;
+  animation-delay: 80ms;
+}
+
+.startup-splash-animation {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .startup-splash-copy {
   display: flex;
   flex-direction: column;
@@ -88,12 +111,6 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tighter);
-}
-
-.startup-splash-tagline {
-  color: var(--ds-text-muted);
-  font-size: var(--text-md);
-  line-height: var(--leading-compact-plus);
 }
 
 .startup-splash-track {
@@ -741,7 +758,8 @@
 .window-chrome-row .title-nav-btn,
 .work-panel-new-tab,
 .work-panel-maximize,
-.settings-tier-swap {
+.settings-tier-swap,
+.settings-close {
   display: inline-flex;
   height: var(--ds-work-panel-toggle-size);
   width: var(--ds-work-panel-toggle-size);
@@ -762,7 +780,8 @@
 .main-titlebar .title-nav-btn:hover:not(:disabled),
 .window-chrome-row .title-nav-btn:hover:not(:disabled),
 .work-panel-new-tab:hover:not(:disabled),
-.work-panel-maximize:hover:not(:disabled) {
+.work-panel-maximize:hover:not(:disabled),
+.settings-close:hover:not(:disabled) {
   background: var(--ds-bg-hover);
   color: var(--ds-text-primary);
 }
@@ -1406,18 +1425,12 @@
   right: var(--ds-window-controls-width);
 }
 
-/* Same clearance for the Settings size-tier swap: the full tier reaches the
- * window edge, so the caption buttons always sit over its corner. */
-:root[data-platform="win32"] .settings-shell-full .settings-tier-swap,
-:root[data-platform="linux"] .settings-shell-full .settings-tier-swap {
-  right: calc(var(--ds-window-controls-width) + 12px);
-}
-
-/* The centered panel only overlaps that band once the window is narrow enough
- * for the buttons to reach inside it, so it clears exactly the overlap — no
- * corner jump at the widths where nothing is in the way. */
-:root[data-platform="win32"] .settings-shell-compact .settings-tier-swap,
-:root[data-platform="linux"] .settings-shell-compact .settings-tier-swap {
+/* The Settings close control only exists on the compact panel, which floats
+ * inside the window instead of reaching the caption buttons. It still pays the
+ * overlap once the window is narrow enough for the buttons to reach inside that
+ * band — no corner jump at the widths where nothing is in the way. */
+:root[data-platform="win32"] .settings-shell-compact .settings-close,
+:root[data-platform="linux"] .settings-shell-compact .settings-close {
   right: calc(12px + max(0px, var(--ds-window-controls-width) - (100vw - var(--settings-panel-width)) / 2));
 }
 
@@ -1585,6 +1598,11 @@
   --app-frame-radius: 16px;
   padding-bottom: var(--app-frame-gap);
   background: var(--ds-bg-sidebar);
+  /* The light plate continues onto the ground so the margin around the sheet
+     reads as one chrome surface, not a flat border colour. */
+  background-image: var(--ds-chrome-ground-image, none);
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 /* The chrome band belongs to the shell, not to the sheet: the window buttons

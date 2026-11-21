@@ -2,10 +2,11 @@
 
 ## 1. Settings root (Codex full-page shell)
 
-Settings has two size tiers, set from one icon button in the top-right corner
-of the page and persisted in the optional `AppSettings.settingsLayout` field. An
-absent field resolves to `full`, so an upgrade never changes what an existing
-user sees.
+Settings has two size tiers, set from one icon button in the top-left corner
+of the page, and persisted in the optional `AppSettings.settingsLayout` field.
+The floating tier adds a close control at the right edge of the same band; the
+full tier leaves that corner to the native window buttons. An absent field
+resolves to `full`, so an upgrade never changes what an existing user sees.
 
 The **main window frame** is a separate appearance preference
 (`AppSettings.appFrame`, set from General ▸ Appearance ▸ 界面排版): `window`
@@ -59,15 +60,19 @@ tier except where a rule is explicitly scoped to it:
   automatic collapse/restore transitions on the visible shell still animate;
   initial presentation and route restoration do not.
 - Top of rail: traffic-light clearance and the pill **Search settings…**
-- The size tier has one entry: an icon button in the top-right corner of the
+- The size tier has one entry: an icon button in the top-left corner of the
   46px band — the same 28px seat, vertical centering and `no-drag` treatment as
   the shell's other chrome controls — and it names the tier it lands on
   (`切换为浮层` / `Switch to Floating panel`), so the control states the result
-  of the press instead of restating both options. It is the last control in that
-  band and clears the native caption buttons: in the `full` tier it inherits the
-  window-controls width offset the rest of the band already uses, and in the
-  `compact` tier it only moves when a narrow window pulls that band over the
-  panel.
+  of the press instead of restating both options. The `compact` tier adds a
+  close control with the same seat at the opposite edge, because the panel is a
+  layer inside the app and that is the only corner it owns; the `full` tier
+  deliberately renders no close control there, since it already shows the
+  native caption buttons in that corner and a second X would duplicate the
+  window's own close button (Back to app and the scrim are its ways out). The
+  close control clears the native caption buttons: it only moves when a narrow
+  window pulls that band over the panel. The swap sits at the band's left edge
+  and owes nothing to those buttons.
   The Appearance card's **Interface layout** row is the main window frame, not
   this tier: it writes `appFrame`, so the two preferences stay independent.
 - The **Back to app** (`返回应用`) action is pinned to the foot of the rail, not
@@ -218,6 +223,62 @@ tier except where a rule is explicitly scoped to it:
     destination, control, or stored value, only the ground and the sheet change,
     and it never writes the Settings page's own tier (`settingsLayout`). Absent
     resolves to `整窗`.
+  - **Startup appearance** (one card: `进度条动画` head line with a `开机 Logo 显示`
+    switch at its right end): two independent settings on one surface. The
+    switch controls whether the brand mark appears on the boot splash (on when
+    absent). The three preview cards beneath choose the animation in the
+    splash's loading area — the shipped progress bar (`默认进度条`), the
+    bundled second preset `临界血条` ("Critical bar"), or the user's own file
+    (`自定义动画`, SVG/GIF/PNG/WebP, up to 8 MB). The default card previews a
+    progress bar, never the logo, so the two settings never read as duplicates;
+    the chosen custom card shows the file's preview and original name with a
+    **Change file** action, and choosing it while no file is stored opens the
+    import dialog directly. Both switches are stored as one main-process record
+    in the app data directory (`startup-appearance.json` plus the imported file)
+    instead of `AppSettings`, because the splash mounts before the host and
+    settings bootstrap; an absent or unreadable record shows the shipped
+    appearance.
+  - **App icon** rows inside the appearance card (no card of their own): one
+    row, `图标样式` with the hint that the pick applies
+    right away to the window, the page icon and the browser tab, while shortcut
+    and installer art updates on the next launch, plus one tile per bundled icon
+    style (`Trail`, `小熊` / "Mascot", `云朵` / "Cloud"). A
+    tile previews the bundled art on the card surface — one uniform ground, no
+    light/dark split — and the selected tile carries a check badge. `cloud` ships
+    an animated mark: the tile, the in-app brand mark and the page icon draw the
+    bundled GIF — the home sprite plated onto the style's own light or dark tile,
+    so a fixed light/dark pick stays legible on the opposite surface — while the
+    OS window/taskbar/Dock icon keeps the static PNG because the native API takes
+    a single bitmap; the `prefers-reduced-motion` preference falls back to the
+    still frame. The style
+    is a main-process record in
+    the app data directory (`app-icon.json`), read while the Windows/Linux
+    window icon and the macOS Dock tile are created, and re-applied to every
+    live window (`BrowserWindow.setIcon`) or the Dock tile when the user picks
+    another style. The renderer repaints the document `rel="icon"` from the
+    same bundled art (declaring `image/gif` for `cloud`), so the packaged page
+    icon, the Browser Dev Mode window and
+    the browser tab follow in the same session; only the OS install/shortcut
+    art stays launch-time. An absent or
+    unreadable record resolves to `trail`. Packaged builds read the PNGs from
+    `resources/app-icons`, shipped from `build/app-icons`.
+  - **Icon appearance** picker on the same card head line, right-aligned:
+    `图标外观` plus a compact menu-select drop-down offering `浅色` / `深色` /
+    `跟随 Trail`. It is a head-line control rather than a second card or a
+    segmented row, so the style tiles remain the card's only visual subject
+    (matching the `进度条动画` card, where the logo switch closes its title
+    line). Every bundled style
+    (`trail`, `mascot`, `cloud`) ships a light and a dark artwork, so the row
+    changes the tiles in both picks; a style without a dark artwork would
+    disable the picker instead of silently doing nothing.
+    `跟随 Trail` resolves against Trail's own light/dark mode: the main process
+    reads `nativeTheme.shouldUseDarkColors` (which mirrors the app's theme, not
+    the bare OS theme) when it repaints the window/dock, and the renderer
+    resolves it against `document.documentElement.dataset.theme` for the page
+    icon and the tile previews. The pick is the second field of the same
+    `app-icon.json` record, written through its own IPC channel
+    (`appIcon/appearanceSet`) so the existing style channel keeps its contract,
+    and it repaints the live window/dock in the same session.
   - **Translucent window** (macOS only): one switch for the native window
     surface (ADR 0332). On — and absent — keeps the shipped `sidebar` vibrancy
     material behind a transparent backing; off paints the opaque surface that
@@ -1042,8 +1103,9 @@ system while preserving their different data ownership:
 1. Opening Settings takes the app surface away from the coding shell: the
    `full` tier hides it, the `compact` tier keeps it painting under the scrim
    but `inert`, so nothing behind the panel is reachable
-2. Rail shows the search pill at the top, the size tier switch in the top-right
-   corner of the band rather than in the rail, the
+2. Rail shows the search pill at the top, the size tier switch in the top-left
+   corner of the band rather than in the rail, the floating tier's close control
+   at its right edge, the
    back-to-app action pinned at the foot on the main sidebar's footer icon
    line, and exactly General / 常规, AI,
    Shortcuts / 快捷键, Instructions / 指令, Models / 模型, Skills / 技能, MCP,
@@ -1165,6 +1227,7 @@ the current window width:
 | Content width | Full available pane width after rail and gutters |
 | Card radius | ~14px elevated stroke |
 | Compact panel | centered `min(clamp(720px, 54vw, 1040px), 100vw - 48px)` × `min(clamp(480px, 74vh, 880px), 100vh - 48px)`, `--radius-lg-plus`, `--ds-shadow-dialog`, over `--ds-scrim`; the scrim dims the painted app tree, which stays `inert` |
-| Tier switch | 28px chrome seat, 16px icon, top-right of the band, `z-index` above the drag region, clears `--ds-window-controls-width` |
+| Tier switch | 28px chrome seat, 16px icon, top-left of the band, `z-index` above the drag region, clears the macOS traffic lights in the `full` tier |
+| Close control | `compact` tier only: 28px chrome seat, 16px glyph, top-right of the band, `z-index` above the drag region, clears `--ds-window-controls-width` |
 | Toggle | **32×20** thumb 16, neutral accent on (not green) |
 | Open-target pill | leading VS Code glyph |

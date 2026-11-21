@@ -23,6 +23,8 @@ import { registerScheduledIpc } from "./scheduled-ipc";
 import { registerSessionIpc } from "./session-ipc";
 import { registerSettingsIpc } from "./settings-ipc";
 import { registerStorageIpc } from "../storage/ipc";
+import { applyWindowIcon } from "../app-icon-runtime";
+import { isDevelopmentBuild } from "../installation";
 import { registerConfigSyncIpc } from "./config-sync-ipc";
 import { registerBackgroundTasksIpc } from "./background-tasks-ipc";
 import { registerSkillsIpc } from "./skills-ipc";
@@ -226,6 +228,20 @@ export function registerIpcHandlers(dependencies: RegisterIpcDependencies) {
     channel: string,
     fn: (event: IpcMainInvokeEvent, ...args: any[]) => Promise<any>,
   ) => {
+    /*
+     * The browser-dev bridge (WEB_MODE) dispatches through `ipcHandlers` and
+     * has no renderer event to hand over. Without this entry every
+     * event-taking channel — storage, notifications, windows — is reported as
+     * "not available in Browser Dev Mode" even though the desktop handler
+     * exists. The synthetic event names the main window, which is the only
+     * sender the bridge could ever represent.
+     */
+    ipcHandlers.set(channel, (...args: any[]) =>
+      fn(
+        { sender: getMainWindow()?.webContents ?? { id: -1 } } as IpcMainInvokeEvent,
+        ...args,
+      ),
+    );
     ipcMain.handle(channel, async (event, ...args) =>
       wrap(() => fn(event, ...args)),
     );
@@ -308,6 +324,14 @@ export function registerIpcHandlers(dependencies: RegisterIpcDependencies) {
     applyKeepAwakeWhileRunning,
     applyUpdatePreference: (preference) => updater.setPreference(preference),
     resolveEffectiveCommandShell,
+    applyAppIconRuntime: (style, appearance) => {
+      const result = applyWindowIcon({ style, appearance, isDevelopmentBuild });
+      if (!result.applied) {
+        logger.app("lifecycle", "warn", "app icon runtime apply skipped", {
+          data: { style, appearance, reason: result.reason },
+        });
+      }
+    },
     liveCallService,
   });
   registerConfigSyncIpc({

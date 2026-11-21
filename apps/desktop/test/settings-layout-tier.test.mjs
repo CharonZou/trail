@@ -2,10 +2,10 @@
  * Settings page layout tier (Full / Compact).
  *
  * Guards the Settings page's own size tier: the stored field stays optional and
- * absent means the shipped full-window page, the shell's top-right icon button
- * swaps between the tiers, the compact tier restyles the same tree as a
- * centered panel over the live app, and none of it moves a pixel of the full
- * tier.
+ * absent means the shipped full-window page, the shell's top-left icon button
+ * swaps between the tiers, its top-right counterpart closes the page, the
+ * compact tier restyles the same tree as a centered panel over the live app,
+ * and none of it moves a pixel of the full tier.
  *
  * The main window frame (`appFrame`, General ▸ Appearance ▸ 界面排版) is a
  * different preference and is guarded in settings-app-frame.test.mjs.
@@ -79,14 +79,24 @@ test("an absent tier resolves to the shipped full-window page", () => {
   assert.doesNotMatch(settingsNav, /settingsLayout/);
 });
 
-test("the tier swap is one icon button in the shell's top-right corner", () => {
+test("the tier swap is one icon button in the shell's top-left corner", () => {
+  // The swap lives inside the rail's drag strip so its `no-drag` hole is
+  // subtracted after that strip's caption rectangle: a sibling painted before
+  // the strip would have the corner reclaimed and the press turn into a drag.
   const swapIndex = settings.indexOf('className="settings-tier-swap no-drag"');
   const bandIndex = settings.indexOf('className="settings-titlebar"');
+  const navTopIndex = settings.indexOf('className="settings-nav-top drag"');
   assert.ok(swapIndex >= 0, "tier swap control missing");
   assert.ok(
     swapIndex > bandIndex,
     "the swap control must follow the drag band, which paints over earlier siblings",
   );
+  assert.ok(
+    swapIndex > navTopIndex,
+    "the swap must sit inside the rail's drag strip, not before it",
+  );
+  // Nothing in the rail may close the strip around the control.
+  assert.doesNotMatch(settings, /settings-nav-top[^>]*overflow/);
   assert.match(settings, /<TooltipButton\s[\s\S]{0,200}?className="settings-tier-swap no-drag"/);
   assert.match(settings, /tooltip=\{layoutSwapLabel\}/);
   assert.match(settings, /ariaLabel=\{layoutSwapLabel\}/);
@@ -101,30 +111,73 @@ test("the tier swap is one icon button in the shell's top-right corner", () => {
   // The supplied glyph is authored with a literal black fill; the theme owns
   // the color, otherwise the control vanishes on the dark theme.
   assert.match(iconsSource, /viewBox="0 0 1024 1024"\s*\n\s*fill="currentColor"/);
+
+  // The compact panel carries its own close control at the band's opposite
+  // edge; the full tier leaves that corner to the native caption buttons, so a
+  // second X would duplicate the window's own close button.
+  const closeIndex = settings.indexOf('className="settings-close no-drag"');
+  assert.ok(closeIndex >= 0, "settings close control missing");
+  assert.match(
+    settings,
+    /settingsLayout === "compact" \? \(\s*<TooltipButton[\s\S]{0,300}?className="settings-close no-drag"/,
+  );
+  assert.equal(
+    settings.match(/className="settings-close no-drag"/g)?.length,
+    1,
+    "the close control must be rendered once, behind the compact condition",
+  );
+  assert.match(settings, /<IconClose size=\{16\} \/>/);
+  assert.match(settings, /tooltip=\{t\("common\.close"\)\}/);
+  assert.match(settings, /ariaLabel=\{t\("common\.close"\)\}/);
+  assert.match(
+    settings,
+    /className="settings-close no-drag"[\s\S]{0,400}?onClick=\{\(\) => setPage\("chat"\)\}/,
+  );
 });
 
-test("the swap control joins the shared chrome geometry and clears native buttons", () => {
-  const rule = cssRuleIn(settingsCss, ".settings-tier-swap");
-  assert.match(rule, /position:\s*absolute/);
+test("the band's controls share chrome geometry and clear native buttons", () => {
+  const swapRule = cssRuleIn(settingsCss, ".settings-tier-swap");
+  assert.match(swapRule, /position:\s*absolute/);
   // Above .settings-titlebar (z-index 10), whose opaque band would bury it.
-  assert.match(rule, /z-index:\s*11/);
-  assert.match(rule, /top:\s*calc\(\(var\(--ds-toolbar-height\) - var\(--ds-work-panel-toggle-size\)\) \/ 2\)/);
-  assert.match(rule, /right:\s*12px/);
-  // One geometry for every chrome icon control, so the seat cannot drift.
-  assert.match(chromeCss, /\.work-panel-maximize,\n\.settings-tier-swap \{/);
-  // The full tier reaches the window edge, so Windows/Linux caption buttons
-  // always sit over it — same clearance the drag band already takes.
+  assert.match(swapRule, /z-index:\s*11/);
+  assert.match(swapRule, /top:\s*calc\(\(var\(--ds-toolbar-height\) - var\(--ds-work-panel-toggle-size\)\) \/ 2\)/);
+  assert.match(swapRule, /left:\s*12px/);
+  // macOS draws its traffic lights over the full tier's top-left corner, so the
+  // swap pays the same lead inset the shell chrome already reads.
   assert.match(
-    cssRule(
-      ':root[data-platform="win32"] .settings-shell-full .settings-tier-swap,\n:root[data-platform="linux"] .settings-shell-full .settings-tier-swap',
+    cssRuleIn(
+      settingsCss,
+      ':root[data-platform="darwin"] .settings-shell-full .settings-tier-swap',
     ),
-    /right:\s*calc\(var\(--ds-window-controls-width\) \+ 12px\)/,
+    /left:\s*var\(--ds-window-lead-inset\)/,
+  );
+
+  const closeRule = cssRuleIn(settingsCss, ".settings-close");
+  assert.match(closeRule, /position:\s*absolute/);
+  assert.match(closeRule, /z-index:\s*11/);
+  assert.match(closeRule, /top:\s*calc\(\(var\(--ds-toolbar-height\) - var\(--ds-work-panel-toggle-size\)\) \/ 2\)/);
+  assert.match(closeRule, /right:\s*12px/);
+
+  // One geometry for every chrome icon control, so the seats cannot drift.
+  assert.match(chromeCss, /\.settings-tier-swap,\n\.settings-close \{/);
+  // The close control is the one that needs hover wash; it sits alone on the
+  // band instead of inside an existing group.
+  assert.match(
+    chromeCss,
+    /\.work-panel-maximize:hover:not\(:disabled\),\n\.settings-close:hover:not\(:disabled\) \{/,
+  );
+  // The close control only exists on the compact panel, which floats inside
+  // the window; the full tier has no renderer close control to clear with.
+  assert.doesNotMatch(
+    chromeCss,
+    /\.settings-shell-full \.settings-close \{/,
+    "the full tier must not reserve caption clearance for a control it never renders",
   );
   // The centered panel only overlaps that band once the window is narrow
   // enough for it to reach inside the panel, so it clears exactly the overlap.
   assert.match(
     cssRule(
-      ':root[data-platform="win32"] .settings-shell-compact .settings-tier-swap,\n:root[data-platform="linux"] .settings-shell-compact .settings-tier-swap',
+      ':root[data-platform="win32"] .settings-shell-compact .settings-close,\n:root[data-platform="linux"] .settings-shell-compact .settings-close',
     ),
     /right:\s*calc\(12px \+ max\(0px, var\(--ds-window-controls-width\) - \(100vw - var\(--settings-panel-width\)\) \/ 2\)\)/,
   );
@@ -224,7 +277,7 @@ test("the compact tier reclaims the chrome clearance it no longer needs", () => 
   // The plugin-theme palette guard forbids a `.window-controls` rule in the
   // Settings sheet, so the band override must live in chrome.css with the band.
   assert.doesNotMatch(settingsCss, /\.window-controls\s*\{/);
-  // The rail carries no tier UI after the swap moved into the top-right band.
+  // The rail carries no tier UI after the swap moved into the top-left band.
   assert.doesNotMatch(settingsCss, /settings-layout-tier/);
 });
 

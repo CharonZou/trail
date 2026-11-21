@@ -125,6 +125,10 @@
         "to": "tray-icon.png"
       },
       {
+        "from": "build/app-icons",
+        "to": "app-icons"
+      },
+      {
         "from": "../../packages/agent-runtime/dist-bundle",
         "to": "agent-runtime"
       },

@@ -4,11 +4,13 @@ import {
 } from "electron";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { readAppIcon, resolveAppIconPath } from "../app-icon";
 import {
   APP_MENU_COMMANDS,
   APP_NAME,
   IPC,
   isThemeColorScheme,
+  resolveAppIconAppearance,
   traySessionTitle,
   migrateKeybindingOverrides,
   resolveFontScale,
@@ -128,15 +130,26 @@ export function createApplicationLifecycle({
   });
   let trayActivationGeneration = 0;
 
-  function applyDevelopmentBranding() {
-    if (process.platform !== "darwin" || !isDevelopmentBuild || !app.dock) return;
+  function applyAppIcon() {
+    if (process.platform !== "darwin" || !app.dock) return;
 
-    const iconPath = join(app.getAppPath(), "build", "icon_1024.png");
+    const record = readAppIcon(dataDir);
+    const iconPath = resolveAppIconPath({
+      style: record.style,
+      appearance: resolveAppIconAppearance(record.appearance, nativeTheme.shouldUseDarkColors),
+      isDevelopmentBuild,
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      exists: existsSync,
+    });
+    if (!iconPath) {
+      logger.app("lifecycle", "warn", "app icon missing", { data: { dataDir } });
+      return;
+    }
+
     const icon = nativeImage.createFromPath(iconPath);
     if (icon.isEmpty()) {
-      logger.app("lifecycle", "warn", "development dock icon missing", {
-        data: { iconPath },
-      });
+      logger.app("lifecycle", "warn", "app icon unreadable", { data: { iconPath } });
       return;
     }
 
@@ -759,7 +772,7 @@ export function createApplicationLifecycle({
   return {
     traySessions,
     taskbarUnreadBadge,
-    applyDevelopmentBranding,
+    applyAppIcon,
     hasVisibleWindow,
     restoreMainWindow,
     toggleMainWindow,

@@ -63,3 +63,33 @@ export function isBuiltinThemePreference(value: unknown): value is BuiltinThemeP
 export function builtinWindowBackground(scheme: ThemeColorScheme): string {
   return BUILTIN_THEME_BY_ID[scheme].windowBackground;
 }
+
+/**
+ * Chrome palette preset (Settings ▸ General ▸ Appearance ▸ 主题模式).
+ *
+ * A preset recolours the window chrome — the sidebar plate and its gradient,
+ * the settings rail, and the content pane's ground — without touching
+ * semantic colours, accents on controls, or any behaviour. Ids are the
+ * contract: the colours themselves live in `styles/tokens.css` as one
+ * `[data-chrome-theme]` block per scheme, so a preset is never duplicated in
+ * TypeScript and the CSS cannot drift from the ids offered here.
+ */
+export type ChromeThemeId = "forest" | "mint" | "honey" | "parchment";
+
+/** `forest` keeps the shipped chrome palette, so an absent field changes nothing. */
+export const DEFAULT_CHROME_THEME: ChromeThemeId = "forest";
+
+/** Picker order in the appearance card. */
+export const CHROME_THEMES: readonly ChromeThemeId[] = [
+  DEFAULT_CHROME_THEME,
+  "mint",
+  "honey",
+  "parchment",
+];
+
+/** True when a stored or incoming value names a chrome palette preset. */
+export function isChromeThemeId(value: unknown): value is ChromeThemeId {
+  return (
+    value === "forest" || value === "mint" || value === "honey" || value === "parchment"
+  );
+}

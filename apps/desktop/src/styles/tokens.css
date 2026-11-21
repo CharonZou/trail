@@ -39,12 +39,52 @@
   --ds-settings-rail-bg: var(--ds-bg-under);
   --ds-bg-sidebar: var(--ds-settings-rail-bg, var(--ds-bg-under));
   /*
+   * Paint layer for the floating layout's ground (the margin outside the
+   * content sheet). It mirrors `--ds-bg-sidebar-image` so a themed plate
+   * reaches the ground too; dark keeps today's opaque ground.
+   */
+  --ds-chrome-ground-image: none;
+  /*
    * Optional paint layer for the sidebar surface (gradients / images).
    * `--ds-bg-sidebar` stays a color so color-mix, borders, and macOS glass
    * tint keep working; themes set this to a CSS <image> value when they want
    * a gradient or picture plate.
    */
   --ds-bg-sidebar-image: none;
+  /*
+   * Marker colour of the active chrome palette (主题模式). It paints the tile
+   * accent in Settings only; control accents stay on `--ds-accent` so a
+   * palette pick never restyles buttons, focus rings, or semantic states.
+   */
+  --ds-chrome-accent: #8fbf9a;
+  /* Chrome palette presets dark-side values — see the light block. */
+  --ds-preset-mint-primary: #121716;
+  --ds-preset-mint-sidebar: #171f1d;
+  --ds-preset-mint-image: linear-gradient(
+    180deg,
+    #1c2826 0%,
+    #19211f 56%,
+    #151b1d 100%
+  );
+  --ds-preset-mint-accent: #6fd2bb;
+  --ds-preset-honey-primary: #17150f;
+  --ds-preset-honey-sidebar: #1e1b13;
+  --ds-preset-honey-image: linear-gradient(
+    180deg,
+    #262012 0%,
+    #211c12 56%,
+    #171410 100%
+  );
+  --ds-preset-honey-accent: #e0b45c;
+  --ds-preset-parchment-primary: #171310;
+  --ds-preset-parchment-sidebar: #1e1a16;
+  --ds-preset-parchment-image: linear-gradient(
+    180deg,
+    #29221c 0%,
+    #241e19 56%,
+    #181512 100%
+  );
+  --ds-preset-parchment-accent: #d8866a;
   --ds-bg-secondary: var(--gray-800);
   --ds-bg-tertiary: var(--gray-750);
   --ds-bg-inset: var(--gray-1000);
@@ -227,6 +267,63 @@
   --ds-bg-primary: #ffffff;
   --ds-settings-rail-bg: #f3f3f3;
   --ds-bg-sidebar: var(--ds-settings-rail-bg, #f3f3f3);
+  /*
+   * Light chrome plate: the vertical gradient sampled from the GoGo window
+   * (its `--bg-app` sits under a 35% background plate there, which reads
+   * #E5E7CC at the top, #DCE1D5 mid-band and #CFD9DF at the bottom).
+   * It is painted as an image so `--ds-bg-sidebar` can stay a mid-tone colour
+   * for color-mix, borders, and the macOS glass tint. Sidebar, sidebar footer,
+   * the floating-layout ground and the settings rail all follow it; the
+   * content pane stays white.
+   */
+  --ds-settings-rail-bg: #dce1d5;
+  --ds-bg-sidebar: var(--ds-settings-rail-bg, #dce1d5);
+  --ds-bg-sidebar-image: linear-gradient(
+    180deg,
+    #eaecd4 0%,
+    #e5e7cc 14%,
+    #dce1d5 56%,
+    #cfd9df 100%
+  );
+  --ds-chrome-ground-image: var(--ds-bg-sidebar-image);
+  /* Marker colour of the active chrome palette (主题模式), preview only. */
+  --ds-chrome-accent: #4a6a4f;
+  /*
+   * Chrome palette presets (主题模式). The literal colours live here, inside a
+   * theme root; the `[data-chrome-theme]` blocks further down only remap
+   * `--ds-*` tokens onto these, so the guard's theme-root rule stays satisfied
+   * and the Settings tile can preview the exact same values.
+   */
+  --ds-preset-mint-primary: #fbfdfc;
+  --ds-preset-mint-sidebar: #d6e3de;
+  --ds-preset-mint-image: linear-gradient(
+    180deg,
+    #e3efe9 0%,
+    #dcebe5 14%,
+    #d3e2df 56%,
+    #cbdcdf 100%
+  );
+  --ds-preset-mint-accent: #2f7d6a;
+  --ds-preset-honey-primary: #fdfcf4;
+  --ds-preset-honey-sidebar: #e5dfc8;
+  --ds-preset-honey-image: linear-gradient(
+    180deg,
+    #f5f0da 0%,
+    #efe8cf 14%,
+    #e7e0c6 56%,
+    #ded8c1 100%
+  );
+  --ds-preset-honey-accent: #b8892c;
+  --ds-preset-parchment-primary: #fcfaf6;
+  --ds-preset-parchment-sidebar: #e4dcd0;
+  --ds-preset-parchment-image: linear-gradient(
+    180deg,
+    #f3ece2 0%,
+    #ede5d8 14%,
+    #e5dccd 56%,
+    #ddd3c6 100%
+  );
+  --ds-preset-parchment-accent: #a2543a;
   --ds-bg-secondary: #f9f9f9;
   --ds-bg-tertiary: #f3f3f3;
   --ds-bg-inset: #ededed;
@@ -300,6 +397,90 @@
   /* Codex elevation-prominent exact (same dark/light formula). */
   --ds-shadow-composer: 0 3px 7.5px #0000000a, 0 0 20px #0000000d;
   --ds-bg-elevated-primary: color-mix(in oklab, #ffffff 70%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Chrome palette presets — Settings ▸ Appearance ▸ 主题模式
+ *
+ * A preset recolours the chrome ground only: the sidebar plate and its
+ * vertical gradient, the settings rail, the floating layout's ground, the
+ * content pane's own paper (`--ds-bg-primary`, which the main pane, the
+ * conversation top bar and the floating sheet already read), and the
+ * `--ds-chrome-accent` marker that paints the picker tile.
+ *
+ * `forest` is the shipped palette and has no block: an absent
+ * `data-chrome-theme` and the explicit `forest` id resolve to the same pixels,
+ * so adding this field cannot restyle an existing install.
+ *
+ * The selectors also match the picker tile itself, so a tile previews the
+ * preset's real tokens instead of a hand-painted swatch. Text roles, borders,
+ * semantic states, and control accents stay untouched: a palette pick never
+ * restyles buttons or warnings.
+ *
+ * Every palette colour is declared once, in the scheme's root block above as
+ * `--ds-preset-<id>-<role>`; these blocks only remap the surface tokens onto
+ * them. That keeps literals inside a theme root (the stylesheet guard) and
+ * makes the tile and the live window read the same numbers.
+ * ------------------------------------------------------------------------- */
+
+:root[data-theme="light"][data-chrome-theme="mint"],
+[data-theme="light"] .chrome-theme-tile[data-chrome-theme="mint"] {
+  --ds-bg-primary: var(--ds-preset-mint-primary);
+  --ds-settings-rail-bg: var(--ds-preset-mint-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-mint-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-mint-image);
+  --ds-chrome-ground-image: var(--ds-preset-mint-image);
+  --ds-chrome-accent: var(--ds-preset-mint-accent);
+}
+
+:root[data-theme="dark"][data-chrome-theme="mint"],
+[data-theme="dark"] .chrome-theme-tile[data-chrome-theme="mint"] {
+  --ds-bg-primary: var(--ds-preset-mint-primary);
+  --ds-settings-rail-bg: var(--ds-preset-mint-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-mint-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-mint-image);
+  --ds-chrome-ground-image: var(--ds-preset-mint-image);
+  --ds-chrome-accent: var(--ds-preset-mint-accent);
+}
+
+:root[data-theme="light"][data-chrome-theme="honey"],
+[data-theme="light"] .chrome-theme-tile[data-chrome-theme="honey"] {
+  --ds-bg-primary: var(--ds-preset-honey-primary);
+  --ds-settings-rail-bg: var(--ds-preset-honey-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-honey-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-honey-image);
+  --ds-chrome-ground-image: var(--ds-preset-honey-image);
+  --ds-chrome-accent: var(--ds-preset-honey-accent);
+}
+
+:root[data-theme="dark"][data-chrome-theme="honey"],
+[data-theme="dark"] .chrome-theme-tile[data-chrome-theme="honey"] {
+  --ds-bg-primary: var(--ds-preset-honey-primary);
+  --ds-settings-rail-bg: var(--ds-preset-honey-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-honey-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-honey-image);
+  --ds-chrome-ground-image: var(--ds-preset-honey-image);
+  --ds-chrome-accent: var(--ds-preset-honey-accent);
+}
+
+:root[data-theme="light"][data-chrome-theme="parchment"],
+[data-theme="light"] .chrome-theme-tile[data-chrome-theme="parchment"] {
+  --ds-bg-primary: var(--ds-preset-parchment-primary);
+  --ds-settings-rail-bg: var(--ds-preset-parchment-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-parchment-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-parchment-image);
+  --ds-chrome-ground-image: var(--ds-preset-parchment-image);
+  --ds-chrome-accent: var(--ds-preset-parchment-accent);
+}
+
+:root[data-theme="dark"][data-chrome-theme="parchment"],
+[data-theme="dark"] .chrome-theme-tile[data-chrome-theme="parchment"] {
+  --ds-bg-primary: var(--ds-preset-parchment-primary);
+  --ds-settings-rail-bg: var(--ds-preset-parchment-sidebar);
+  --ds-bg-sidebar: var(--ds-preset-parchment-sidebar);
+  --ds-bg-sidebar-image: var(--ds-preset-parchment-image);
+  --ds-chrome-ground-image: var(--ds-preset-parchment-image);
+  --ds-chrome-accent: var(--ds-preset-parchment-accent);
 }
 
 @theme {

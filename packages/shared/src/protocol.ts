@@ -7,7 +7,7 @@ export const APP_ID = "net.aiuo.pi-desktop";
 // paired remote hosts — renaming those strands existing data and breaks
 // contracts that ship outside this repository, not just this build.
 export const APP_NAME = "Trail";
-export const APP_VERSION = "1.0.3";
+export const APP_VERSION = "1.0.4";
 
 export const APP_MENU_COMMANDS = [
   "newTask",
@@ -193,6 +193,19 @@ export const IPC = {
     projectOpenWith: "pi-desktop/project/openWith",
     settingsGet: "pi-desktop/settings/get",
     settingsSet: "pi-desktop/settings/set",
+    /**
+     * Startup appearance (Settings ▸ General ▸ Appearance): logo visibility
+     * and the loading animation. Read by the boot splash before host/settings
+     * bootstrap, so the desktop main process owns the record instead of the
+     * host-backed settings object.
+     */
+    startupAppearanceGet: "pi-desktop/startupAppearance/get",
+    startupAppearancePick: "pi-desktop/startupAppearance/pick",
+    startupAppearanceSet: "pi-desktop/startupAppearance/set",
+    /** App icon style; applied at the next launch, main-owned for the same reason. */
+    appIconGet: "pi-desktop/appIcon/get",
+    appIconSet: "pi-desktop/appIcon/set",
+    appIconAppearanceSet: "pi-desktop/appIcon/appearanceSet",
     configSyncGetState: "pi-desktop/configSync/getState",
     backgroundTasksList: "pi-desktop/backgroundTasks/list",
     backgroundTasksOutput: "pi-desktop/backgroundTasks/output",

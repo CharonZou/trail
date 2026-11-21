@@ -8325,9 +8325,15 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - D684 gives Settings two size tiers: **整页 / Full page** keeps the shipped
   full-window takeover, and **浮层 / Floating panel** reframes the same page as a
   centered floating panel over the app scrim. The tier has one entry — a
-  `TooltipButton` in the top-right corner of the window band, in the same 28px
+  `TooltipButton` in the top-left corner of the window band, in the same 28px
   seat as the shell's other chrome controls, whose label names the tier the
-  press lands on, so it states a transition instead of restating two options.
+  press lands on, so it states a transition instead of restating two options;
+  the `compact` tier adds a matching close control at the band's right edge,
+  while the `full` tier leaves that corner to the native caption buttons —
+  a second X there would duplicate the window's own close button, so Back to
+  app and the scrim stay its ways out. *(Amended 2026-11-18: the swap moved
+  from the top-right to the top-left, and the close control took the vacated
+  corner on the compact panel only.)*
 - **`full` is the resolved default, not a written one.** `settingsLayout` stays
   optional in `AppSettings` and an absent value means `full`, so upgrading
   changes nothing an existing profile sees and nothing is rewritten at boot. One

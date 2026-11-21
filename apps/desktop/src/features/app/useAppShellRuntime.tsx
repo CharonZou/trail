@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { installRendererApi } from "../../capture/renderer-api";
 import { StartupSplash } from "../../components/StartupSplash";
 import { appFrameOf } from "../../lib/app-frame";
+import { applyChromeTheme } from "../../lib/chrome-theme";
 import { api } from "../../lib/api";
 import { composerSuggestion } from "../chat/composer/plugins/suggestion-bridge";
 import { subscribeRemoteInteractions } from "../../lib/remote-interactions";
@@ -604,6 +605,13 @@ export function useAppShellRuntime() {
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [settings?.theme, pluginThemes]);
+
+  // Chrome palette preset (Settings ▸ Appearance ▸ 主题模式): the id only
+  // stamps `data-chrome-theme`; tokens.css owns every colour, so switching
+  // costs one attribute and no re-render of the tree.
+  useEffect(() => {
+    applyChromeTheme(settings?.chromeTheme);
+  }, [settings?.chromeTheme]);
 
   // Global UI font: the Settings picker stores a CSS `font-family` stack in
   // `AppSettings.fontFamily`; absent means the built-in token stack.

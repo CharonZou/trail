@@ -86,7 +86,7 @@ export type StartupDependencies = {
   getHost: () => HostProcess | null;
   getMainWindow: () => BrowserWindow | null;
   sendToRenderer: (channel: string, payload: unknown) => void;
-  applyDevelopmentBranding: () => void;
+  applyAppIcon: () => void;
   createTray: () => void;
   dispatchApplicationMenuCommand: (command: AppMenuCommand) => void;
   dispatchNativeMenuAction: (action: NativeMenuAction) => void;
@@ -155,7 +155,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
       getHost,
       getMainWindow,
       sendToRenderer,
-      applyDevelopmentBranding,
+      applyAppIcon,
       createTray,
       dispatchApplicationMenuCommand,
       dispatchNativeMenuAction,
@@ -178,7 +178,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
     // A launch that lost the single-instance lock is already quitting. Never
     // create a window, a tray, or a child process on top of the running app.
     if (!hasSingleInstanceLock) return;
-    applyDevelopmentBranding();
+    applyAppIcon();
 
     // A Chromium-process crash from a previous run left a minidump, and nothing
     // else would ever mention it. Report one durable line per new dump set,

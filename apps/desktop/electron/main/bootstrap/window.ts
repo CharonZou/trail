@@ -8,6 +8,9 @@ import {
   builtinWindowBackground,
   IPC,
   MAC_TRAFFIC_LIGHT_POSITION,
+  resolveAppIconAppearance,
+  type AppIconAppearance,
+  type AppIconStyle,
   type CloseBehavior,
 } from "@trail/shared";
 import type { BrowserHost } from "../browser-host";
@@ -49,8 +52,24 @@ import {
 } from "../window-background";
 import { recoverRendererAfterGone } from "../renderer-recovery";
 import { resolveWindowIconPath } from "./icon-paths";
+import { readAppIcon, resolveAppIconPath } from "../app-icon";
 
-function windowsIconPath(isDevelopmentBuild: boolean): string | undefined {
+function windowsIconPath(
+  isDevelopmentBuild: boolean,
+  style: AppIconStyle,
+  appearance: AppIconAppearance,
+): string | undefined {
+  // A chosen style ships as a PNG, so it wins over the platform's .ico. A
+  // missing file falls back to the shipped window icon rather than none.
+  const styled = resolveAppIconPath({
+    style,
+    appearance,
+    isDevelopmentBuild,
+    appPath: app.getAppPath(),
+    resourcesPath: process.resourcesPath,
+    exists: existsSync,
+  });
+  if (styled) return styled;
   return (
     resolveWindowIconPath({
       isDevelopmentBuild,
@@ -190,6 +209,12 @@ export async function createWindow({
   const initialWindowBackground = builtinWindowBackground(
     nativeTheme.shouldUseDarkColors ? "dark" : "light",
   );
+  // Read once: the record drives both the window icon and its light/dark art.
+  const appIconRecord = readAppIcon(dataDir);
+  const appIconAppearance = resolveAppIconAppearance(
+    appIconRecord.appearance,
+    nativeTheme.shouldUseDarkColors,
+  );
   const windows11NativeCorners = usesWindows11NativeCorners(
     process.platform,
     process.getSystemVersion(),
@@ -235,7 +260,7 @@ export async function createWindow({
         }),
     ...(process.platform === "win32"
       ? {
-          icon: windowsIconPath(isDevelopmentBuild),
+          icon: windowsIconPath(isDevelopmentBuild, appIconRecord.style, appIconAppearance),
         }
       : {}),
     webPreferences: {
@@ -2151,8 +2176,8 @@ export async function createWindow({
             await typeSearch("设计");
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-search-query");
-            // Settings hits: "主题" resolves to 通用 tab's theme row.
-            await typeSearch("主题");
+            // Settings hits: "明暗模式" resolves to 通用 tab's theme row.
+            await typeSearch("明暗模式");
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-search-settings");
             await setTheme("dark");
@@ -2164,9 +2189,9 @@ export async function createWindow({
             await typeSearch("插件");
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-search-pages");
-            // Anchor flash: Enter on the 主题 settings hit lands on 基础 and
+            // Anchor flash: Enter on the 明暗模式 settings hit lands on 基础 and
             // flashes the theme row.
-            await typeSearch("主题");
+            await typeSearch("明暗模式");
             await new Promise((r) => setTimeout(r, 350));
             await searchKey("ArrowDown");
             await searchKey("Enter");

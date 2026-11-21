@@ -2,7 +2,7 @@
  * Data-only index of the settings IA, shared by the settings page nav and
  * the global search dialog. Keyword keys are the i18n keys of the rows
  * rendered inside each tab; search matches their translations, so a query
- * like "主题" or "theme" can surface the tab that owns the row.
+ * like "明暗模式" or "theme" can surface the tab that owns the row.
  */
 
 export type SettingsTabId =

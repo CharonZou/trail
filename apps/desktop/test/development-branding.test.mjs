@@ -76,7 +76,10 @@ test("Windows packages and windows use the canonical Trail icon", () => {
   assert.ok(windowsIcon.readUInt16LE(4) >= 4, "ICO must contain multiple sizes");
   assert.match(iconScriptSource, /windows_icon = BUILD \/ "icon\.ico"/);
   assert.match(iconScriptSource, /format="ICO"/);
-  assert.match(windowSource, /function windowsIconPath\(isDevelopmentBuild: boolean\)/);
+  assert.match(
+    windowSource,
+    /function windowsIconPath\(isDevelopmentBuild: boolean, style: AppIconStyle\)/,
+  );
   // Build mode decides the asset root: a development launch that reports
   // `app.isPackaged === true` (ELECTRON_FORCE_IS_PACKAGED) must still resolve
   // the checkout's `build/icon.ico`, not `process.resourcesPath`.
@@ -85,7 +88,8 @@ test("Windows packages and windows use the canonical Trail icon", () => {
     windowSource,
     /app\.isPackaged\s*\n?\s*\?\s*process\.resourcesPath/,
   );
-  assert.match(windowSource, /icon: windowsIconPath\(isDevelopmentBuild\)/);
+  // The chosen style ships as a PNG and wins over the .ico fallback.
+  assert.match(windowSource, /icon: windowsIconPath\(isDevelopmentBuild, readAppIcon\(dataDir\)\.style\)/);
 });
 
 /** The alpha split of a decoded image: the brand mark is flat, so only
@@ -212,14 +216,11 @@ test("Linux packages align the desktop entry with the Wayland app identity", () 
   assert.equal(packageJson.build.linux.syncDesktopName, true);
 });
 
-test("macOS development uses the canonical Trail Dock icon", () => {
+test("macOS Dock icon follows the stored app icon style", () => {
+  assert.match(brandingSource, /process\.platform !== "darwin" \|\| !app\.dock/);
   assert.match(
     brandingSource,
-    /process\.platform !== "darwin" \|\| !isDevelopmentBuild \|\| !app\.dock/,
-  );
-  assert.match(
-    brandingSource,
-    /join\(app\.getAppPath\(\), "build", "icon_1024\.png"\)/,
+    /resolveAppIconPath\(\{[\s\S]*?style: readAppIcon\(dataDir\)\.style/,
   );
   assert.match(brandingSource, /nativeImage\.createFromPath\(iconPath\)/);
   assert.match(brandingSource, /if \(icon\.isEmpty\(\)\)/);
@@ -229,7 +230,7 @@ test("macOS development uses the canonical Trail Dock icon", () => {
   // and must not touch the running app's Dock tile.
   assert.match(
     startupSource,
-    /if \(!hasSingleInstanceLock\) return;\s+applyDevelopmentBranding\(\);/,
+    /if \(!hasSingleInstanceLock\) return;\s+applyAppIcon\(\);/,
   );
 });
 

@@ -1,4 +1,18 @@
-import { IPC, type UpdatePreference } from "@trail/shared";
+import {
+  IPC,
+  STARTUP_ANIMATION_DIALOG_EXTENSIONS,
+  type AppIconAppearance,
+  type AppIconStyle,
+  type StartupAppearancePatch,
+  type UpdatePreference,
+} from "@trail/shared";
+import { dialog } from "electron";
+import {
+  importStartupAnimation,
+  readStartupAppearance,
+  setStartupAppearance,
+} from "../startup-appearance";
+import { readAppIcon, setAppIcon, setAppIconAppearance } from "../app-icon";
 import type { AgentSidecar } from "../agent-sidecar";
 import type { HostProcess } from "../host-process";
 import type { IpcRegistrar } from "./types";
@@ -28,6 +42,8 @@ export type SettingsIpcDependencies = {
   applyKeepAwakeWhileRunning: (settings?: { keepAwakeWhileRunning?: unknown } | null) => void;
   applyUpdatePreference: (preference: UpdatePreference) => void;
   resolveEffectiveCommandShell: () => Promise<unknown>;
+  /** Repaint the live window/taskbar/dock from the stored record. */
+  applyAppIconRuntime: (style: AppIconStyle, appearance: AppIconAppearance) => void;
   liveCallService?: Pick<LiveCallService, "beginSettingsWrite" | "settingsWritten">;
 };
 
@@ -48,6 +64,7 @@ export function registerSettingsIpc({
   applyKeepAwakeWhileRunning,
   applyUpdatePreference,
   resolveEffectiveCommandShell,
+  applyAppIconRuntime,
   liveCallService,
 }: SettingsIpcDependencies): void {
   let host: HostProcess | null = null;
@@ -64,6 +81,51 @@ export function registerSettingsIpc({
     if (!host) throw new Error("host unavailable");
     const settings = await host.call("settings.get");
     return normalizeSettings(settings);
+  });
+
+  /*
+   * Startup appearance: the logo switch and the loading animation. The splash
+   * reads this before host bootstrap, so it is served entirely from the
+   * main-process record — no host round trip, and a missing record simply
+   * answers the shipped appearance.
+   */
+  handle(IPC.invoke.startupAppearanceGet, async () => readStartupAppearance(dataDir));
+
+  handle(IPC.invoke.startupAppearancePick, async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [
+        { name: "Animation", extensions: STARTUP_ANIMATION_DIALOG_EXTENSIONS },
+      ],
+    });
+    const picked = result.canceled ? null : result.filePaths[0] ?? null;
+    if (!picked) {
+      return { ...readStartupAppearance(dataDir), canceled: true };
+    }
+    return importStartupAnimation(dataDir, picked);
+  });
+
+  handle(IPC.invoke.startupAppearanceSet, async (patch: unknown) =>
+    setStartupAppearance(dataDir, (patch ?? {}) as StartupAppearancePatch),
+  );
+
+  /*
+   * App icon style. The record stays main-owned (window/dock read it while
+   * they are created); the same pick is repainted onto the live window,
+   * taskbar and dock here, so switching styles does not need a restart.
+   */
+  handle(IPC.invoke.appIconGet, async () => readAppIcon(dataDir));
+
+  handle(IPC.invoke.appIconSet, async (style: unknown) => {
+    const next = setAppIcon(dataDir, style);
+    applyAppIconRuntime(next.style, next.appearance);
+    return next;
+  });
+
+  handle(IPC.invoke.appIconAppearanceSet, async (appearance: unknown) => {
+    const next = setAppIconAppearance(dataDir, appearance);
+    applyAppIconRuntime(next.style, next.appearance);
+    return next;
   });
 
   handle(IPC.invoke.networkProxyTest, async (settings: unknown) => {

@@ -542,7 +542,7 @@ applicationLifecycle = createApplicationLifecycle({
   getHost,
 });
 const {
-  applyDevelopmentBranding,
+  applyAppIcon,
   hasVisibleWindow,
   restoreMainWindow,
   toggleMainWindow,
@@ -1066,7 +1066,7 @@ registerApplicationStartup({
   getHost,
   getMainWindow,
   sendToRenderer,
-  applyDevelopmentBranding,
+  applyAppIcon,
   createTray,
   dispatchApplicationMenuCommand,
   dispatchNativeMenuAction,

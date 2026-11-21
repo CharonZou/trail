@@ -5,8 +5,9 @@ import { readMainSource } from "./helpers/main-source.mjs";
 
 const read = (relativePath) => readFile(new URL(relativePath, import.meta.url), "utf8");
 
-const [dialog, page, api, protocol, main, runtime, sidecar, db, groups, rpc] = await Promise.all([
+const [dialog, editor, page, api, protocol, main, runtime, sidecar, db, groups, rpc] = await Promise.all([
   read("../src/components/ProjectMemoryDialog.tsx"),
+  read("../src/components/ProjectMemoryEditor.tsx"),
   read("../src/pages/ProjectsPage.tsx"),
   read("../src/lib/api.ts"),
   read("../../../packages/shared/src/protocol.ts"),
@@ -18,15 +19,17 @@ const [dialog, page, api, protocol, main, runtime, sidecar, db, groups, rpc] = a
   read("../../../crates/host-core/src/rpc/mod.rs"),
 ]);
 
-test("project memory has a host-backed editor and project menu entry", () => {
-  assert.match(dialog, /api\.getProjectMemory\(project\.path\)/);
-  assert.match(dialog, /api\.getProjectGroupMemory\(project\.groupId\)/);
-  assert.match(dialog, /project\.legacy/);
-  assert.match(dialog, /api\.saveProjectMemory\(project\.path, normalized\)/);
+test("project memory has one host-backed editor and a project menu entry", () => {
+  assert.match(editor, /api\.getProjectMemory\(project\.path\)/);
+  assert.match(editor, /api\.getProjectGroupMemory\(project\.groupId\)/);
+  assert.match(editor, /project\.legacy/);
+  assert.match(editor, /api\.saveProjectMemory\(project\.path, normalized\)/);
+  assert.match(editor, /project\.memoryAdd/);
+  assert.match(editor, /project\.memoryRemove/);
+  assert.match(editor, /entriesFromMemory/);
   assert.match(dialog, /useBlockingOverlay\(\)/);
-  assert.match(dialog, /project\.memoryAdd/);
-  assert.match(dialog, /project\.memoryRemove/);
-  assert.match(dialog, /entriesFromMemory/);
+  assert.match(dialog, /ProjectMemoryEditor/);
+  assert.match(dialog, /onSavingChange=\{setSaving\}/);
   assert.match(dialog, /project\.memoryDescription/);
   assert.match(page, /ProjectMemoryDialog/);
   assert.match(page, /project\.editMemory/);

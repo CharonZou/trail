@@ -18,7 +18,8 @@ const chineseCatalog = await readFile(
 );
 
 test("notification center exposes an accessible sidebar footer trigger and dialog", () => {
-  assert.match(componentSource, /<IconBell size=\{14\} aria-hidden \/>/);
+  assert.match(componentSource, /iconSize = 14/);
+  assert.match(componentSource, /<IconBell size=\{iconSize\} aria-hidden \/>/);
   assert.match(componentSource, /className=\{`footer-notification notification-trigger/);
   assert.match(componentSource, /onBeforeOpen\?\.\(\)/);
   assert.match(componentSource, /aria-haspopup="dialog"/);

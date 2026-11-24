@@ -18,6 +18,7 @@ import { LifecycleConfirmationDialog } from "../../components/LifecycleConfirmat
 import { ProjectCreateDialog } from "../../components/ProjectCreateDialog";
 import { SearchDialog } from "../../components/SearchDialog";
 import { Sidebar } from "../../components/Sidebar";
+import { SidebarRail } from "../../components/SidebarRail";
 import { StartupRecovery } from "../../components/StartupRecovery";
 import { ToastHost } from "../../components/Toast";
 import { UpdateBanner } from "../../components/UpdateBanner";
@@ -181,7 +182,12 @@ export function AppShell() {
                 onWidthCommit={handleSidebarWidthCommit}
                 onResizeCollapse={handleSidebarResizeCollapse}
               />
-            ) : null}
+            ) : (
+              /* Collapsed: the icon rail keeps the left edge occupied instead
+                 of unmounting the whole column, so destinations stay reachable
+                 and the collapsed shell still shows the current one. */
+              <SidebarRail className={sidebarEntering ? "is-entering" : undefined} />
+            )}
 
             {workPanelMaximized && (
               /* MainChat is absent; the panel header owns dragging while this
@@ -189,7 +195,7 @@ export function AppShell() {
               <div
                 className={cx(
                   "window-chrome-row",
-                  !sidebarCollapsed && "sidebar-expanded",
+                  sidebarCollapsed ? "sidebar-collapsed" : "sidebar-expanded",
                 )}
               >
                 {sidebarCollapsed && (

@@ -62,8 +62,11 @@ function formatRelativeTime(value: string, locale: string, justNow: string): str
 
 export function NotificationCenter({
   onBeforeOpen,
+  iconSize = 14,
 }: {
   onBeforeOpen?: () => void;
+  /** Trigger glyph size. The collapsed rail uses a larger tile than the footer. */
+  iconSize?: number;
 }) {
   const { t, i18n } = useTranslation();
   const storedNotifications = useAppStore((state) => state.notifications);
@@ -243,7 +246,7 @@ export function NotificationCenter({
           }
         }}
       >
-        <IconBell size={14} aria-hidden />
+        <IconBell size={iconSize} aria-hidden />
         {unreadCount > 0 ? (
           <span className="notification-badge" aria-hidden>
             {unreadCount > 99 ? "99+" : unreadCount}

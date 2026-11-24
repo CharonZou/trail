@@ -36,6 +36,7 @@ import {
   IconMic,
 } from "../../components/icons";
 import { Badge, Button, cx, SegmentedControl, SettingsToggle, TooltipButton } from "../../components/ui";
+import { BrandLogo } from "../../components/BrandLogo";
 import { OverlayBackdrop } from "../../components/OverlayBackdrop";
 import { ModelConfigPage } from "../../components/settings/ModelConfigPage";
 import { KeyboardShortcutsSection } from "../../components/settings/KeyboardShortcutsSection";
@@ -723,6 +724,9 @@ export function SettingsPage() {
           {tab === "about" && (
             <div className="settings-stack">
               <div className="settings-about-hero">
+                <div className="settings-about-hero-mark" aria-hidden>
+                  <BrandLogo size={40} />
+                </div>
                 <div className="settings-about-hero-name">
                   {version?.name || "Trail"}
                 </div>

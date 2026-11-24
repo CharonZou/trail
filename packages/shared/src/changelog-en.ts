@@ -18,6 +18,7 @@ export const enEntries: ChangelogEntry[] = [
       "Opening slash commands with a Chinese input method no longer inserts a duplicate `/、`; the alias applies only after the composition commits.",
       "A regenerated prompt from an older turn can no longer appear above the latest reply when its branch archive finishes outside the loaded history window.",
       "Inline visualizations render sooner: the visualization shell preloads the bundled D3 and a `viz` chart helper layer, a failing fragment shows its error instead of an empty card, and the visualize skill asks for one write plus a reply.",
+      "A collapsed sidebar now folds into an icon rail: the brand, the four destinations and the footer tools stay one click away, and Settings → About opens with the app mark.",
     ],
   },
   {

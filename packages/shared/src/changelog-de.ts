@@ -18,6 +18,7 @@ export const deEntries: ChangelogEntry[] = [
       "Slash-Befehle mit chinesischer Eingabemethode fügen kein doppeltes `/、` mehr ein; der Alias greift erst, nachdem die Komposition übernommen wurde.",
       "Eine neu erzeugte Antwort aus einem älteren Turn erscheint nicht mehr über der letzten Antwort, wenn ihr Branch-Archiv außerhalb des geladenen Verlaufsfensters fertig wird.",
       "Inline-Visualisierungen erscheinen schneller: Die Visualisierungsschale lädt das gebündelte D3 und eine `viz`-Hilfsschicht vor, ein fehlerhaftes Fragment zeigt seinen Fehler statt einer leeren Karte, und der visualize-Skill verlangt ein Schreiben plus eine Antwort.",
+      "Eine eingeklappte Seitenleiste wird zur Icon-Leiste: Marke, die vier Ziele und die Fußwerkzeuge bleiben mit einem Klick erreichbar, und Einstellungen → Info beginnt wieder mit dem App-Symbol.",
     ],
   },
   {

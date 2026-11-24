@@ -18,6 +18,7 @@ export const frEntries: ChangelogEntry[] = [
       "Ouvrir les commandes slash avec une méthode de saisie chinoise n'insère plus un `/、` en double ; l'alias ne s'applique qu'une fois la composition validée.",
       "Un prompt régénéré d'un tour ancien ne peut plus apparaître au-dessus de la dernière réponse lorsque son archive de branche se termine hors de la fenêtre d'historique chargée.",
       "Les visualisations intégrées s'affichent plus tôt : l'enveloppe de visualisation précharge le D3 embarqué et une couche d'aide `viz`, un fragment en erreur montre son erreur au lieu d'une carte vide, et la skill visualize demande une écriture puis une réponse.",
+      "Repliée, la barre latérale devient une colonne d'icônes : la marque, les quatre destinations et les outils du pied restent à un clic, et Réglages → À propos s'ouvre de nouveau sur l'icône de l'application.",
     ],
   },
   {

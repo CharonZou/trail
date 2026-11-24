@@ -18,6 +18,7 @@ export const ptBREntries: ChangelogEntry[] = [
       "Abrir comandos de barra com um método de entrada chinês não insere mais um `/、` duplicado; o alias só se aplica depois que a composição é confirmada.",
       "Um prompt regenerado de um turno antigo não pode mais aparecer acima da última resposta quando o arquivo do seu branch termina fora da janela de histórico carregada.",
       "Visualizações em linha aparecem mais cedo: a estrutura de visualização pré-carrega o D3 incluído e uma camada de ajuda `viz`, um fragmento com erro mostra o erro em vez de um cartão vazio, e a skill visualize pede uma escrita mais uma resposta.",
+      "Com a barra lateral recolhida, ela vira uma faixa de ícones: a marca, os quatro destinos e as ferramentas do rodapé continuam a um clique, e Configurações → Sobre volta a abrir com o ícone do app.",
     ],
   },
   {

@@ -18,6 +18,7 @@ export const esEntries: ChangelogEntry[] = [
       "Abrir comandos de barra con un método de entrada chino ya no inserta un `/、` duplicado; el alias se aplica solo cuando la composición se confirma.",
       "Un prompt regenerado de un turno anterior ya no puede aparecer por encima de la última respuesta cuando su archivo de rama termina fuera de la ventana de historial cargada.",
       "Las visualizaciones en línea aparecen antes: el armazón de visualización precarga el D3 incluido y una capa de ayuda `viz`, un fragmento con error muestra el error en lugar de una tarjeta vacía, y la skill visualize pide una escritura más una respuesta.",
+      "Con la barra lateral contraída queda una tira de iconos: la marca, los cuatro destinos y las herramientas del pie siguen a un clic, y Ajustes → Acerca de vuelve a abrir con el icono de la app.",
     ],
   },
   {

@@ -18,6 +18,7 @@ export const trEntries: ChangelogEntry[] = [
       "Çince bir giriş yöntemiyle eğik çizgi komutlarını açmak artık yinelenen bir `/、` eklemiyor; takma ad yalnızca kompozisyon tamamlandıktan sonra uygulanıyor.",
       "Eski bir turdan yeniden oluşturulan istem, dal arşivi yüklenen geçmiş penceresinin dışında tamamlansa bile en son yanıtın üzerinde görünemiyor.",
       "Satır içi görselleştirmeler daha erken görünüyor: görselleştirme kabuğu paketlenmiş D3 ve bir `viz` grafik yardımcı katmanını önceden yüklüyor, betiği hata veren parça boş kart yerine hatayı gösteriyor ve visualize becerisi tek yazma artı tek yanıt istiyor.",
+      "Daraltılmış kenar çubuğu artık bir simge şeridine dönüşüyor: marka, dört hedef ve alt araçlar tek tıkla erişilebilir kalıyor; Ayarlar → Hakkında yeniden uygulama simgesiyle açılıyor.",
     ],
   },
   {

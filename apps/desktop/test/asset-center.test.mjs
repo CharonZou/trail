@@ -126,7 +126,7 @@ test("sidebar, destination history, and lazy route expose Asset Center", async (
   assert.match(sidebar, /page === "assets"[\s\S]*setPage\("assets"\)/);
   assert.match(shell, /page === "assets"[\s\S]*<AssetCenterPage \/>/);
   assert.match(shell, /import\("\.\.\/\.\.\/pages\/AssetCenterPage"\)/);
-  assert.match(state, /"plugins" \| "assets" \| "settings"/);
+  assert.match(state, /"plugins" \| "assets" \| "knowledge" \| "apps" \| "settings"/);
   assert.match(page, /<ProjectMemoryEditor/);
   assert.match(page, /<AgentSkillsPage \/>/);
   assert.match(page, /<AgentSubagentsPage \/>/);

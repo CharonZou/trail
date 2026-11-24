@@ -1,5 +1,11 @@
 # Unreleased changes
 
+> The knowledge base, Agent applications, and titlebar back/forward work has a
+> paste-ready 1.0.5 highlight set (nine locales, 13 bullets each) in
+> `docs/project/changelog-1.0.5-draft.md`. The five items below are already
+> folded into that entry, so prune both places when the set changes. Version
+> surfaces still bump only through `scripts/release.mjs`.
+
 - Fixed prompt cache misses after a conversation's agent runtime is rebuilt
   (#1972). Rebuilding happens after a restart or when the thinking level, mode,
   project rules, or model settings change. Assistant replies now keep the

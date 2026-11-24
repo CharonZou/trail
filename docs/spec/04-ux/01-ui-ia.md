@@ -90,9 +90,13 @@ destination, chat as the home surface, tools and permissions inline.
   Preview navigation must also remain above the panel;
   macOS keeps native traffic lights and its existing fullscreen insets.
   Destination history is
-  shortcut-first (`Cmd/Ctrl+[` and `Cmd/Ctrl+]`) with no dedicated back/forward
-  chrome; while Extensions is active, the footer Plugins button performs one
-  Back step as the only pointer affordance. The main titlebar has no
+  shortcut-served (`Cmd/Ctrl+[` and `Cmd/Ctrl+]`) and mirrored by a two-button
+  back/forward cluster at the left of the content titlebar, ahead of the
+  collapsed-sidebar actions and the conversation breadcrumb; both buttons read
+  their enabled state from the same history index as the shortcuts, so the
+  pointer and keyboard affordances never disagree. While Extensions is active,
+  the footer Plugins button also performs one Back step as a second pointer
+  affordance. The main titlebar has no
   notification action; the durable local inbox opens from the sidebar footer
   bell instead (D130/D117). In work-panel preview mode, MainChat is unmounted
   and a window-level 46px chrome row keeps New Task, sidebar, and native window
@@ -428,7 +432,33 @@ set apart by tone and spacing, and hairlines are reserved for floating layers
 (menus, sheet, dialogs). MCP, Skills, and Subagents are not tabs or sections of
 Extensions.
 
-### 3.5 Settings (full-page takeover)
+### 3.4a Knowledge base
+
+The Knowledge destination is a two-column workbench: a library list on the
+left, and the selected library's retrieval and documents on the right. Header
+actions are Refresh and New library; the detail row carries Import files, Add
+note, Build semantic index (only when the library enables semantic search), and
+Delete library. Import opens the native file picker from the main process, so
+the page never asks the user to type a path. A note dialog stores pasted text as
+a document. The search row offers hybrid, keyword, and semantic modes; semantic
+options are disabled for libraries that never built an index, and a degraded
+answer states that keyword results are shown instead. Documents list title,
+chunk count, size, status, and a per-row remove action; a failed row shows the
+extraction error in place. Library creation is the only place that chooses an
+embedding provider and model, which keeps scoping decisions visible at creation
+time.
+
+### 3.4b Agent applications
+
+Agent applications is an auto-filling card gallery of registered web tools.
+Each card shows the icon (an emoji or initials), name, kind badge (URL or local
+folder), description, entry, an Open action, Edit, and Delete. An application
+whose entry disappeared renders dimmed with the reason and a disabled Open, so
+the user can repair or remove it. **Open** does not start a second Browser: it
+opens the existing work-panel `pi.browser` tab at the computed URL, beside the
+conversation. The add/edit dialog switches between a URL field and a folder
+field with a native directory picker; a folder must contain `index.html`.
+
 ### 3.5 Settings (full-page takeover)
 Settings replaces the whole shell (D063): back-to-app + search + a grouped
 settings rail with concise, parallel destination labels. The Agent group
@@ -488,13 +518,14 @@ shared capability contract:
 
 ## 5. Navigation model
 
-- `page` state: `chat | scheduled | plugins | settings`; `chat` is the
+- `page` state: `chat | scheduled | plugins | assets | knowledge | apps |
+  settings`; `chat` is the
   conversation-surface route, not an operating mode. The project
   archive is the `projects` settings tab rather than a standalone page.
-- Destination history is linear; `Cmd/Ctrl+[` and `Cmd/Ctrl+]` traverse it
-  without persistent back/forward chrome. While Extensions is active, the
-  footer Plugins button reuses one Back step (§2 shell regions); no separate
-  back or forward control is added.
+- Destination history is linear; `Cmd/Ctrl+[` and `Cmd/Ctrl+]` traverse it,
+  and the titlebar back/forward cluster performs the same steps by pointer.
+  While Extensions is active, the footer Plugins button reuses one Back step
+  (§2 shell regions).
 - Selecting a project tab reuses `project.set` when its path differs from the
   selected host workspace and keeps the other tabs retained.
 - Selecting a project-scoped thread activates its project before switching to

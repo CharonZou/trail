@@ -146,6 +146,8 @@ impl Database {
                 tx.execute_batch(SCHEMA_LATEST)?;
                 tx.execute_batch(PLAN_APPROVALS_SCHEMA)?;
                 tx.execute_batch(crate::session_collaboration::SCHEMA)?;
+                tx.execute_batch(crate::knowledge::SCHEMA)?;
+                tx.execute_batch(crate::agent_apps::SCHEMA)?;
                 tx.execute_batch(WORKTREE_DDL)?;
                 tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
                 tx.commit()?;
@@ -216,6 +218,13 @@ impl Database {
             26 => {
                 migrate_v26_to_v27(&conn, path)?;
             }
+            27 => {
+                migrate_v27_to_v28(&conn, path)?;
+            }
+            28 => {
+                // No-op here; the v28 to v29 step runs in the post-match chain
+                // so both hops can complete in a single launch.
+            }
             legacy @ 1..=6 => {
                 let _ = conn.execute_batch("PRAGMA wal_checkpoint(TRUNCATE);");
                 drop(conn);
@@ -278,6 +287,14 @@ impl Database {
         }
         if migrated_version == 26 {
             migrate_v26_to_v27(&conn, path)?;
+            migrated_version = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+        }
+        if migrated_version == 27 {
+            migrate_v27_to_v28(&conn, path)?;
+            migrated_version = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+        }
+        if migrated_version == 28 {
+            migrate_v28_to_v29(&conn, path)?;
         }
         let db = Self { conn, data_dir };
         db.boot_maintenance()?;

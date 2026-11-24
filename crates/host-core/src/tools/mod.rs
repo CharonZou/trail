@@ -3314,6 +3314,28 @@ pub fn builtin_tool_defs() -> Value {
                 "properties": { "command": { "type": "string" } },
                 "required": ["command"]
             }
+        },
+        {
+            "name": "KnowledgeSearch",
+            "description": "Search the user's local knowledge base and return the best matching passages with their document title and source path. \
+    Use it before answering questions about material the user imported (handbooks, specs, PDFs, notes). \
+    Omit `libraryId` to search every library. Prefer `mode: \"hybrid\"`; `keyword` is exact-ish text matching and `semantic` needs an indexed library. \
+    Results are excerpts, not whole documents: order them, cite the document title, and say when nothing matched.",
+            "risk": "low",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": { "type": "string", "description": "What to look for, in the user's own wording" },
+                    "libraryId": { "type": "string", "description": "Restrict to one library; omit to search all libraries" },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["hybrid", "keyword", "semantic"],
+                        "description": "Search mode (default hybrid)"
+                    },
+                    "limit": { "type": "integer", "description": "Max passages (default 6, max 20)", "minimum": 1 }
+                },
+                "required": ["query"]
+            }
         }
     ])
 }

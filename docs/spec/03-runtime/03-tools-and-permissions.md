@@ -75,6 +75,7 @@ Let the agent get things done, but stay under control by default.
 | `Bash` | high | Execute commands |
 | `asktool` | low | Ask one or more user questions and return the submitted answers as tool output |
 | `TodoWrite` | low | Replace the current Agent session checklist; host validates and persists the full ordered snapshot |
+| `KnowledgeSearch` | low | Search the local knowledge libraries; returns ranked passages with document titles ([23](23-knowledge-and-agent-apps.md)) |
 
 > Names may be fine-tuned during implementation, but semantics stay consistent.
 

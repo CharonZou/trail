@@ -28,7 +28,7 @@ import { api } from "../../lib/api";
 import { PortalVisibilityProvider } from "../../lib/portal-visibility";
 import { workPanelLayout } from "../../lib/work-panel-resize";
 import { LiveVoiceStatusHost } from "../voice/live/LiveVoiceStatusHost";
-import { CollapsedTitlebarActions, RoutePending } from "./chrome";
+import { CollapsedTitlebarActions, HistoryTitlebarActions, RoutePending } from "./chrome";
 import { useAppShellRuntime } from "./useAppShellRuntime";
 
 const SettingsPage = lazy(() =>
@@ -49,6 +49,16 @@ const PluginsPage = lazy(() =>
 const AssetCenterPage = lazy(() =>
   import("../../pages/AssetCenterPage").then((module) => ({
     default: module.AssetCenterPage,
+  })),
+);
+const KnowledgePage = lazy(() =>
+  import("../../pages/KnowledgePage").then((module) => ({
+    default: module.KnowledgePage,
+  })),
+);
+const AgentAppsPage = lazy(() =>
+  import("../../pages/AgentAppsPage").then((module) => ({
+    default: module.AgentAppsPage,
   })),
 );
 const loadChatSurface = () => import("../../components/ChatSurface");
@@ -222,15 +232,16 @@ export function AppShell() {
                       presentedWorkPanelOpen && "work-panel-open",
                     )}
                   >
-                    {sidebarCollapsed && (
-                      <div className="main-titlebar-left no-drag">
+                    <div className="main-titlebar-left no-drag">
+                      <HistoryTitlebarActions />
+                      {sidebarCollapsed && (
                         <CollapsedTitlebarActions
                           onToggleSidebar={reopenSidebar}
                           onNewTask={() => void runMenuCommand("newTask")}
                           sidebarToggleShortcut={sidebarToggleShortcut}
                         />
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
                 {page !== "settings" ? <UpdateBanner /> : null}
@@ -302,6 +313,14 @@ export function AppShell() {
                   ) : page === "assets" ? (
                     <div className="route-surface route-page">
                       <AssetCenterPage />
+                    </div>
+                  ) : page === "knowledge" ? (
+                    <div className="route-surface route-page">
+                      <KnowledgePage />
+                    </div>
+                  ) : page === "apps" ? (
+                    <div className="route-surface route-page">
+                      <AgentAppsPage />
                     </div>
                   ) : (
                     <ChatSurface visible={page === "chat"} />

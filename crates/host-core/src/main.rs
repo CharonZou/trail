@@ -1,4 +1,5 @@
 mod activation;
+mod agent_apps;
 mod agent_capabilities;
 mod artifacts;
 mod audit;
@@ -7,6 +8,7 @@ mod config_sync;
 mod data_relocation;
 mod db;
 mod keyboard;
+mod knowledge;
 mod mcp_servers;
 mod network_policy;
 mod network_proxy;

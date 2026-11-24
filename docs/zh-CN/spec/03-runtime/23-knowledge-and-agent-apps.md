@@ -8,7 +8,7 @@ Schema v29 在 JSON-RPC 分发器之后新增两个由宿主拥有的领域：
 - `apps.*` —— 桌面在既有工作面板 Browser 标签页中打开的 Web 应用注册表。
 
 两者只由 `crates/host-core` 写入。渲染进程通过 `host.call` 访问它们，永不直接打开 SQLite。决策见
-[ADR 0338](../../adr/0338-knowledge-base-and-agent-apps.md)。
+[ADR 0338](../../../adr/0338-knowledge-base-and-agent-apps.md)。
 
 ## 1. 存储
 

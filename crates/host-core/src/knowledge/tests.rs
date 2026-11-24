@@ -329,3 +329,6 @@ async fn search_returns_a_flat_payload_and_records_a_search_activity() {
     assert_eq!(points.len(), 7);
     assert!(points.last().unwrap()["searches"].as_i64().unwrap() >= 1);
 }
+
+use super::documents::*;
+use super::retrieval::*;

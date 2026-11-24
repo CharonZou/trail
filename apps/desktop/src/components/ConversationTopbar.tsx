@@ -19,6 +19,7 @@ import {
   scheduledReturnFor,
   scheduledReturnUsesHistory,
 } from "../features/scheduled/scheduled-return";
+import { HistoryTitlebarActions } from "../features/app/chrome";
 import {
   IconChevronLeft,
   IconFolder,
@@ -259,6 +260,14 @@ export function ConversationTopbar({
             <IconSidebar size={15} />
           </TooltipButton>
         </div>
+        {/*
+          A scheduled run already owns the labelled return control below, which
+          performs the same history step; the generic cluster stays out of that
+          row so two back affordances never sit side by side.
+        */}
+        {scheduledSession ? null : (
+          <HistoryTitlebarActions buttonClassName="ct-icon-btn" />
+        )}
         {scheduledSession ? (
           <button
             type="button"

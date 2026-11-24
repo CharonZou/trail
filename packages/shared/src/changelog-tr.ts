@@ -2,6 +2,26 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const trEntries: ChangelogEntry[] = [
   {
+    version: "1.0.5",
+    date: "2026-11-24",
+    highlights: [
+      "Bilgi tabanı kenar çubuğunda ana hedef oldu: merkez, kitaplık, belge ve parça sayılarını kullanılabilirlik oranıyla gösteriyor; sağlık, erişim eğilimi ve son etkinlik yanında durduğu için bir kitaplığı açmadan dizin durumu görülebiliyor.",
+      "Her kitaplık; aranabilir, içe aktarılabilir ve dizinlenebilir bir belge listesi olarak açılıyor; bir belgeye tıklamak, dizinlenmiş metnini aynı pencerede Markdown olarak okutuyor.",
+      "İçe aktarma metin, PDF ve DOCX dosyalarını tek seferde en fazla 100 adet kabul ediyor, yinelenenleri ikinci kez saklamak yerine bildiriyor ve kitaplık başına etkinlik kaydı tutuyor; eski bir `.doc` dosyası eyleme dönük bir mesajla reddedilirken partinin kalanı aktarılmaya devam ediyor.",
+      "Arama, yerel tam metin dizininden çevrimdışı yanıt veriyor ve iki karakterli Çince sorguları da buluyor; anlamsal arama isteğe bağlı kalıyor ve gömme sağlayıcısı yoksa hata vermek yerine nedeniyle birlikte anahtar sözcük sonuçlarına düşüyor.",
+      "Ajanlar, yerleşik bir araçla bilgi tabanını sorgulayıp belge başlıklarıyla sıralanmış pasajlar alabiliyor; böylece bir konuşma, önce yapıştırmadan aktardığınız içeriği alıntılayabiliyor.",
+      "Ajan uygulamaları bir web adresi ya da yerel klasör kaydedip çalışma paneli tarayıcısında açılıyor ve son açılma zamanını hatırlıyor; `index.html` dosyasını kaybeden klasör listede kalıyor, kullanılamaz olarak işaretleniyor ve Aç devre dışı bırakılıyor.",
+      "İçerik başlık çubuğu artık her hedefte, konuşma satırı dahil, `Cmd/Ctrl+[` ve `Cmd/Ctrl+]` ile eşdeğer bir geri/ileri çifti taşıyor: iki düğme de aynı geçmiş yığınını okuduğu için fare ve klavye hiçbir zaman farklı sonuç vermiyor.",
+      "Yalnızca anahtar sözcükle çalışan bir kitaplık artık beklemede vektörleştirme bildirmiyor; yan panel yerleşikken bilgi tabanı sayfası dar genişlikte de okunabilir kalıyor.",
+      "Fast modu, bir ChatGPT aboneliği veya OpenAI Responses bağlantısı için model bazında açılabiliyor ve konuşmada `/fast` ile değiştirilebiliyor; istekler sağlayıcının priority hizmet katmanını kullanıyor ve açıkken besteci model çipi bunu işaretliyor.",
+      "Bir konuşmanın çalışma zamanını yeniden kurmak artık geçmişi yeniden yazmıyor: düşünme, akıl yürütme ve Gemini işlev çağrısı imzaları korunuyor, böylece yeniden başlatma veya ayar değişikliğinden sonra istem önbellekleri isabet etmeye devam ediyor.",
+      "Çince bir giriş yöntemiyle eğik çizgi komutlarını açmak artık yinelenen bir `/、` eklemiyor; takma ad yalnızca kompozisyon tamamlandıktan sonra uygulanıyor.",
+      "Eski bir turdan yeniden oluşturulan istem, dal arşivi yüklenen geçmiş penceresinin dışında tamamlansa bile en son yanıtın üzerinde görünemiyor.",
+      "Satır içi görselleştirmeler daha erken görünüyor: görselleştirme kabuğu paketlenmiş D3 ve bir `viz` grafik yardımcı katmanını önceden yüklüyor, betiği hata veren parça boş kart yerine hatayı gösteriyor ve visualize becerisi tek yazma artı tek yanıt istiyor.",
+      "Daraltılmış kenar çubuğu artık bir simge şeridine dönüşüyor: marka, dört hedef ve alt araçlar tek tıkla erişilebilir kalıyor; Ayarlar → Hakkında yeniden uygulama simgesiyle açılıyor.",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-11-20",
     highlights: [

@@ -18,6 +18,7 @@ import { LifecycleConfirmationDialog } from "../../components/LifecycleConfirmat
 import { ProjectCreateDialog } from "../../components/ProjectCreateDialog";
 import { SearchDialog } from "../../components/SearchDialog";
 import { Sidebar } from "../../components/Sidebar";
+import { SidebarRail } from "../../components/SidebarRail";
 import { StartupRecovery } from "../../components/StartupRecovery";
 import { ToastHost } from "../../components/Toast";
 import { UpdateBanner } from "../../components/UpdateBanner";
@@ -28,7 +29,7 @@ import { api } from "../../lib/api";
 import { PortalVisibilityProvider } from "../../lib/portal-visibility";
 import { workPanelLayout } from "../../lib/work-panel-resize";
 import { LiveVoiceStatusHost } from "../voice/live/LiveVoiceStatusHost";
-import { CollapsedTitlebarActions, RoutePending } from "./chrome";
+import { CollapsedTitlebarActions, HistoryTitlebarActions, RoutePending } from "./chrome";
 import { useAppShellRuntime } from "./useAppShellRuntime";
 
 const SettingsPage = lazy(() =>
@@ -49,6 +50,16 @@ const PluginsPage = lazy(() =>
 const AssetCenterPage = lazy(() =>
   import("../../pages/AssetCenterPage").then((module) => ({
     default: module.AssetCenterPage,
+  })),
+);
+const KnowledgePage = lazy(() =>
+  import("../../pages/KnowledgePage").then((module) => ({
+    default: module.KnowledgePage,
+  })),
+);
+const AgentAppsPage = lazy(() =>
+  import("../../pages/AgentAppsPage").then((module) => ({
+    default: module.AgentAppsPage,
   })),
 );
 const loadChatSurface = () => import("../../components/ChatSurface");
@@ -171,7 +182,12 @@ export function AppShell() {
                 onWidthCommit={handleSidebarWidthCommit}
                 onResizeCollapse={handleSidebarResizeCollapse}
               />
-            ) : null}
+            ) : (
+              /* Collapsed: the icon rail keeps the left edge occupied instead
+                 of unmounting the whole column, so destinations stay reachable
+                 and the collapsed shell still shows the current one. */
+              <SidebarRail className={sidebarEntering ? "is-entering" : undefined} />
+            )}
 
             {workPanelMaximized && (
               /* MainChat is absent; the panel header owns dragging while this
@@ -179,7 +195,7 @@ export function AppShell() {
               <div
                 className={cx(
                   "window-chrome-row",
-                  !sidebarCollapsed && "sidebar-expanded",
+                  sidebarCollapsed ? "sidebar-collapsed" : "sidebar-expanded",
                 )}
               >
                 {sidebarCollapsed && (
@@ -222,15 +238,16 @@ export function AppShell() {
                       presentedWorkPanelOpen && "work-panel-open",
                     )}
                   >
-                    {sidebarCollapsed && (
-                      <div className="main-titlebar-left no-drag">
+                    <div className="main-titlebar-left no-drag">
+                      <HistoryTitlebarActions />
+                      {sidebarCollapsed && (
                         <CollapsedTitlebarActions
                           onToggleSidebar={reopenSidebar}
                           onNewTask={() => void runMenuCommand("newTask")}
                           sidebarToggleShortcut={sidebarToggleShortcut}
                         />
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
                 {page !== "settings" ? <UpdateBanner /> : null}
@@ -302,6 +319,14 @@ export function AppShell() {
                   ) : page === "assets" ? (
                     <div className="route-surface route-page">
                       <AssetCenterPage />
+                    </div>
+                  ) : page === "knowledge" ? (
+                    <div className="route-surface route-page">
+                      <KnowledgePage />
+                    </div>
+                  ) : page === "apps" ? (
+                    <div className="route-surface route-page">
+                      <AgentAppsPage />
                     </div>
                   ) : (
                     <ChatSurface visible={page === "chat"} />

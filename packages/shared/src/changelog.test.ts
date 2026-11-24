@@ -38,9 +38,9 @@ describe("changelog catalog", () => {
 
   it("lists 1.0.1 through the current release newest-first", () => {
     const versions = CHANGELOG.en.map((entry) => entry.version);
-    expect(versions[0]).toBe("1.0.4");
+    expect(versions[0]).toBe("1.0.5");
     expect(versions.at(-1)).toBe(STABLE_FROM);
-    expect(versions).toEqual(["1.0.4", "1.0.3", "1.0.2", "1.0.1"]);
+    expect(versions).toEqual(["1.0.5", "1.0.4", "1.0.3", "1.0.2", "1.0.1"]);
     for (const version of versions) {
       expect(version).not.toMatch(/-/);
     }

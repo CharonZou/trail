@@ -114,8 +114,9 @@ recency only breaks ties between equally relevant matches.
   work panel is open, those controls stay viewport-fixed at the window's right
   edge over the panel header, which reserves the control band plus the
   work-panel toggle so resource close remains reachable. The sole panel
-  collapse control is that viewport-fixed toggle. Destination history has no visible back/forward
-  controls and remains available through the renderer shortcuts. The first
+  collapse control is that viewport-fixed toggle. Destination history exposes a
+  back/forward cluster in the content titlebar that performs the same steps as
+  the renderer shortcuts. The first
   transcript row starts below the 46px titlebar control band so user and
   assistant content cannot overlap the minimize, maximize/restore, or close
   targets. Destination pages and the plugin detail sheet start below the same

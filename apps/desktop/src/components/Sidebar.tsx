@@ -110,6 +110,8 @@ import {
   IconArchive,
   IconArchiveRestore,
   IconArrowUpDown,
+  IconBookOpen,
+  IconBrowser,
   IconPlug,
   IconBranch,
   IconCheck,
@@ -2621,6 +2623,34 @@ export function Sidebar({
           >
             <IconPlug size={14} aria-hidden />
             <span>{t("nav.plugins")}</span>
+          </TooltipButton>
+          <TooltipButton
+            type="button"
+            className={`extensions-entry ${page === "knowledge" ? "active" : ""}`}
+            data-nav="knowledge"
+            tooltip={t("knowledge.title")}
+            ariaLabel={t("knowledge.title")}
+            onClick={() => page === "knowledge"
+              ? (canNavBack() ? navBack() : setPage("chat"))
+              : setPage("knowledge")}
+            aria-pressed={page === "knowledge"}
+          >
+            <IconBookOpen size={14} aria-hidden />
+            <span>{t("knowledge.title")}</span>
+          </TooltipButton>
+          <TooltipButton
+            type="button"
+            className={`extensions-entry ${page === "apps" ? "active" : ""}`}
+            data-nav="apps"
+            tooltip={t("agentApps.title")}
+            ariaLabel={t("agentApps.title")}
+            onClick={() => page === "apps"
+              ? (canNavBack() ? navBack() : setPage("chat"))
+              : setPage("apps")}
+            aria-pressed={page === "apps"}
+          >
+            <IconBrowser size={14} aria-hidden />
+            <span>{t("agentApps.title")}</span>
           </TooltipButton>
         </div>
 

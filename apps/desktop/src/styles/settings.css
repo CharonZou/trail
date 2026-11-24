@@ -1673,6 +1673,21 @@
   text-align: center;
 }
 
+/* The About block opens with the app's own mark, the same art the sidebar
+   brand and the window icon use, so identity comes before the name/version
+   pair instead of the block starting as bare text. */
+.settings-about-hero-mark {
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  border-radius: var(--radius-lg);
+  background: var(--ds-bg-hover);
+  color: var(--ds-text-primary);
+}
+
 .settings-about-hero-name {
   color: var(--ds-text-primary);
   font-size: var(--text-xl);

@@ -1,8 +1,20 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import i18n from "i18next";
 import { useTranslation } from "react-i18next";
-import { TooltipButton } from "../../components/ui";
-import { IconNewSession, IconSidebar } from "../../components/icons";
+import {
+  KEYBOARD_SHORTCUTS,
+  keybindingDisplayParts,
+  resolveKeybinding,
+  type ShortcutPlatform,
+} from "@trail/shared";
+import { TooltipButton, cx } from "../../components/ui";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconNewSession,
+  IconSidebar,
+} from "../../components/icons";
+import { useAppStore } from "../../stores/app-store";
 
 export class ErrorBoundary extends Component<
   { children: ReactNode },
@@ -30,6 +42,71 @@ export class ErrorBoundary extends Component<
     }
     return this.props.children;
   }
+}
+
+/**
+ * Browser-style history controls for the window titlebar. The store already owns
+ * the page/session stack (`navStack` + `navIndex`) and the Alt+Left / Alt+Right
+ * shortcuts; this component is only the visible affordance, and it derives its
+ * disabled state from the same stack so it can never drift from the shortcuts.
+ */
+export function HistoryTitlebarActions({
+  buttonClassName = "title-nav-btn",
+  className,
+}: {
+  buttonClassName?: string;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const navStackLength = useAppStore((state) => state.navStack.length);
+  const navIndex = useAppStore((state) => state.navIndex);
+  const navBack = useAppStore((state) => state.navBack);
+  const navForward = useAppStore((state) => state.navForward);
+  const canBack = navIndex > 0;
+  const canForward = navIndex < navStackLength - 1;
+  const keybindings = useAppStore((state) => state.settings?.keybindings);
+  const platform = (
+    typeof window === "undefined" ? "darwin" : window.piDesktop?.platform ?? "darwin"
+  ) as ShortcutPlatform;
+  const shortcutLabel = (id: "navigateBack" | "navigateForward"): string => {
+    const shortcut = KEYBOARD_SHORTCUTS.find((entry) => entry.id === id);
+    if (!shortcut) return "";
+    const parts = keybindingDisplayParts(
+      resolveKeybinding(shortcut, keybindings, platform),
+      platform,
+    );
+    return parts.join(platform === "darwin" ? "" : "+");
+  };
+  const label = (id: "navigateBack" | "navigateForward", text: string): string => {
+    const shortcut = shortcutLabel(id);
+    return shortcut ? t("nav.actionWithShortcut", { action: text, shortcut }) : text;
+  };
+  return (
+    <div className={cx("titlebar-nav no-drag", className)} role="group">
+      <TooltipButton
+        type="button"
+        className={buttonClassName}
+        tooltip={label("navigateBack", t("nav.back"))}
+        ariaLabel={t("nav.back")}
+        data-nav="nav-back"
+        disabled={!canBack}
+        onClick={navBack}
+      >
+        <IconChevronLeft size={15} />
+      </TooltipButton>
+      <TooltipButton
+        type="button"
+        className={buttonClassName}
+        tooltip={label("navigateForward", t("nav.forward"))}
+        ariaLabel={t("nav.forward")}
+        data-nav="nav-forward"
+        disabled={!canForward}
+        onClick={navForward}
+      >
+        <IconChevronRight size={15} />
+      </TooltipButton>
+    </div>
+  );
 }
 
 export function CollapsedTitlebarActions({

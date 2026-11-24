@@ -2,6 +2,22 @@ import { projectPlanHistory } from "./plan-history";
 import { guardRemoteInvocation } from "./remote-ipc-safety";
 import { isRemoteSession, safeSessionSummary } from "./remote-session-safety";
 import type {
+  AgentApplication,
+  AgentApplicationCreateInput,
+  AgentApplicationUpdateInput,
+  KnowledgeCreateLibraryInput,
+  KnowledgeActivityListResult,
+  KnowledgeActivityTrendResult,
+  KnowledgeDocument,
+  KnowledgeDocumentPreview,
+  KnowledgeImportFilesResult,
+  KnowledgeIndexResult,
+  KnowledgeLibrary,
+  KnowledgeSearchInput,
+  KnowledgeSearchResult,
+  KnowledgeUpdateLibraryInput,
+} from "@trail/shared";
+import type {
   ConfigSyncTestInput,
   ConfigSyncTestResult,
   ScheduledTaskRun,
@@ -775,6 +791,56 @@ export const api = {
      * main-side high-water mark restarts with it (#1753). */
     bootId?: string;
   }) => invoke<{ ok: boolean }>(IPC.invoke.pluginSessionActive, input),
+  // ---- Knowledge base -----------------------------------------------------
+  knowledgeListLibraries: () =>
+    invoke<{ libraries: KnowledgeLibrary[] }>(IPC.invoke.knowledgeListLibraries),
+  knowledgeCreateLibrary: (input: KnowledgeCreateLibraryInput) =>
+    invoke<{ library: KnowledgeLibrary }>(IPC.invoke.knowledgeCreateLibrary, input),
+  knowledgeUpdateLibrary: (input: KnowledgeUpdateLibraryInput) =>
+    invoke<{ library: KnowledgeLibrary }>(IPC.invoke.knowledgeUpdateLibrary, input),
+  knowledgeDeleteLibrary: (id: string) =>
+    invoke<{ removed: boolean }>(IPC.invoke.knowledgeDeleteLibrary, id),
+  knowledgeListDocuments: (libraryId: string) =>
+    invoke<{ documents: KnowledgeDocument[] }>(
+      IPC.invoke.knowledgeListDocuments,
+      libraryId,
+    ),
+  knowledgeGetDocument: (input: { libraryId: string; documentId: string }) =>
+    invoke<KnowledgeDocumentPreview>(IPC.invoke.knowledgeGetDocument, input),
+  /** Opens the native file picker in main and imports the chosen files. */
+  knowledgeImportFiles: (libraryId: string) =>
+    invoke<KnowledgeImportFilesResult>(IPC.invoke.knowledgeImportFiles, libraryId),
+  knowledgeImportText: (input: { libraryId: string; title: string; text: string }) =>
+    invoke<{ outcome: unknown }>(IPC.invoke.knowledgeImportText, input),
+  knowledgeDeleteDocument: (id: string) =>
+    invoke<{ removed: boolean }>(IPC.invoke.knowledgeDeleteDocument, id),
+  knowledgeSearch: (input: KnowledgeSearchInput) =>
+    invoke<KnowledgeSearchResult & { semanticError?: string }>(
+      IPC.invoke.knowledgeSearch,
+      input,
+    ),
+  knowledgeIndexLibrary: (libraryId: string) =>
+    invoke<KnowledgeIndexResult>(IPC.invoke.knowledgeIndexLibrary, libraryId),
+  knowledgeListActivities: (input?: { libraryId?: string; limit?: number }) =>
+    invoke<KnowledgeActivityListResult>(IPC.invoke.knowledgeListActivities, input ?? {}),
+  knowledgeActivityTrend: (input?: { days?: number }) =>
+    invoke<KnowledgeActivityTrendResult>(IPC.invoke.knowledgeActivityTrend, input ?? {}),
+  knowledgeSupportedExtensions: () =>
+    invoke<{ extensions: string[]; maxBytes: number }>(
+      IPC.invoke.knowledgeSupportedExtensions,
+    ),
+  // ---- Agent applications --------------------------------------------------
+  agentAppsList: () => invoke<{ apps: AgentApplication[] }>(IPC.invoke.agentAppsList),
+  agentAppsCreate: (input: AgentApplicationCreateInput) =>
+    invoke<{ app: AgentApplication }>(IPC.invoke.agentAppsCreate, input),
+  agentAppsUpdate: (input: AgentApplicationUpdateInput) =>
+    invoke<{ app: AgentApplication }>(IPC.invoke.agentAppsUpdate, input),
+  agentAppsDelete: (id: string) =>
+    invoke<{ removed: boolean }>(IPC.invoke.agentAppsDelete, id),
+  agentAppsMarkOpened: (id: string) =>
+    invoke<{ openedAt: string }>(IPC.invoke.agentAppsMarkOpened, id),
+  /** Opens the native directory picker in main; null means cancelled. */
+  agentAppsPickFolder: () => invoke<string | null>(IPC.invoke.agentAppsPickFolder),
   listSessions: () =>
     invoke<{ sessions: SessionSummary[]; runningSessionIds?: string[] }>(IPC.invoke.sessionList).then((result) => ({
       ...result,

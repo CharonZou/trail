@@ -2,6 +2,26 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const esEntries: ChangelogEntry[] = [
   {
+    version: "1.0.5",
+    date: "2026-11-24",
+    highlights: [
+      "La base de conocimiento pasa a ser un destino principal de la barra lateral: su panel muestra totales de bibliotecas, documentos y fragmentos con la disponibilidad, junto a salud, tendencia de accesos y actividad reciente, para conocer el estado del índice antes de abrir una biblioteca.",
+      "Cada biblioteca se abre como una lista de documentos con búsqueda, importación e indexación, y al hacer clic en un documento se lee su texto indexado como Markdown en la misma ventana en lugar de salir de la aplicación.",
+      "La importación acepta texto, PDF y DOCX por lotes, informa duplicados en lugar de guardarlos dos veces y mantiene un registro de actividad por biblioteca; un `.doc` antiguo se rechaza con un mensaje accionable mientras el resto del lote sigue importándose.",
+      "La búsqueda responde sin conexión desde un índice de texto completo local, incluso con consultas chinas de dos caracteres; la búsqueda semántica sigue siendo opcional y, sin proveedor de embeddings, vuelve a resultados por palabra clave indicando el motivo en lugar de fallar.",
+      "Los agentes pueden consultar la biblioteca con una herramienta integrada y reciben pasajes ordenados con el título de su documento, de modo que una conversación cite lo importado sin pegarlo antes.",
+      "Las aplicaciones de agente registran una URL web o una carpeta local y se abren en el navegador del panel de trabajo, recordando cuándo se abrieron por última vez; una carpeta que pierde su `index.html` sigue listada como no disponible con Abrir desactivado.",
+      "La barra de título del contenido incorpora ahora un par atrás/adelante en todos los destinos, incluida la fila de conversación, equivalente a `Cmd/Ctrl+[` y `Cmd/Ctrl+]`: ambos botones leen la misma pila de historial, así que ratón y teclado nunca discrepan.",
+      "Una biblioteca solo de palabras clave deja de anunciar vectorización pendiente, y la página de conocimiento mantiene un diseño legible cuando el panel lateral está acoplado.",
+      "Fast mode se activa por modelo para una suscripción de ChatGPT o una conexión de OpenAI Responses y se alterna con `/fast`; las solicitudes usan el nivel de servicio priority y el chip del modelo en el compositor lo marca mientras está activo.",
+      "Reconstruir el runtime de una conversación ya no reescribe su historial: el pensamiento, el razonamiento y las firmas de llamadas a funciones de Gemini sobreviven, así que las cachés de prompt siguen acertando tras un reinicio o un cambio de ajustes.",
+      "Abrir comandos de barra con un método de entrada chino ya no inserta un `/、` duplicado; el alias se aplica solo cuando la composición se confirma.",
+      "Un prompt regenerado de un turno anterior ya no puede aparecer por encima de la última respuesta cuando su archivo de rama termina fuera de la ventana de historial cargada.",
+      "Las visualizaciones en línea aparecen antes: el armazón de visualización precarga el D3 incluido y una capa de ayuda `viz`, un fragmento con error muestra el error en lugar de una tarjeta vacía, y la skill visualize pide una escritura más una respuesta.",
+      "Con la barra lateral contraída queda una tira de iconos: la marca, los cuatro destinos y las herramientas del pie siguen a un clic, y Ajustes → Acerca de vuelve a abrir con el icono de la app.",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-11-20",
     highlights: [

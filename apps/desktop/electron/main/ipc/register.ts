@@ -20,6 +20,8 @@ import { registerPluginUiIpc } from "./plugin-ui-ipc";
 import { registerJevIpc } from "./jev-ipc";
 import { registerProviderIpc } from "./provider-ipc";
 import { registerScheduledIpc } from "./scheduled-ipc";
+import { registerKnowledgeIpc } from "./knowledge-ipc";
+import { registerAgentAppsIpc } from "./agent-apps-ipc";
 import { registerSessionIpc } from "./session-ipc";
 import { registerSettingsIpc } from "./settings-ipc";
 import { registerStorageIpc } from "../storage/ipc";
@@ -403,6 +405,8 @@ export function registerIpcHandlers(dependencies: RegisterIpcDependencies) {
       return handler(...args);
     },
   });
+  registerKnowledgeIpc({ registrar, getHost, getMainWindow });
+  registerAgentAppsIpc({ registrar, getHost, getMainWindow });
   registerWorkspaceIpc({
     registrar,
     getMainWindow,

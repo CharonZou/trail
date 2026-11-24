@@ -434,10 +434,79 @@
 }
 
 .sidebar-rail {
-  width: 56px;
-  flex: 0 0 56px;
+  width: var(--ds-sidebar-rail-width, 56px);
+  flex: 0 0 var(--ds-sidebar-rail-width, 56px);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding: 6px 0 10px;
+  -webkit-app-region: no-drag;
+}
+
+/*
+  Icon rail contents. The plate is 56px, every control is a 36px square on the
+  same `--radius-md` seat as the sidebar's own icon buttons, and the active
+  destination keeps the `--ds-bg-active` tile so the collapsed shell reads the
+  same "where am I" signal as the expanded extensions list.
+*/
+.sidebar-rail-brand {
+  display: flex;
+  width: 100%;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  color: var(--ds-text-primary);
+}
+
+.sidebar-rail-group {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.sidebar-rail-spacer {
+  flex: 1 1 auto;
+  min-height: 8px;
+}
+
+.sidebar-rail-divider {
+  width: 26px;
+  height: 1px;
+  margin: 6px 0 8px;
+  background: var(--ds-border-subtle);
+}
+
+.sidebar-rail-btn {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--ds-text-muted);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.sidebar-rail-btn:hover {
+  background: var(--ds-bg-hover);
+  color: var(--ds-text-primary);
+}
+
+.sidebar-rail-btn.active {
+  background: var(--ds-bg-active);
+  color: var(--ds-text-primary);
+}
+
+/* The notification trigger ships as a 32px footer control; on the rail it takes
+   the same 36px seat as its neighbours so the cluster lines up. */
+.sidebar-rail .notification-trigger {
+  width: 36px;
+  height: 36px;
 }
 
 /*
@@ -1567,6 +1636,11 @@
   left: var(--ds-sidebar-width);
 }
 
+/* Collapsed still keeps a left column: the rail, not the window edge. */
+.window-chrome-row.sidebar-collapsed {
+  left: var(--ds-sidebar-rail-width, 56px);
+}
+
 .window-chrome-row button {
   pointer-events: auto;
   -webkit-app-region: no-drag;
@@ -1605,9 +1679,13 @@
   background-size: cover;
 }
 
-/* The chrome band belongs to the shell, not to the sheet: the window buttons
-   and the breadcrumb read on the shell ground, as the reference does. */
+/* The chrome band belongs to the shell, not to the sheet: the window buttons,
+   the breadcrumb and the history pair read on the shell ground, as the
+   reference does. Route pages use `.main-titlebar`, conversations use
+   `.conversation-topbar`; both would otherwise paint a sheet-coloured strip
+   over the ground. */
 .app-shell.app-frame-floating .main-pane,
+.app-shell.app-frame-floating .main-titlebar,
 .app-shell.app-frame-floating .conversation-topbar {
   background: transparent;
 }

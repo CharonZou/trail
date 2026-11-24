@@ -1,4 +1,4 @@
-# 04. Data Storage (Schema v27)
+# 04. Data Storage (Schema v29)
 
 
 ### Lossless tool-image storage (#1868)
@@ -1715,7 +1715,7 @@ truncating at a guessed position.
 - JSON columns are read blind on hot paths (shipped to the renderer as-is);
   anything filtered or summed is a promoted column by rule.
 
-## 7. Versioning, v7 reset, and v8-to-v27 migration
+## 7. Versioning, v7 reset, and v8-to-v29 migration
 
 - `PRAGMA user_version` stays the schema authority; future structural changes
   add ordered Rust migration fns again, each in one transaction, with a
@@ -1726,7 +1726,7 @@ truncating at a guessed position.
   Sessions, providers, and settings from the old file are not carried over;
   the archive remains for manual recovery. All pre-v7 migration code
   (v1 `settings.sqlite` import, v2→v6 chain) is deleted.
-- Fresh installs run the full v27 DDL directly.
+- Fresh installs run the full v29 DDL directly.
 - **Schema v7 first reaches v8, then uses the guarded path.** The v7→v8
   migration is followed by the same guarded v8→v15 migration; schema-v9 and
   schema-v10 databases take the same guarded path and receive an exact readable
@@ -1803,6 +1803,15 @@ truncating at a guessed position.
   session `/fast` switch, defaulting to `0` for every existing session. Forks
   copy it; scheduled runs and delegated workers start at `0`. The migration
   keeps a v26 backup.
+- **Schema v28 is additive.** It adds `knowledge_libraries`,
+  `knowledge_documents`, `knowledge_chunks`, the FTS5 `trigram` index
+  `knowledge_chunks_fts`, and `agent_apps` (ADR 0338). Existing
+  databases gain empty tables; no user configuration or transcript is rewritten.
+  The migration keeps a v27 backup and shares its DDL with fresh installs.
+- **Schema v29 is additive.** It adds `knowledge_activity` and its two indexes
+  for the knowledge hub's recent-activity and visit-trend cards (ADR 0338).
+  The migration keeps a v28 backup, reuses `knowledge::SCHEMA`, and does not
+  rewrite documents, chunks, or vectors.
 - **Schema v14 is additive.** It adds nullable `sessions.deleted_at`, the
   partial deletion index, and `session_import_origins`. Existing sessions stay
   active and have no origin rows. The migration runs in the same guarded

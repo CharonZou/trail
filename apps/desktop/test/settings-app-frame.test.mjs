@@ -112,11 +112,12 @@ test("only the ground and the plate change in the floating frame", () => {
     /background: var\(--ds-bg-sidebar\)/,
     "the ground becomes the rail's own colour, so the rail reads as part of it",
   );
-  // The chrome band is not part of the sheet: the window buttons and the
-  // breadcrumb keep reading on the ground.
+  // The chrome band is not part of the sheet: the window buttons, the
+  // breadcrumb and the history pair keep reading on the ground, on route
+  // pages and in conversations alike.
   assert.match(
     chromeCss,
-    /\.app-shell\.app-frame-floating \.main-pane,\n\.app-shell\.app-frame-floating \.conversation-topbar \{\n  background: transparent;/,
+    /\.app-shell\.app-frame-floating \.main-pane,\n\.app-shell\.app-frame-floating \.main-titlebar,\n\.app-shell\.app-frame-floating \.conversation-topbar \{\n  background: transparent;/,
   );
   // The caption lane keeps its hit band but must not lay a second strip of the
   // work area's colour over the ground.

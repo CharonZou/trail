@@ -19669,3 +19669,64 @@ their separate platform acceptance.
   `apps/desktop/test/project-memory.test.mjs`. Full native clicking remains a
   Draft scenario and runs only when explicitly requested in a capable
   environment.
+
+## Knowledge base and Agent application scenarios
+
+- **E2E-KNOWLEDGE-IMPORT-SEARCH**: A user creates a library, imports a text
+  file, a PDF, and a DOCX through the native picker, sees the documents listed
+  with chunk counts, and searches a phrase that only appears in one of them. The
+  result names that document, and a two-character CJK query still returns a
+  hit through the `LIKE` fallback. A legacy `.doc` file is rejected with an
+  actionable message while the other files in the same batch import.
+- **E2E-KNOWLEDGE-SEMANTIC-DEGRADE**: A library with semantic search enabled but
+  no reachable embedding provider returns keyword hits with `degraded: true`
+  rather than an error; once a provider is configured, `indexLibrary` reports
+  progress and a paraphrase query resolves.
+- **E2E-KNOWLEDGE-SCHEMA-UPGRADE**: Opening a v27 database creates the five v28
+  tables, then the v29 activity table, and keeps every existing session, setting,
+  and transcript row readable; a fresh install produces the same table set.
+  Reopening either file is a plain open.
+- **E2E-KNOWLEDGE-HUB**: The hub shows the library count, document total,
+  processing count, and availability from the library payload; filtering by name
+  narrows the pager; opening a row lands on its detail. A search appends a
+  "search" row to recent activity and increments today's point in the trend.
+  Health drops and names the failure when an import fails, and the quick actions
+  open the relevant library rather than sending a chat message. A keyword-only
+  library with unembedded chunks is counted as ready, not processing.
+- **E2E-KNOWLEDGE-READER**: Clicking a document row opens the reader, which
+  renders the stored chunks as Markdown and shows status, size, chunk count,
+  character count, source path, and index coverage; back returns to the same
+  document list. A failed import opens the reader with its stored error instead
+  of an empty page, and a document id from another library is rejected.
+- **E2E-AGENT-APP-OPEN**: A registered URL application opens the work-panel
+  `pi.browser` tab at its `openUrl` and updates `lastOpenedAt`; a local folder
+  application opens its percent-encoded `file://` URL read-only. Removing
+  `index.html` from a folder leaves the row listed with `available: false` and a
+  reason, and the card's Open action is disabled.
+- **E2E-AGENT-APP-VALIDATION**: Creating an application with a `javascript:`
+  URL, a relative folder path, or a folder without `index.html` fails with a
+  validation message and writes no row.
+- **E2E-KNOWLEDGE-SEARCH-TOOL**: `KnowledgeSearch` is listed to the model, runs
+  without a permission prompt, and returns ranked passages with document titles;
+  an empty library returns an empty hit list instead of an error.
+
+## Titlebar history scenarios
+
+- **E2E-NAV-HISTORY-TITLEBAR**: Every destination shows the back/forward cluster
+  at the left of the content titlebar — beside the breadcrumb in the conversation
+  topbar, ahead of the collapsed-sidebar actions on destination pages. With a
+  single destination the pair is disabled; after visiting a second destination
+  Back enables and steps to the previous one, Forward enables and returns, and
+  Forward disables again once the stack is exhausted. Clicking either button
+  takes exactly the same step as `Cmd/Ctrl+[` / `Cmd/Ctrl+]`, and their hover
+  labels name the configured shortcut.
+
+- **Specs linked**: `03-runtime/23-knowledge-and-agent-apps.md`, ADR 0338,
+  `04-ux/01-ui-ia.md`.
+- **Acceptance**: A user can build a searchable local library and open a
+  registered application beside the conversation without a second database owner
+  or a second Browser surface.
+- **Status**: Host-domain unit tests cover chunking, extraction validation,
+  application entry validation, and retrieval ranking. The desktop click-through
+  above is a Draft scenario and runs only when explicitly requested in a capable
+  environment.

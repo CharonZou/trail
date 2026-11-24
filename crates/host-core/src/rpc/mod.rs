@@ -1351,6 +1351,39 @@ fn shell_failure_result(
     }
 }
 
+/// `KnowledgeSearch` reads only the local knowledge tables, so it is answered
+/// before the filesystem/shell permission pipeline. The lookup itself is
+/// bounded by the caller limit and the query length, and it registers no
+/// process, so skipping the cancellation registry is safe.
+async fn knowledge_search_tool_result(
+    state: Arc<Mutex<AppState>>,
+    p: &ToolsExecuteParams,
+    started: std::time::Instant,
+) -> tools::ToolsExecuteResult {
+    match crate::knowledge::search_for_tool(state, &p.args).await {
+        Ok(content) => tools::ToolsExecuteResult {
+            tool_call_id: p.tool_call_id.clone(),
+            ok: true,
+            is_error: None,
+            content,
+            duration_ms: started.elapsed().as_millis() as u64,
+            denied: None,
+            error_code: None,
+            command_shell_id: None,
+        },
+        Err(error) => tools::ToolsExecuteResult {
+            tool_call_id: p.tool_call_id.clone(),
+            ok: false,
+            is_error: Some(true),
+            content: json!({ "error": error.message, "code": error.kind }),
+            duration_ms: started.elapsed().as_millis() as u64,
+            denied: None,
+            error_code: Some(error.kind.to_string()),
+            command_shell_id: None,
+        },
+    }
+}
+
 fn shell_changed_result(
     p: &ToolsExecuteParams,
     expected_shell_id: &str,
@@ -4145,11 +4178,29 @@ async fn handle_request(
                 .map_err(|message| rpc_err(1000, message, "INTERNAL"))?;
             Ok(json!({ "ok": true, "found": found }))
         }
+        // Knowledge and application registries are their own domains (schema
+        // v28); the dispatcher only routes, their modules own validation and
+        // SQL so this match does not grow another feature.
+        m if m.starts_with("knowledge.") => crate::knowledge::handle(state.clone(), m, &params)
+            .await
+            .map_err(|error| rpc_err(error.code, error.message, error.kind)),
+        m if m.starts_with("apps.") => {
+            let st = state.lock().await;
+            crate::agent_apps::handle(&st.db, m, &params)
+                .map_err(|error| rpc_err(error.code, error.message, error.kind))
+        }
         "tools.execute" => {
             let call_started = std::time::Instant::now();
             let p: ToolsExecuteParams = serde_json::from_value(params.clone())
                 .map_err(|e| rpc_err(1002, e.to_string(), "INVALID_PARAMS"))?;
             let execution_timeout_ms = tools::effective_timeout_ms(&p.tool_name, p.timeout_ms);
+
+            if p.tool_name == "KnowledgeSearch" {
+                return serde_json::to_value(
+                    knowledge_search_tool_result(state.clone(), &p, call_started).await,
+                )
+                .map_err(|e| rpc_err(1000, e.to_string(), "INTERNAL"));
+            }
 
             let remote_workspace = {
                 let st = state.lock().await;

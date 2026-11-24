@@ -28,3 +28,5 @@
 | [live-voice.md](/zh-CN/spec/03-runtime/live-voice) | 应用托管的实时语音通话 |
 
 - [图片生成与编辑](/zh-CN/spec/03-runtime/21-image-generation)
+- [便携式配置同步](/zh-CN/spec/03-runtime/22-config-sync)
+- [知识库与 Agent 应用](/zh-CN/spec/03-runtime/23-knowledge-and-agent-apps)

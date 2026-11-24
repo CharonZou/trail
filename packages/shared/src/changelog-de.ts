@@ -2,6 +2,26 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const deEntries: ChangelogEntry[] = [
   {
+    version: "1.0.5",
+    date: "2026-11-24",
+    highlights: [
+      "Die Wissensdatenbank wird ein eigener Haupteintrag der Seitenleiste: Die Übersicht nennt Bibliotheks-, Dokument- und Chunk-Zahlen samt Verfügbarkeit und stellt Gesundheit, Zugriffsverlauf und letzte Aktivität daneben, sodass der Indexzustand schon vor dem Öffnen einer Bibliothek sichtbar ist.",
+      "Jede Bibliothek öffnet sich als durchsuchbare Dokumentliste mit Import und Indexierung; ein Klick auf ein Dokument liest den indexierten Text als Markdown im selben Fenster, statt die App zu verlassen.",
+      "Der Import nimmt Text-, PDF- und DOCX-Dateien stapelweise an, meldet Duplikate statt sie doppelt zu speichern und führt ein Aktivitätsprotokoll je Bibliothek; eine alte `.doc`-Datei wird mit einer umsetzbaren Meldung abgelehnt, während der übrige Stapel weiterläuft.",
+      "Die Suche antwortet offline aus einem lokalen Volltextindex, auch bei zweistelligen chinesischen Suchbegriffen; die semantische Suche bleibt optional und fällt ohne Embedding-Anbieter mit genanntem Grund auf Stichwort-Treffer zurück.",
+      "Agenten können die Bibliothek über ein eingebautes Werkzeug abfragen und erhalten sortierte Textstellen mit Dokumenttiteln, sodass ein Gespräch importierte Inhalte zitieren kann, ohne dass sie vorher eingefügt werden.",
+      "Agent-Anwendungen registrieren entweder eine Web-Adresse oder einen lokalen Ordner und öffnen im Browser des Arbeitsbereichs, wobei der letzte Öffnungszeitpunkt erhalten bleibt; einem Ordner ohne `index.html` bleibt gelistet, aber als nicht verfügbar mit deaktiviertem Öffnen.",
+      "Die Titelleiste des Inhaltsbereichs trägt nun auf jedem Ziel, auch in der Konversationszeile, ein Paar Zurück/Vorwärts, das `Cmd/Ctrl+[` und `Cmd/Ctrl+]` entspricht: Beide Schaltflächen lesen denselben Verlaufsstapel, daher stimmen Zeiger und Tastatur immer überein.",
+      "Eine reine Stichwort-Bibliothek meldet nicht mehr ausstehende Vektorisierung, und bei angedocktem Seitenpanel bleibt die Wissensseite auch in schmaler Breite lesbar.",
+      "Fast Mode lässt sich pro Modell für ein ChatGPT-Abo oder eine OpenAI-Responses-Verbindung aktivieren und im Gespräch mit `/fast` umschalten; Anfragen nutzen die Priority-Service-Stufe, und der Modell-Chip im Composer markiert den Zustand.",
+      "Der Neuaufbau der Laufzeit eines Gesprächs schreibt den Verlauf nicht mehr um: Denken, Reasoning und Gemini-Funktionsaufruf-Signaturen bleiben erhalten, sodass Prompt-Caches nach Neustart oder Einstellungsänderung weiter treffen.",
+      "Slash-Befehle mit chinesischer Eingabemethode fügen kein doppeltes `/、` mehr ein; der Alias greift erst, nachdem die Komposition übernommen wurde.",
+      "Eine neu erzeugte Antwort aus einem älteren Turn erscheint nicht mehr über der letzten Antwort, wenn ihr Branch-Archiv außerhalb des geladenen Verlaufsfensters fertig wird.",
+      "Inline-Visualisierungen erscheinen schneller: Die Visualisierungsschale lädt das gebündelte D3 und eine `viz`-Hilfsschicht vor, ein fehlerhaftes Fragment zeigt seinen Fehler statt einer leeren Karte, und der visualize-Skill verlangt ein Schreiben plus eine Antwort.",
+      "Eine eingeklappte Seitenleiste wird zur Icon-Leiste: Marke, die vier Ziele und die Fußwerkzeuge bleiben mit einem Klick erreichbar, und Einstellungen → Info beginnt wieder mit dem App-Symbol.",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-11-20",
     highlights: [

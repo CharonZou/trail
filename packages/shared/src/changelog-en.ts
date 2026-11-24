@@ -2,6 +2,26 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const enEntries: ChangelogEntry[] = [
   {
+    version: "1.0.5",
+    date: "2026-11-24",
+    highlights: [
+      "Knowledge base joins the sidebar as a first-class destination: its hub reports library, document and chunk totals with an availability read-out, beside health, access trend and recent activity, so the state of the index is visible before opening a library.",
+      "Each library opens into a document list you can search, import into and index, and clicking a document reads its indexed text as Markdown in the same window instead of leaving the app.",
+      "Import accepts text, PDF and DOCX files a batch at a time, reports duplicates instead of storing them twice, and keeps a per-library activity log; a legacy `.doc` file is refused with an actionable message while the rest of the batch still imports.",
+      "Search answers offline from a local full-text index, including two-character Chinese queries; semantic search stays optional and falls back to keyword hits with a stated reason when no embedding provider is configured.",
+      "Agents can query the library through a built-in tool and receive ranked passages with their document titles, so a conversation can quote what you imported without pasting it first.",
+      "Agent applications register either a web URL or a local folder and open in the work-panel browser, remembering when each was last opened; a folder that loses its `index.html` stays listed as unavailable with Open disabled.",
+      "The content titlebar now carries a back/forward pair on every destination, including the conversation row, matching `Cmd/Ctrl+[` and `Cmd/Ctrl+]`: both buttons read the same history stack, so pointer and keyboard always agree on what is reachable.",
+      "A keyword-only library no longer claims pending vectorization, and the knowledge page keeps a readable layout when the side panel is docked.",
+      "Fast mode can be turned on per model for a ChatGPT subscription or an OpenAI Responses connection and toggled in a conversation with `/fast`; requests use the provider's priority service tier and the composer's model chip marks it while it is on.",
+      "Rebuilding a conversation's runtime no longer rewrites its history: thinking, reasoning and Gemini function-call signatures survive the rebuild, so prompt caches keep hitting after a restart or a settings change.",
+      "Opening slash commands with a Chinese input method no longer inserts a duplicate `/、`; the alias applies only after the composition commits.",
+      "A regenerated prompt from an older turn can no longer appear above the latest reply when its branch archive finishes outside the loaded history window.",
+      "Inline visualizations render sooner: the visualization shell preloads the bundled D3 and a `viz` chart helper layer, a failing fragment shows its error instead of an empty card, and the visualize skill asks for one write plus a reply.",
+      "A collapsed sidebar now folds into an icon rail: the brand, the four destinations and the footer tools stay one click away, and Settings → About opens with the app mark.",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-11-20",
     highlights: [

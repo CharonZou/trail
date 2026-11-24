@@ -46,7 +46,7 @@ test("sidebar brand returns to the chat home", () => {
   assert.match(brandButton, /t\("app\.shellName"\)/);
 });
 
-test("sidebar header retains non-mac branding and collapse without a search control", () => {
+test("sidebar header keeps its branding and collapse; history lives in the titlebar", () => {
   const header = sidebarSource.match(
     /<div className="sidebar-header">[\s\S]*?<\/div>\s*<\/div>/,
   )?.[0] ?? "";
@@ -54,9 +54,13 @@ test("sidebar header retains non-mac branding and collapse without a search cont
   assert.match(header, /className="brand no-drag"/);
   assert.match(header, /className="sidebar-header-actions no-drag"/);
   assert.doesNotMatch(header, /IconSearch/);
+  assert.doesNotMatch(header, /IconChevronLeft|IconChevronRight/);
   assert.match(header, /<IconSidebar/);
   assert.match(header, /data-nav="toggle-sidebar"/);
-  assert.doesNotMatch(appSource, /IconChevronLeft|IconChevronRight/);
+  assert.match(
+    appSource,
+    /className="main-titlebar-left no-drag"[\s\S]*?<HistoryTitlebarActions \/>/,
+  );
 });
 
 test("work panel collapse control is the viewport-fixed shell toggle", () => {

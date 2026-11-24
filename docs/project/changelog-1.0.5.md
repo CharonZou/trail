@@ -1,44 +1,42 @@
-# 1.0.5 changelog draft (unreleased)
+# 1.0.5 changelog (shipped 2026-11-24)
 
-Status: **draft only.** Nothing here is in the shipped catalogs yet. The
-catalogs still end at `1.0.4`, `package.json` stays `1.0.4`, and
-`changelog.test.ts` still asserts `1.0.4` as the newest entry. Version surfaces
-are bumped last by `node scripts/release.mjs 1.0.5` (release runbook §4.1), never
-by hand.
+Status: **applied.** Every catalog in `packages/shared/src/changelog-<locale>.ts`
+now carries this entry first (13 highlights, all nine locales, `date`
+`2026-11-24`), `changelog.test.ts` pins `1.0.5` newest-first, and
+`node scripts/release.mjs 1.0.5` bumped the version surfaces. The blocks below
+are kept as the source record of what shipped; do not paste them again.
 
-Scope of this draft: the three user-visible additions on
+Scope of this entry: the three user-visible additions on
 `feat/knowledge-and-agent-apps` — knowledge base, Agent applications, and the
 titlebar back/forward pair — plus the two correctness fixes that changed what a
-user sees, plus the five merged-but-unreleased items already listed in
+user sees, plus the five merged-but-unreleased items previously listed in
 `docs/project/unreleased.md` (Fast mode, runtime-rebuild prompt cache, Chinese
 IME slash alias, regenerated-prompt ordering, visualization preload). All of
 them share one entry: **13 highlights**.
 
-## How to apply
+## How it was applied
 
-1. For each catalog in `packages/shared/src/changelog-<locale>.ts`, insert the
-   block below as the **first** element of its array (newest-first), and set
-   `date` to the real release day.
+1. For each catalog in `packages/shared/src/changelog-<locale>.ts`, the block
+   below was inserted as the **first** element of its array (newest-first), with
+   `date` set to the release day, `2026-11-24`.
 2. English is the source of truth (ADR 0009); every shipped locale keeps the
    same version list and the same highlight count (13 here).
-3. Update `packages/shared/src/changelog.test.ts`: `versions[0]` becomes
-   `"1.0.5"` and the expected array becomes
+3. `packages/shared/src/changelog.test.ts` asserts `versions[0] === "1.0.5"` and
    `["1.0.5", "1.0.4", "1.0.3", "1.0.2", "1.0.1"]`.
-4. Then run `node scripts/release.mjs 1.0.5` (root + `apps/*` + `packages/*` +
-   `docs/package.json`, `Cargo.toml` / `Cargo.lock`, `APP_VERSION`,
-   `README.md` / `README.zh-CN.md`), then verify with
-   `pnpm --filter @trail/shared test` or the vitest run for
-   `packages/shared/src/changelog.test.ts`.
+4. `node scripts/release.mjs 1.0.5` then bumped the version surfaces (root +
+   `apps/*` + `packages/*` + `docs/package.json`, `Cargo.toml` / `Cargo.lock`,
+   `APP_VERSION`), and `node scripts/check-release-docs.mjs 1.0.5` passed on the
+   result.
 
 ## Provenance of highlights 9–13
 
-These five are the items `docs/project/unreleased.md` already carried from
-merges after `1.0.4`; they are folded in here so the tagged tree never ships
-them silently. When the release set changes, prune them from both places, not
-just one. Fast mode reaches every edit here (`/fast`, priority tier, composer
-chip); the visualization preload lives in `resources/gen-ui/visualize-helpers.js`
-and the visualize skill; the IME, cache and ordering fixes are already in the
-renderer and runtime.
+These five were carried by `docs/project/unreleased.md` from merges after
+`1.0.4`; they are folded in here so the tagged tree never ships them silently.
+They now count as shipped, so `unreleased.md` no longer lists them. Fast mode
+reaches every edit here (`/fast`, priority tier, composer chip); the
+visualization preload lives in `resources/gen-ui/visualize-helpers.js` and the
+visualize skill; the IME, cache and ordering fixes are in the renderer and
+runtime.
 
 ## English (`packages/shared/src/changelog-en.ts`)
 

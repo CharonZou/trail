@@ -2,6 +2,25 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const frEntries: ChangelogEntry[] = [
   {
+    version: "1.0.5",
+    date: "2026-11-24",
+    highlights: [
+      "La base de connaissances devient une destination de premier niveau de la barre latérale : son accueil affiche les totaux de bibliothèques, documents et fragments avec la disponibilité, à côté de la santé, de la tendance des accès et de l'activité récente, pour connaître l'état de l'index avant d'ouvrir une bibliothèque.",
+      "Chaque bibliothèque s'ouvre en une liste de documents interrogeable, importable et indexable ; un clic sur un document lit son texte indexé en Markdown dans la même fenêtre au lieu de quitter l'application.",
+      "L'import accepte texte, PDF et DOCX par lots, signale les doublons au lieu de les stocker deux fois et tient un journal d'activité par bibliothèque ; un ancien `.doc` est refusé avec un message actionnable tandis que le reste du lot continue.",
+      "La recherche répond hors ligne depuis un index plein texte local, y compris pour des requêtes chinoises de deux caractères ; la recherche sémantique reste facultative et, sans fournisseur d'embeddings, retombe sur les résultats par mot-clé en indiquant la raison au lieu d'échouer.",
+      "Les agents peuvent interroger la bibliothèque via un outil intégré et reçoivent des passages classés avec le titre de leur document, si bien qu'une conversation cite ce que vous avez importé sans le coller au préalable.",
+      "Les applications d'agent enregistrent une URL web ou un dossier local et s'ouvrent dans le navigateur du panneau de travail, en retenant la dernière ouverture ; un dossier qui perd son `index.html` reste listé comme indisponible, avec Ouvrir désactivé.",
+      "La barre de titre du contenu porte désormais une paire précédent/suivant sur chaque destination, y compris la ligne de conversation, équivalente à `Cmd/Ctrl+[` et `Cmd/Ctrl+]` : les deux boutons lisent la même pile d'historique, donc souris et clavier ne divergent jamais.",
+      "Une bibliothèque en mots-clés seuls n'annonce plus une vectorisation en attente, et la page de connaissances reste lisible lorsque le panneau latéral est ancré.",
+      "Le mode Fast s'active par modèle pour un abonnement ChatGPT ou une connexion OpenAI Responses et se bascule avec `/fast` ; les requêtes passent par le palier de service priority et la puce du modèle dans le composeur l'indique tant qu'il est actif.",
+      "Reconstruire le runtime d'une conversation ne réécrit plus son historique : la réflexion, le raisonnement et les signatures d'appel de fonction Gemini survivent, donc les caches de prompt continuent de toucher après un redémarrage ou un changement de réglages.",
+      "Ouvrir les commandes slash avec une méthode de saisie chinoise n'insère plus un `/、` en double ; l'alias ne s'applique qu'une fois la composition validée.",
+      "Un prompt régénéré d'un tour ancien ne peut plus apparaître au-dessus de la dernière réponse lorsque son archive de branche se termine hors de la fenêtre d'historique chargée.",
+      "Les visualisations intégrées s'affichent plus tôt : l'enveloppe de visualisation précharge le D3 embarqué et une couche d'aide `viz`, un fragment en erreur montre son erreur au lieu d'une carte vide, et la skill visualize demande une écriture puis une réponse.",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-11-20",
     highlights: [

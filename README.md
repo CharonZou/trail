@@ -48,10 +48,25 @@ Your projects, transcripts, settings and credentials stay on your machine in a
 SQLite database owned by a Rust host core. Models are interchangeable: cloud
 providers, local runtimes and OAuth-backed accounts join the same workflow.
 
-> **Current release line: 1.0.4 (Early Preview).**
+> **Current release line: 1.0.5 (Early Preview).**
 
 ## Capabilities
 
+* **Knowledge base (1.0.5).** Libraries sit behind a first-class sidebar
+  destination: the hub reports library, document and chunk totals with an
+  availability read-out next to index health, access trend and recent activity.
+  Each library opens into a searchable document list that imports text, PDF and
+  DOCX files a batch at a time, reports duplicates instead of storing them
+  twice, and keeps a per-library activity log; clicking a document reads its
+  indexed text as Markdown in the same window. Search answers offline from a
+  local full-text index, semantic search is optional and falls back with a
+  stated reason, and agents query a library through a built-in tool.
+* **Agent applications (1.0.5).** Register a web URL or a local folder and open
+  it in the work-panel browser; each entry remembers when it was last opened,
+  and a folder that loses its `index.html` stays listed as unavailable.
+* **Same-history navigation (1.0.5).** A back/forward pair sits in the content
+  titlebar on every destination and drives the same history stack as
+  `Cmd/Ctrl+[` and `Cmd/Ctrl+]`, so pointer and keyboard always agree.
 * **Asset center (1.0.4).** Overview, memory, skills and subagents collected in
   one workspace from a first-class sidebar entry: global and per-project asset
   counts, searchable memory entries, full skill and subagent management, and a
@@ -77,11 +92,15 @@ providers, local runtimes and OAuth-backed accounts join the same workflow.
 
 ## Screenshots
 
-Every frame below is captured from the 1.0.4 preview build running on Windows
+Every frame below is captured from a Trail preview build running on Windows
 with the default Forest theme — no mockups.
 
-| Asset center | Skills |
+| Knowledge base | Document reader |
 | --- | --- |
+| <img src="docs/image/readme/knowledge-hub.png" alt="Knowledge base hub" width="100%" /> | <img src="docs/image/readme/knowledge-reader.png" alt="Document reader" width="100%" /> |
+| **Agent applications** | **Titlebar history** |
+| <img src="docs/image/readme/agent-apps.png" alt="Agent applications" width="100%" /> | <img src="docs/image/readme/titlebar-history.png" alt="Titlebar back and forward" width="100%" /> |
+| **Asset center** | **Skills** |
 | <img src="docs/image/readme/asset-center.png" alt="Asset center overview" width="100%" /> | <img src="docs/image/readme/asset-skills.png" alt="Skills tab" width="100%" /> |
 | **Subagents** | **Memory** |
 | <img src="docs/image/readme/asset-subagents.png" alt="Subagents tab" width="100%" /> | <img src="docs/image/readme/asset-memory.png" alt="Memory tab" width="100%" /> |
@@ -145,13 +164,15 @@ pnpm dist
 
 On Windows, `start-dev.cmd` performs the same startup steps in one click.
 
-## Latest release: 1.0.4
+## Latest release: 1.0.5
 
-Released 2026-11-20. The version log in **Settings → About** lists 1.0.1 through
-1.0.4 in detail; earlier history is intentionally omitted.
+Released 2026-11-24. 1.0.5 continues the 1.0.x early-preview line; the version
+log in **Settings → About** lists 1.0.1 through 1.0.5 in detail, and earlier
+history is intentionally omitted.
 
 | Version | Highlights |
 | --- | --- |
+| **1.0.5** | Knowledge base (hub, searchable libraries, batch import, in-app document reader, offline full-text and optional semantic search, agent tool), Agent applications opened in the work-panel browser, titlebar back/forward, Fast mode, prompt-cache-stable runtime rebuilds, Chinese IME slash fix, regenerated-prompt ordering, faster inline visualizations |
 | **1.0.4** | Asset center (overview, memory, skills, subagents, JSON backup), configurable startup appearance, app icon and chrome theme, Trail data-directory adoption for existing installs |
 | **1.0.3** | Whole-window versus floating-card layout, settings page as a sheet, thinking-effort slider with `Ctrl+T`, provider brand marks, open a project in VS Code / Trae / IntelliJ IDEA |
 | **1.0.2** | Per-project workspace icon and color, workspace index toggle, token usage card, window card, more provider marks |

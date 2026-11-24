@@ -7,7 +7,7 @@ export const APP_ID = "net.aiuo.pi-desktop";
 // paired remote hosts — renaming those strands existing data and breaks
 // contracts that ship outside this repository, not just this build.
 export const APP_NAME = "Trail";
-export const APP_VERSION = "1.0.4";
+export const APP_VERSION = "1.0.5";
 
 export const APP_MENU_COMMANDS = [
   "newTask",

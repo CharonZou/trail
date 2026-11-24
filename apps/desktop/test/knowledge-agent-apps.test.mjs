@@ -81,7 +81,7 @@ test("knowledge schema keeps CJK substring search and agent apps stay a registry
     read("../../../crates/host-core/src/agent_apps/schema.sql"),
     read("../../../crates/host-core/src/db/knowledge_apps_migration.rs"),
     read("../../../crates/host-core/src/db/knowledge_activity_migration.rs"),
-    read("../../../crates/host-core/src/knowledge/mod.rs"),
+    read("../../../crates/host-core/src/knowledge/retrieval.rs"),
   ]);
   assert.match(knowledgeSchema, /tokenize = 'trigram'/);
   assert.match(knowledgeSchema, /CREATE TRIGGER IF NOT EXISTS knowledge_chunks_ai/);

@@ -1605,9 +1605,13 @@
   background-size: cover;
 }
 
-/* The chrome band belongs to the shell, not to the sheet: the window buttons
-   and the breadcrumb read on the shell ground, as the reference does. */
+/* The chrome band belongs to the shell, not to the sheet: the window buttons,
+   the breadcrumb and the history pair read on the shell ground, as the
+   reference does. Route pages use `.main-titlebar`, conversations use
+   `.conversation-topbar`; both would otherwise paint a sheet-coloured strip
+   over the ground. */
 .app-shell.app-frame-floating .main-pane,
+.app-shell.app-frame-floating .main-titlebar,
 .app-shell.app-frame-floating .conversation-topbar {
   background: transparent;
 }

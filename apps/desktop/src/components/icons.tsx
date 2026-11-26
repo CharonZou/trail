@@ -175,6 +175,33 @@ export const IconChat = icon(MessageSquare);
 export const IconNewSession = icon(MessageSquarePlus);
 export const IconFolder = icon(Folder);
 export const IconFolderOpen = icon(FolderOpen);
+
+/**
+ * Folder glyph for the knowledge file tree. Two-tone rounded folder so the
+ * catalog reads like a file browser instead of a flat list of rows.
+ */
+export function IconFolderTree({ size = 14, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        d="M2.4 6.9c0-1.1.9-2 2-2h4.3c.6 0 1.2.3 1.6.8l1 1.2h8.3c1.1 0 2 .9 2 2v.9H2.4z"
+        fill="#D8A22F"
+      />
+      <path
+        d="M3.9 9.1c0-.8.7-1.5 1.5-1.5h14.1c1 0 1.7.9 1.5 1.9l-1.3 8.2c-.1.9-.9 1.5-1.8 1.5H6.3c-1 0-1.9-.8-1.9-1.9z"
+        fill="#F5CB52"
+      />
+    </svg>
+  );
+}
 export const IconNewProject = icon(FolderPlus);
 export const IconGripVertical = icon(GripVertical);
 export const IconFileText = icon(FileText);

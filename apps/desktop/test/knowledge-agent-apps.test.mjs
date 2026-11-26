@@ -22,10 +22,11 @@ test("sidebar, lazy routes, and page state expose Knowledge and Agent apps", asy
 });
 
 test("pages call the renderer API instead of IPC channels or SQLite", async () => {
-  const [knowledge, hub, detail, apps] = await Promise.all([
+  const [knowledge, hub, workbench, search, apps] = await Promise.all([
     read("../src/pages/KnowledgePage.tsx"),
     read("../src/pages/knowledge/KnowledgeHub.tsx"),
-    read("../src/pages/knowledge/KnowledgeLibraryDetail.tsx"),
+    read("../src/pages/knowledge/workbench/KnowledgeWorkbench.tsx"),
+    read("../src/pages/knowledge/workbench/WorkbenchSearch.tsx"),
     read("../src/pages/AgentAppsPage.tsx"),
   ]);
   assert.match(knowledge, /api\.knowledgeListLibraries\(\)/);
@@ -35,7 +36,7 @@ test("pages call the renderer API instead of IPC channels or SQLite", async () =
   assert.match(knowledge, /api\.knowledgeImportText\(\{ libraryId: selectedId, title, text \}\)/);
   assert.match(knowledge, /api\.knowledgeIndexLibrary\(library\.id\)/);
   assert.match(knowledge, /api\.knowledgeDeleteDocument\(document\.id\)/);
-  assert.match(detail, /api\.knowledgeSearch\(\{/);
+  assert.match(search, /api\.knowledgeSearch\(\{/);
   // The hub is a pure view: it receives data and callbacks, never IPC or SQL.
   assert.doesNotMatch(hub, /api\./);
   assert.match(apps, /api\.agentAppsList\(\)/);
@@ -43,7 +44,7 @@ test("pages call the renderer API instead of IPC channels or SQLite", async () =
   assert.match(apps, /api\.agentAppsPickFolder\(\)/);
   assert.match(apps, /openWorkPanelTab\(browserPluginTab\(app\.openUrl\)\)/);
   assert.match(apps, /api\.agentAppsMarkOpened\(app\.id\)/);
-  for (const source of [knowledge, hub, detail, apps]) {
+  for (const source of [knowledge, hub, workbench, search, apps]) {
     assert.doesNotMatch(source, /window\.api|pi-desktop\/|sqlite/i);
   }
 });
@@ -76,22 +77,30 @@ test("main-process IPC registers both domains and derives channels from shared p
 });
 
 test("knowledge schema keeps CJK substring search and agent apps stay a registry", async () => {
-  const [knowledgeSchema, appSchema, migration, current, search] = await Promise.all([
-    read("../../../crates/host-core/src/knowledge/schema.sql"),
-    read("../../../crates/host-core/src/agent_apps/schema.sql"),
-    read("../../../crates/host-core/src/db/knowledge_apps_migration.rs"),
-    read("../../../crates/host-core/src/db/knowledge_activity_migration.rs"),
-    read("../../../crates/host-core/src/knowledge/retrieval.rs"),
-  ]);
+  const [knowledgeSchema, appSchema, migration, current, workbenchMigration, search] =
+    await Promise.all([
+      read("../../../crates/host-core/src/knowledge/schema.sql"),
+      read("../../../crates/host-core/src/agent_apps/schema.sql"),
+      read("../../../crates/host-core/src/db/knowledge_apps_migration.rs"),
+      read("../../../crates/host-core/src/db/knowledge_activity_migration.rs"),
+      read("../../../crates/host-core/src/db/knowledge_workbench_migration.rs"),
+      read("../../../crates/host-core/src/knowledge/retrieval.rs"),
+    ]);
   assert.match(knowledgeSchema, /tokenize = 'trigram'/);
   assert.match(knowledgeSchema, /CREATE TRIGGER IF NOT EXISTS knowledge_chunks_ai/);
   assert.match(knowledgeSchema, /CREATE TABLE IF NOT EXISTS knowledge_activity/);
+  // Schema v30 stores the authored body beside its chunks.
+  assert.match(knowledgeSchema, /content_md    TEXT NOT NULL DEFAULT ''/);
+  assert.match(knowledgeSchema, /content_state TEXT NOT NULL DEFAULT 'legacy'/);
+  assert.match(knowledgeSchema, /content_kind  TEXT NOT NULL DEFAULT 'text'/);
   assert.match(appSchema, /CREATE TABLE IF NOT EXISTS agent_apps/);
   assert.doesNotMatch(appSchema, /http_get|reqwest|proxy/i);
   assert.match(migration, /migrate_v27_to_v28_tx/);
   assert.match(migration, /crate::knowledge::SCHEMA/);
   assert.match(current, /fn migrate_v28_to_v29_tx/);
   assert.match(current, /crate::knowledge::SCHEMA/);
+  assert.match(workbenchMigration, /pub\(crate\) fn migrate_v29_to_v30/);
+  assert.match(workbenchMigration, /ALTER TABLE knowledge_documents ADD COLUMN content_md/);
   assert.match(search, /pub async fn search_for_tool/);
 });
 
@@ -130,25 +139,35 @@ test("every locale carries the knowledge and agent application catalogs", async 
   }
 });
 
-test("document rows open a reader backed by knowledge.getDocument", async () => {
-  const [detail, reader, api, ipc, protocol, sharedTypes] = await Promise.all([
-    read("../src/pages/knowledge/KnowledgeLibraryDetail.tsx"),
-    read("../src/pages/knowledge/KnowledgeDocumentReader.tsx"),
+test("the workbench reads and rewrites document bodies through host-core", async () => {
+  const [workbench, reader, api, ipc, protocol, sharedTypes] = await Promise.all([
+    read("../src/pages/knowledge/workbench/KnowledgeWorkbench.tsx"),
+    read("../src/pages/knowledge/workbench/WorkbenchReader.tsx"),
     read("../src/lib/api.ts"),
     read("../electron/main/ipc/knowledge-ipc.ts"),
     read("../../../packages/shared/src/protocol.ts"),
     read("../../../packages/shared/src/types/knowledge.ts"),
   ]);
+  assert.match(protocol, /knowledgeGetDocumentContent: "pi-desktop\/knowledge\/getDocumentContent"/);
+  assert.match(protocol, /knowledgeSaveDocumentContent: "pi-desktop\/knowledge\/saveDocumentContent"/);
   assert.match(protocol, /knowledgeGetDocument: "pi-desktop\/knowledge\/getDocument"/);
-  assert.match(ipc, /IPC\.invoke\.knowledgeGetDocument/);
-  assert.match(api, /knowledgeGetDocument: \(input: \{ libraryId: string; documentId: string \}\)/);
+  assert.match(ipc, /IPC\.invoke\.knowledgeGetDocumentContent/);
+  assert.match(ipc, /IPC\.invoke\.knowledgeSaveDocumentContent/);
+  assert.match(ipc, /typeof content !== "string"/);
+  assert.match(api, /knowledgeGetDocumentContent: \(input: \{ libraryId: string; documentId: string \}\)/);
+  assert.match(api, /knowledgeSaveDocumentContent: \(input: \{/);
   assert.match(sharedTypes, /export type KnowledgeDocumentPreview/);
-  assert.match(detail, /className="knowledge-document-open"/);
-  assert.match(detail, /setOpenDocument\(document\)/);
-  assert.match(detail, /<KnowledgeDocumentReader/);
-  assert.match(reader, /knowledgeGetDocument\(\{ libraryId: library\.id, documentId: document\.id \}\)/);
-  assert.match(reader, /<Markdown source=\{body\}/);
-  assert.doesNotMatch(reader, /window\.api|pi-desktop\/|sqlite/i);
+  assert.match(sharedTypes, /export type KnowledgeDocumentContent = \{/);
+  assert.match(sharedTypes, /contentState: KnowledgeDocumentContentState/);
+  // The reader shows the stored body, not chunks re-joined in the renderer.
+  assert.match(
+    workbench,
+    /\.knowledgeGetDocumentContent\(\{ libraryId: library\.id, documentId: activeId \}\)/,
+  );
+  assert.match(workbench, /api\.knowledgeSaveDocumentContent\(\{/);
+  assert.match(reader, /<Markdown source=\{content\} renderDiagrams=\{false\} \/>/);
+  assert.match(reader, /querySelectorAll<HTMLElement>\("h1, h2, h3, h4"\)/);
+  assert.doesNotMatch(workbench + reader, /window\.api|pi-desktop\/|sqlite/i);
 });
 
 test("titlebar carries browser-style back and forward over the nav stack", async () => {

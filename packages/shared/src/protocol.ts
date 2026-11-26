@@ -262,6 +262,10 @@ export const IPC = {
     knowledgeDeleteLibrary: "pi-desktop/knowledge/deleteLibrary",
     knowledgeListDocuments: "pi-desktop/knowledge/listDocuments",
     knowledgeGetDocument: "pi-desktop/knowledge/getDocument",
+    // Document bodies live in their own columns (schema v30) so the reader does
+    // not have to rebuild text from overlapping chunks.
+    knowledgeGetDocumentContent: "pi-desktop/knowledge/getDocumentContent",
+    knowledgeSaveDocumentContent: "pi-desktop/knowledge/saveDocumentContent",
     knowledgeImportFiles: "pi-desktop/knowledge/importFiles",
     knowledgeImportText: "pi-desktop/knowledge/importText",
     knowledgeDeleteDocument: "pi-desktop/knowledge/deleteDocument",

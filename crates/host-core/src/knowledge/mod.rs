@@ -128,6 +128,12 @@ pub struct KnowledgeDocument {
     pub error_code: Option<String>,
     pub error_message: Option<String>,
     pub chunk_count: i64,
+    /// `ready` once the extracted body is stored; `legacy` rows are backfilled on
+    /// first read (schema v30); `failed` when extraction produced nothing.
+    pub content_state: String,
+    /// `markdown | text | pdf-text | office-text` — drives reader affordances.
+    pub content_kind: String,
+    pub char_count: i64,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -201,6 +207,14 @@ pub async fn handle(
         "knowledge.getDocument" => {
             let st = state.lock().await;
             documents::get_document(&st.db, params)
+        }
+        "knowledge.getDocumentContent" => {
+            let st = state.lock().await;
+            documents::get_document_content(&st.db, params)
+        }
+        "knowledge.saveDocumentContent" => {
+            let st = state.lock().await;
+            documents::save_document_content(&st.db, params)
         }
         "knowledge.importFiles" => {
             let st = state.lock().await;

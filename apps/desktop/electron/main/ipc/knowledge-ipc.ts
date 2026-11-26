@@ -78,6 +78,35 @@ export function registerKnowledgeIpc({
     });
   });
 
+  registrar.handle(IPC.invoke.knowledgeGetDocumentContent, async (input: unknown) => {
+    if (!input || typeof input !== "object") throw new Error("document query required");
+    const { libraryId, documentId } = input as {
+      libraryId?: unknown;
+      documentId?: unknown;
+    };
+    return requireHost(getHost).call("knowledge.getDocumentContent", {
+      libraryId: requireString(libraryId, "libraryId"),
+      documentId: requireString(documentId, "documentId"),
+    });
+  });
+
+  registrar.handle(IPC.invoke.knowledgeSaveDocumentContent, async (input: unknown) => {
+    if (!input || typeof input !== "object") throw new Error("document body required");
+    const { libraryId, documentId, content } = input as {
+      libraryId?: unknown;
+      documentId?: unknown;
+      content?: unknown;
+    };
+    if (typeof content !== "string") throw new Error("content required");
+    // The body is forwarded byte-for-byte: trimming it here would silently
+    // rewrite the user's Markdown before the host rechunks it.
+    return requireHost(getHost).call("knowledge.saveDocumentContent", {
+      libraryId: requireString(libraryId, "libraryId"),
+      documentId: requireString(documentId, "documentId"),
+      content,
+    });
+  });
+
   registrar.handle(IPC.invoke.knowledgeImportFiles, async (libraryId: unknown) => {
     const id = requireString(libraryId, "libraryId");
     const host = requireHost(getHost);

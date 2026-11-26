@@ -27,11 +27,15 @@ Both are written only by `crates/host-core`. The renderer reaches them through
 the default `unicode61` tokenizer treats a run of Chinese characters as a single
 token, which makes substring retrieval useless.
 
-Fresh databases run the v28 DDL plus the v29 activity table; the upgrade chain
-is v27→v28→v29. Each step is idempotent (`IF NOT EXISTS`) and reuses the same
-`knowledge::SCHEMA` constant, so a new install and an upgraded install cannot
-diverge. The v28→v29 step only adds a table and its indexes; it does not rewrite
-existing rows.
+Fresh databases run the v30 DDL: the v28 tables, the v29 activity table, and the
+v30 body columns `content_md`, `content_state` (`legacy` / `ready` / `failed`),
+`content_kind` (`markdown` / `text` / `pdf-text` / `office-text`), and
+`char_count`. The upgrade chain is v27→v28→v29→v30. Each step is idempotent
+(`IF NOT EXISTS` for tables and indexes, existence checks for columns) and reuses
+the same `knowledge::SCHEMA` constant, so a new install and an upgraded install
+cannot diverge. The v28→v29 step only adds a table and its indexes; the v29→v30
+step adds columns and a backup, and marks every existing document `legacy`
+instead of rewriting rows: the stored body is materialized on first read.
 
 ### Library payload
 
@@ -48,8 +52,8 @@ existing rows.
 
 Every mutating knowledge call appends one best-effort row to
 `knowledge_activity`: `base.create`, `base.delete`, `doc.upload`,
-`doc.manual`, `doc.delete`, `index.run`, plus `search` for each successful
-retrieval. Writes are best-effort: a failure is logged and never fails the
+`doc.manual`, `doc.delete`, `doc.save`, `index.run`, plus `search` for each
+successful retrieval. Writes are best-effort: a failure is logged and never fails the
 operation the user asked for. Global retention is 500 rows, pruned on insert;
 deleting a library removes its document-level rows but keeps `base.create` and
 `base.delete` so the trail still shows the lifecycle.
@@ -81,6 +85,12 @@ build its picker filter; this section and that constant must not drift.
 
 Legacy binary Office formats (`.doc`, `.ppt`, `.xls`) are rejected with an
 actionable message; they are not OOXML and cannot be read without a converter.
+
+Markdown and plain-text imports keep their source text as the document body
+(`content_md`, `content_kind: markdown`, `content_state: ready`); PDF and Office
+imports store the extracted text with `content_kind: pdf-text` / `office-text`
+and are read-only. Extracted body text is stored verbatim — trimming is limited
+to validation, never applied to the stored value.
 
 Limits: 16 MB per file, 4,000,000 extracted characters, 2,000 chunks per
 document. Chunks aggregate whole paragraphs up to 1,200 characters; a longer
@@ -129,15 +139,39 @@ library's vectors instead of mixing incompatible spaces.
 a mismatch is rejected instead of leaking a row from another library.
 
 `chunks[]` are the stored extraction rows (`ordinal`, `text`, `charCount`,
-`embedded`) in ordinal order. The reader joins them to render the document,
-which keeps preview and retrieval on one source of truth: whatever the agent
-can retrieve is exactly what the user can read. A failed import returns its
+`embedded`) in ordinal order. The preview joins them for the list and search
+surfaces, which keeps preview and retrieval on one source of truth: whatever the
+agent can retrieve is exactly what the user can read. A failed import returns its
 document row with an empty chunk list, so the reader can show the stored
 `errorCode`/`errorMessage` rather than an empty page.
 
 Limits: at most 400 chunks and 240,000 characters per request; a larger source
-is cut at a chunk boundary and `truncated` is true. Nothing new is persisted —
-the method reads `knowledge_documents` and `knowledge_chunks` only.
+is cut at a chunk boundary and `truncated` is true. The method reads
+`knowledge_documents` and `knowledge_chunks` only.
+
+### Stored body
+
+`knowledge.getDocumentContent` takes `{ libraryId, documentId }` and returns
+`{ document, content, contentKind, contentState, truncated }`. It is the read
+path of the reader:
+
+- a `ready` row returns `content_md` unchanged;
+- a `legacy` row is backfilled on first read inside the same transaction: the
+  source file is re-extracted when it still exists, otherwise the stored chunks
+  are joined with 200-character overlap deduplication; the result is capped at
+  800,000 characters, flagged `truncated`, and persisted as `ready` (or `failed`
+  with the extraction error);
+- `content_kind` `pdf-text` / `office-text` is read-only in the UI.
+
+`knowledge.saveDocumentContent` takes `{ libraryId, documentId, content }` and
+returns `{ document }`. Only `markdown` and `text` documents can be rewritten;
+PDF and Office bodies are rejected with `INVALID_PARAMS` because their body is
+the extracted text of a file Trail does not own. A save trims the body only for
+validation, stores it verbatim, re-chunks the document (same paragraph/overlap
+rules as ingestion), clears the library's vectors for that document, updates
+`content_hash`, `char_count`, and `chunk_count`, and appends a `doc.save`
+activity row. An empty body is rejected.
+
 
 ## 5. Retrieval for the agent
 
@@ -197,15 +231,34 @@ The knowledge page has two levels:
   status dot, a health line derived from the library payload, the document
   count, the embedding model, and the last-update date. The context menu and the
   `⋯` menu expose open, rebuild index (semantic libraries only), and delete.
-- **Detail** — back to the hub, ingest actions, semantic index progress, the
-  retrieval box with mode selection (semantic modes are disabled when the
-  library has no vectors), result passages, and the document list with a
-  "needs attention" filter for failed imports. Every document row is a button:
-  it opens the **reader**, which loads `knowledge.getDocument` on demand,
-  renders the extracted chunks as Markdown, and shows status, size, chunk
-  count, character count, source path, and index coverage in a side card. The
-  reader has no editing, outline, summary, or activity features yet; a failed
-  document shows its stored import error instead of an empty page.
+- **Workbench** — opening a library lands on a document workbench, not a list:
+  - a top bar with back, the library name, ingest actions, and five tabs —
+    **documents** (implemented), **ask AI**, **search** (the retrieval panel),
+    **wiki**, and **graph**. The last three plus ask show an explicit
+    "next phase" placeholder; they never render invented data.
+  - a left catalog column (file tree grouped by source folder with a title
+    filter, plus an outline mode that lists the H2/H3 headings of the open
+    document and highlights the section in view through `IntersectionObserver`);
+  - a center reader column: a compact page bar (title, kind, size, char count,
+    reading time, save/read-only state), a hero card built from real document
+    stats, and the Markdown body rendered with the shared renderer plus heading
+    anchors. `markdown`/`text` bodies open in an editor textarea; saving calls
+    `knowledge.saveDocumentContent` and refreshes the activity trail. PDF/Office
+    bodies render read-only with the reason stated in the page bar.
+  - a right rail of five cards: a health gauge, document information, index
+    status, related documents (same folder), and the document's activity trail
+    filtered by `documentId`.
+  - layout: ≥1440px is 260px / 1fr / 300px; 1200–1440px keeps three columns with
+    a 280px rail; 1024–1200px moves the rail into a drawer; below 1024px the
+    catalog also becomes a drawer. The page runs full-bleed inside the shell
+    (`.is-workbench` lifts the 1120px content cap).
+
+Workbench health is a document score, not the hub's library score: 100 minus
+60 for a failed import, 30 for zero chunks, 10 for chunks still awaiting
+vectors in a semantic library, 5 for a missing title, and 5 for no update in
+30 days, floored at 0, with the deducted reasons listed under the gauge. The
+score is computed on the fly and never stored — there is no fixed 92.
+
 
 Library health counts vector backlog as "processing" only when semantic search
 is enabled: a keyword-only library with unembedded chunks is healthy, not
@@ -215,6 +268,7 @@ The insight rail shows health, a seven-day search trend, recent activity, and
 three quick actions. Health aggregates ready/total documents across libraries
 with penalties for failed and still-processing documents; the score is not
 stored. Quick actions open the relevant library (focusing search or the failed
-documents filter) or rebuild the semantic index — Trail has no in-library
-"ask AI" surface, so the page does not pretend to send a chat message. All
-strings go through the nine locale catalogs.
+documents filter) or rebuild the semantic index. In-library question answering
+is not implemented yet: the workbench "ask AI" tab is a placeholder, so the page
+does not pretend to send a chat message. All strings go through the nine locale
+catalogs.

@@ -62,6 +62,19 @@ export type KnowledgeActivityTrendResult = {
 
 export type KnowledgeDocumentStatus = "ready" | "failed";
 
+/**
+ * `legacy` rows predate schema v30 and have no stored body; host-core backfills
+ * them the first time the reader asks for their content.
+ */
+export type KnowledgeDocumentContentState = "legacy" | "ready" | "failed";
+
+/** Drives reader affordances: only `markdown` and `text` are editable. */
+export type KnowledgeDocumentContentKind =
+  | "markdown"
+  | "text"
+  | "pdf-text"
+  | "office-text";
+
 export type KnowledgeDocument = {
   id: string;
   libraryId: string;
@@ -73,8 +86,22 @@ export type KnowledgeDocument = {
   errorCode: string | null;
   errorMessage: string | null;
   chunkCount: number;
+  contentState: KnowledgeDocumentContentState;
+  contentKind: KnowledgeDocumentContentKind;
+  /** Characters in the stored body, so the reader need not load it to show size. */
+  charCount: number;
   createdAt: string;
   updatedAt: string;
+};
+
+/** Result of `knowledge.getDocumentContent`. */
+export type KnowledgeDocumentContent = {
+  document: KnowledgeDocument;
+  content: string;
+  contentKind: KnowledgeDocumentContentKind;
+  contentState: KnowledgeDocumentContentState;
+  /** The stored body exceeded the reader cap and was clipped for display. */
+  truncated: boolean;
 };
 
 export type KnowledgeSearchMode = "hybrid" | "keyword" | "semantic";

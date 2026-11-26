@@ -9,13 +9,13 @@ import type {
 } from "@trail/shared";
 import { api } from "../lib/api";
 import { OverlayBackdrop } from "../components/OverlayBackdrop";
-import { Button, Input, Select, Textarea, portalOverlay } from "../components/ui";
+import { Button, Input, Select, Textarea, cx, portalOverlay } from "../components/ui";
 import { useAppStore } from "../stores/app-store";
 import {
   KnowledgeHub,
   type KnowledgeAssistantAction,
 } from "./knowledge/KnowledgeHub";
-import { KnowledgeLibraryDetail } from "./knowledge/KnowledgeLibraryDetail";
+import { KnowledgeWorkbench } from "./knowledge/workbench/KnowledgeWorkbench";
 
 type LibraryDraft = {
   name: string;
@@ -310,12 +310,13 @@ export function KnowledgePage() {
 
   return (
     <div className="route-scroll">
-      <div className="page-frame knowledge-page">
+      <div className={cx("page-frame", "knowledge-page", selected && "is-workbench")}>
         {selected ? (
-          <KnowledgeLibraryDetail
+          <KnowledgeWorkbench
             key={selected.id}
             library={selected}
             documents={documents}
+            activities={activities}
             loading={documentsLoading}
             busy={busy}
             autoFocusSearch={detailIntent.autoFocusSearch}
@@ -326,7 +327,12 @@ export function KnowledgePage() {
             onIndex={() => void runIndex(selected)}
             onDeleteLibrary={() => void deleteLibrary(selected)}
             onDeleteDocument={(document) => void deleteDocument(document)}
-            onSearchFinished={refreshActivities}
+            onDocumentUpdated={(document) =>
+              setDocuments((current) =>
+                current.map((row) => (row.id === document.id ? document : row)),
+              )
+            }
+            onSaveFinished={refreshActivities}
           />
         ) : (
           <KnowledgeHub

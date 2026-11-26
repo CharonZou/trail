@@ -9,6 +9,7 @@ import type {
   KnowledgeActivityListResult,
   KnowledgeActivityTrendResult,
   KnowledgeDocument,
+  KnowledgeDocumentContent,
   KnowledgeDocumentPreview,
   KnowledgeImportFilesResult,
   KnowledgeIndexResult,
@@ -807,6 +808,19 @@ export const api = {
     ),
   knowledgeGetDocument: (input: { libraryId: string; documentId: string }) =>
     invoke<KnowledgeDocumentPreview>(IPC.invoke.knowledgeGetDocument, input),
+  /** The stored body, backfilled on first read for pre-v30 rows. */
+  knowledgeGetDocumentContent: (input: { libraryId: string; documentId: string }) =>
+    invoke<KnowledgeDocumentContent>(IPC.invoke.knowledgeGetDocumentContent, input),
+  /** Rewrites a Markdown/text body and rechunks it in one host transaction. */
+  knowledgeSaveDocumentContent: (input: {
+    libraryId: string;
+    documentId: string;
+    content: string;
+  }) =>
+    invoke<{ document: KnowledgeDocument }>(
+      IPC.invoke.knowledgeSaveDocumentContent,
+      input,
+    ),
   /** Opens the native file picker in main and imports the chosen files. */
   knowledgeImportFiles: (libraryId: string) =>
     invoke<KnowledgeImportFilesResult>(IPC.invoke.knowledgeImportFiles, libraryId),

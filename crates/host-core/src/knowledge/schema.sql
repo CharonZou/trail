@@ -1,4 +1,4 @@
--- Knowledge libraries, documents and chunks (schema v28).
+-- Knowledge libraries, documents and chunks (schema v28; document body v30).
 --
 -- `knowledge_chunks_fts` is an external-content FTS5 index over
 -- `knowledge_chunks.text`. The `trigram` tokenizer is deliberate: the default
@@ -34,6 +34,18 @@ CREATE TABLE IF NOT EXISTS knowledge_documents (
   error_message TEXT,
   chunk_count   INTEGER NOT NULL DEFAULT 0,
   content_hash  TEXT NOT NULL,
+  -- Full extracted body (schema v30). Chunks are a search index; they overlap and
+  -- are hard-split, so they are not a readable document. `content_md` keeps the
+  -- source text (Markdown preserved for `.md`) so the reader and future wiki /
+  -- link features can render the real document instead of gluing chunks.
+  content_md    TEXT NOT NULL DEFAULT '',
+  -- `ready` once content_md was written; `legacy` for rows imported before v30,
+  -- whose body is backfilled on first open; `failed` when extraction failed.
+  content_state TEXT NOT NULL DEFAULT 'legacy'
+                CHECK (content_state IN ('legacy', 'ready', 'failed')),
+  content_kind  TEXT NOT NULL DEFAULT 'text'
+                CHECK (content_kind IN ('markdown', 'text', 'pdf-text', 'office-text')),
+  char_count    INTEGER NOT NULL DEFAULT 0,
   created_at    INTEGER NOT NULL,
   updated_at    INTEGER NOT NULL
 );

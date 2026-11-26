@@ -52,15 +52,26 @@ providers, local runtimes and OAuth-backed accounts join the same workflow.
 
 ## Capabilities
 
-* **Knowledge base (1.0.5).** Libraries sit behind a first-class sidebar
-  destination: the hub reports library, document and chunk totals with an
-  availability read-out next to index health, access trend and recent activity.
-  Each library opens into a searchable document list that imports text, PDF and
-  DOCX files a batch at a time, reports duplicates instead of storing them
-  twice, and keeps a per-library activity log; clicking a document reads its
-  indexed text as Markdown in the same window. Search answers offline from a
-  local full-text index, semantic search is optional and falls back with a
-  stated reason, and agents query a library through a built-in tool.
+* **Knowledge workbench (post-1.0.5).** A document no longer opens into a
+  cramped preview. Libraries still sit behind a first-class sidebar destination,
+  and the hub keeps reporting library, document and chunk totals with
+  availability next to index health, access trend and recent activity — but
+  opening a library now lands in a full three-pane workbench. The left pane is a
+  file tree built from the imported source paths (folders start collapsed and
+  open on click, with a heading outline one switch away); the center pane shows
+  the stored body as Markdown under a hero summary with character, chunk and
+  heading counts; the right rail keeps document health, metadata, index state,
+  related documents and an activity trail visible while you read. Markdown and
+  text documents are editable in place: saving writes the body back to the
+  library, re-chunks it, clears stale vectors and records the change as
+  `doc.save`. A search tab queries the library without leaving the document,
+  offline full-text first and semantic search when configured, and agents still
+  query a library through the built-in tool. Ask AI, Wiki and graph are
+  declared as next phases rather than filled with placeholder data.
+* **Knowledge base search and import (1.0.5).** Batch import of text, PDF and
+  DOCX files, duplicates reported instead of stored twice, a per-library
+  activity log, offline full-text search with a stated fallback reason, and a
+  built-in tool agents can call to query any library.
 * **Agent applications (1.0.5).** Register a web URL or a local folder and open
   it in the work-panel browser; each entry remembers when it was last opened,
   and a folder that loses its `index.html` stays listed as unavailable.
@@ -95,9 +106,9 @@ providers, local runtimes and OAuth-backed accounts join the same workflow.
 Every frame below is captured from a Trail preview build running on Windows
 with the default Forest theme — no mockups.
 
-| Knowledge base | Document reader |
+| Knowledge base | Knowledge workbench |
 | --- | --- |
-| <img src="docs/image/readme/knowledge-hub.png" alt="Knowledge base hub" width="100%" /> | <img src="docs/image/readme/knowledge-reader.png" alt="Document reader" width="100%" /> |
+| <img src="docs/image/readme/knowledge-hub.png" alt="Knowledge base hub" width="100%" /> | <img src="docs/image/readme/knowledge-workbench.png" alt="Knowledge workbench" width="100%" /> |
 | **Agent applications** | **Titlebar history** |
 | <img src="docs/image/readme/agent-apps.png" alt="Agent applications" width="100%" /> | <img src="docs/image/readme/titlebar-history.png" alt="Titlebar back and forward" width="100%" /> |
 | **Asset center** | **Skills** |
@@ -177,6 +188,31 @@ history is intentionally omitted.
 | **1.0.3** | Whole-window versus floating-card layout, settings page as a sheet, thinking-effort slider with `Ctrl+T`, provider brand marks, open a project in VS Code / Trae / IntelliJ IDEA |
 | **1.0.2** | Per-project workspace icon and color, workspace index toggle, token usage card, window card, more provider marks |
 | **1.0.1** | Initial release: local-first workspace, model freedom, persistent transcripts, parallel worktree sessions, subagents, plugins, three platforms |
+
+### Next: knowledge workbench
+
+The document page is being rebuilt from a library detail list into a workbench,
+in phases. Phase 1 is implemented and in review; it is not part of a release
+yet.
+
+* **Three panes, one surface.** Collapsible file tree and heading outline on
+  the left, the document beside it, and a rail of health, metadata, index state,
+  related documents and activity that stays visible while you read.
+* **A real reader.** The stored body renders as Markdown under a hero summary
+  with character, chunk and heading counts, anchored headings, and copy /
+  download actions, instead of a truncated preview.
+* **Editable bodies.** Markdown and text documents save back into the library:
+  the body is re-chunked, stale vectors are cleared, and the change is recorded
+  as a `doc.save` activity.
+* **Honest health.** The rail's score is computed from real deductions — missing
+  body, failed or pending indexing, no headings, stale update — never a
+  hardcoded number.
+* **Search stays in context.** A search tab answers library-scoped queries
+  beside the open document. Ask AI, Wiki and graph are declared as next phases
+  rather than filled with placeholder data.
+
+Later phases add cited answers (Ask AI), deterministic wiki pages and a
+document graph.
 
 ## Repository layout
 

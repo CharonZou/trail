@@ -56,6 +56,40 @@ pub fn chunk_text(text: &str) -> Vec<String> {
     chunks
 }
 
+/// Best-effort readable text for documents imported before schema v30 stored
+/// the extracted body. Chunks overlap by `CHUNK_OVERLAP_CHARS` and are hard-split
+/// mid-paragraph, so a naive join repeats text at every seam. Detect the seam
+/// and drop the duplicated prefix instead of rendering it twice.
+pub fn join_chunks_for_preview(chunks: &[String]) -> String {
+    let mut out = String::new();
+    for raw in chunks {
+        let text = raw.trim();
+        if text.is_empty() {
+            continue;
+        }
+        if out.is_empty() {
+            out.push_str(text);
+            continue;
+        }
+        let out_chars: Vec<char> = out.chars().collect();
+        let next_chars: Vec<char> = text.chars().collect();
+        let max = CHUNK_OVERLAP_CHARS
+            .min(out_chars.len())
+            .min(next_chars.len());
+        let overlap = (1..=max)
+            .rev()
+            .find(|len| out_chars[out_chars.len() - len..] == next_chars[..*len])
+            .unwrap_or(0);
+        if overlap > 0 {
+            out.push_str(&next_chars[overlap..].iter().collect::<String>());
+        } else {
+            out.push_str("\n\n");
+            out.push_str(text);
+        }
+    }
+    out
+}
+
 fn normalize(text: &str) -> String {
     let unified = text.replace("\r\n", "\n").replace('\r', "\n");
     let mut out = String::with_capacity(unified.len());
@@ -160,5 +194,28 @@ mod tests {
     #[test]
     fn empty_text_has_no_chunks() {
         assert!(chunk_text(" \n\n ").is_empty());
+    }
+
+    #[test]
+    fn preview_join_drops_the_hard_split_overlap() {
+        let paragraph = "a".repeat(3000);
+        let chunks = chunk_text(&paragraph);
+        let joined = join_chunks_for_preview(&chunks);
+        assert_eq!(joined.chars().count(), 3000, "no seam duplication");
+    }
+
+    #[test]
+    fn preview_join_keeps_paragraph_seams_for_non_overlapping_chunks() {
+        let joined = join_chunks_for_preview(&[
+            "# Title\n\nfirst paragraph".to_string(),
+            "second paragraph".to_string(),
+        ]);
+        assert_eq!(joined, "# Title\n\nfirst paragraph\n\nsecond paragraph");
+    }
+
+    #[test]
+    fn preview_join_is_empty_for_empty_chunks() {
+        assert!(join_chunks_for_preview(&[]).is_empty());
+        assert!(join_chunks_for_preview(&["  ".to_string()]).is_empty());
     }
 }
